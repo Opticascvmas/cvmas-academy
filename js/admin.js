@@ -1538,7 +1538,15 @@ padding:10px;
 border-radius:8px;
 border:1px solid #ccc;
 ">
-
+<select
+id="branch-${user.id}"
+style="
+padding:10px;
+border-radius:8px;
+border:1px solid #ccc;
+width:100%;
+"
+>
 <option value="${currentBranch}">
 ${currentBranch || "Sucursal"}
 </option>
@@ -1581,7 +1589,6 @@ ${currentBranch || "Sucursal"}
 <option value="Recursos Humanos">Recursos Humanos</option>
 <option value="Ventas">Ventas</option>
 <option value="Mercadeo">Mercadeo</option>
-
 </select>
 
 <select
