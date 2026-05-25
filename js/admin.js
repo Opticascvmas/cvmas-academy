@@ -1523,7 +1523,77 @@ border-radius:8px;
 border:1px solid #ccc;
 "
 />
+<select
+id="branch-${user.id}"
+style="
+padding:10px;
+border-radius:8px;
+border:1px solid #ccc;
+">
 
+<option value="${currentBranch}">
+${currentBranch || "Sucursal"}
+</option>
+
+<option value="Metrocentro 1">
+Metrocentro 1
+</option>
+
+<option value="Metrocentro 2">
+Metrocentro 2
+</option>
+
+<option value="Plaza Mundo">
+Plaza Mundo
+</option>
+
+<option value="Galerias">
+Galerias
+</option>
+
+<option value="Zona Rosa">
+Zona Rosa
+</option>
+
+<option value="Empresarial">
+Empresarial
+</option>
+
+</select>
+
+<select
+id="position-${user.id}"
+style="
+padding:10px;
+border-radius:8px;
+border:1px solid #ccc;
+">
+
+<option value="${currentPosition}">
+${currentPosition || "Cargo"}
+</option>
+
+<option value="Asesor Visual">
+Asesor Visual
+</option>
+
+<option value="Optometrista">
+Optometrista
+</option>
+
+<option value="Capacitador">
+Capacitador
+</option>
+
+<option value="Supervisor">
+Supervisor
+</option>
+
+<option value="RRHH">
+RRHH
+</option>
+
+</select>
 <select
 id="role-${user.id}"
 style="
@@ -1592,6 +1662,16 @@ document.getElementById(
 `name-${userId}`
 ).value;
 
+const branch =
+document.getElementById(
+`branch-${userId}`
+).value;
+
+const position =
+document.getElementById(
+`position-${userId}`
+).value;
+
 const role =
 document.getElementById(
 `role-${userId}`
@@ -1602,6 +1682,8 @@ await window.updateUserData(
 userId,
 {
 name,
+branch,
+position,
 role
 }
 );
