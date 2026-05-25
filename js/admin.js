@@ -972,6 +972,17 @@ box-shadow:
   // =========================
 
   users.forEach(user => {
+    const currentName =
+user.name || "";
+
+const currentBranch =
+user.branch || "";
+
+const currentPosition =
+user.position || "";
+
+const currentRole =
+user.role || "participant";
     const lastLoginDate =
 user.lastLogin
 ? new Date(user.lastLogin)
@@ -1493,7 +1504,65 @@ color:#555;
         `}
 
       </div>
+<div style="
+margin-top:15px;
+display:grid;
+gap:10px;
+background:#f8f9fb;
+padding:15px;
+border-radius:14px;
+">
 
+<input
+id="name-${user.id}"
+value="${currentName}"
+placeholder="Nombre"
+style="
+padding:10px;
+border-radius:8px;
+border:1px solid #ccc;
+"
+/>
+
+<select
+id="role-${user.id}"
+style="
+padding:10px;
+border-radius:8px;
+border:1px solid #ccc;
+">
+
+<option value="${currentRole}">
+${currentRole}
+</option>
+
+<option value="participant">
+participant
+</option>
+
+<option value="admin">
+admin
+</option>
+
+</select>
+
+<button
+onclick="saveUserInfo('${user.id}')"
+style="
+background:#14A9C4;
+color:white;
+border:none;
+padding:12px;
+border-radius:10px;
+font-weight:bold;
+cursor:pointer;
+">
+
+Guardar Cambios
+
+</button>
+
+</div>
     </div>
 
     `;
@@ -1515,3 +1584,30 @@ window.closeAdminPanel = function() {
   ).style.display = "none";
 
 };
+window.saveUserInfo =
+async function(userId){
+
+const name =
+document.getElementById(
+`name-${userId}`
+).value;
+
+const role =
+document.getElementById(
+`role-${userId}`
+).value;
+
+await window.updateUserData(
+"users",
+userId,
+{
+name,
+role
+}
+);
+
+alert("Usuario actualizado");
+
+openAdminPanel();
+
+}
