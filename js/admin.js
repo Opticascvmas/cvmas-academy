@@ -1531,33 +1531,56 @@ border-radius:8px;
 border:1px solid #ccc;
 ">
 
+<select
+id="branch-${user.id}"
+style="
+padding:10px;
+border-radius:8px;
+border:1px solid #ccc;
+">
+
 <option value="${currentBranch}">
 ${currentBranch || "Sucursal"}
 </option>
 
-<option value="Metrocentro 1">
-Metrocentro 1
-</option>
-
-<option value="Metrocentro 2">
-Metrocentro 2
-</option>
-
-<option value="Plaza Mundo">
-Plaza Mundo
-</option>
-
-<option value="Galerias">
-Galerias
-</option>
-
-<option value="Zona Rosa">
-Zona Rosa
-</option>
-
-<option value="Empresarial">
-Empresarial
-</option>
+<option value="Metrocentro 1">Metrocentro 1</option>
+<option value="Metrocentro 2">Metrocentro 2</option>
+<option value="Plaza Mundo">Plaza Mundo</option>
+<option value="Metrocentro Santa Ana">Metrocentro Santa Ana</option>
+<option value="Sonsonate">Sonsonate</option>
+<option value="San Miguel">San Miguel</option>
+<option value="Aguilares">Aguilares</option>
+<option value="Apopa">Apopa</option>
+<option value="Valle Dulce">Valle Dulce</option>
+<option value="San Gabriel">San Gabriel</option>
+<option value="Metropolis">Metropolis</option>
+<option value="Galerias">Galerias</option>
+<option value="El Paseo">El Paseo</option>
+<option value="Zona Rosa">Zona Rosa</option>
+<option value="El Casco">El Casco</option>
+<option value="Multiplaza">Multiplaza</option>
+<option value="Santa Rosa">Santa Rosa</option>
+<option value="Encuentro Zacatecoluca">Encuentro Zacatecoluca</option>
+<option value="Zacatecoluca Centro">Zacatecoluca Centro</option>
+<option value="Usulutan">Usulutan</option>
+<option value="San Francisco Gotera">San Francisco Gotera</option>
+<option value="San Martin">San Martin</option>
+<option value="Unicentro Soyapango">Unicentro Soyapango</option>
+<option value="Alta Vista">Alta Vista</option>
+<option value="Encuentro Lourdes">Encuentro Lourdes</option>
+<option value="Metrocentro Lourdes">Metrocentro Lourdes</option>
+<option value="Acajutla">Acajutla</option>
+<option value="Las Ramblas">Las Ramblas</option>
+<option value="Encuentro Santa Ana">Encuentro Santa Ana</option>
+<option value="Empresarial">Empresarial</option>
+<option value="SAC">SAC</option>
+<option value="Zaragoza">Zaragoza</option>
+<option value="Puerto de La Libertad">Puerto de La Libertad</option>
+<option value="Armenia">Armenia</option>
+<option value="San Marcos">San Marcos</option>
+<option value="Recursos Humanos">Recursos Humanos</option>
+<option value="Ventas">Ventas</option>
+<option value="Mercadeo">Mercadeo</option>
 
 </select>
 
@@ -1677,9 +1700,15 @@ document.getElementById(
 `role-${userId}`
 ).value;
 
-await window.updateUserData(
-"users",
-userId,
+const {
+doc,
+updateDoc
+} = await import(
+"https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js"
+);
+
+await updateDoc(
+doc(window.db,"users",userId),
 {
 name,
 branch,
