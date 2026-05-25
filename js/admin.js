@@ -1590,14 +1590,15 @@ ${currentBranch || "Sucursal"}
 <option value="Ventas">Ventas</option>
 <option value="Mercadeo">Mercadeo</option>
 </select>
-
 <select
 id="position-${user.id}"
 style="
+width:100%;
 padding:10px;
 border-radius:8px;
 border:1px solid #ccc;
-">
+"
+>
 
 <option value="${currentPosition}">
 ${currentPosition || "Cargo"}
@@ -1624,6 +1625,7 @@ RRHH
 </option>
 
 </select>
+
 <select
 id="role-${user.id}"
 style="
