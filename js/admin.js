@@ -1018,8 +1018,9 @@ box-shadow:
 <div style="
 display:grid;
 grid-template-columns:
-repeat(auto-fit,minmax(320px,1fr));
+repeat(auto-fit,minmax(260px,1fr));
 gap:25px;
+align-items:start;
 margin-bottom:30px;
 ">
 
