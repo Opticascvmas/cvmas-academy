@@ -68,6 +68,8 @@ return diff <= 1;
 }).length;
 
 const activeWeek =
+
+
 users.filter(user => {
 
 const last =
@@ -85,7 +87,44 @@ const diff =
 return diff <= 7;
 
 }).length;
+const weeklyActivity = [
 
+{
+day:"Lun",
+value:7
+},
+
+{
+day:"Mar",
+value:9
+},
+
+{
+day:"Mié",
+value:6
+},
+
+{
+day:"Jue",
+value:10
+},
+
+{
+day:"Vie",
+value:12
+},
+
+{
+day:"Sáb",
+value:4
+},
+
+{
+day:"Dom",
+value:3
+}
+
+];
 const inactiveUsers =
 users.length - activeWeek;
 
@@ -252,7 +291,141 @@ Object.entries(branchStats)
   `;
 
 }).join("");
+const branchChartHTML =
+Object.entries(branchStats)
+.sort((a,b)=>{
 
+const avgA =
+Math.round(a[1].total / a[1].count);
+
+const avgB =
+Math.round(b[1].total / b[1].count);
+
+return avgB - avgA;
+
+})
+.map(([branch,data],index)=>{
+
+const avg =
+Math.round(
+data.total / data.count
+);
+
+return `
+
+<div style="
+margin-top:18px;
+">
+
+<div style="
+display:flex;
+justify-content:space-between;
+margin-bottom:8px;
+font-size:14px;
+font-weight:bold;
+color:#0B2137;
+">
+
+<span>
+🏢 ${branch}
+</span>
+
+<span>
+${avg}%
+</span>
+
+</div>
+
+<div style="
+width:100%;
+height:16px;
+background:#edf1f5;
+border-radius:999px;
+overflow:hidden;
+">
+
+<div style="
+width:${avg}%;
+height:100%;
+background:
+linear-gradient(
+90deg,
+#00B9D6,
+#14A9C4
+);
+border-radius:999px;
+transition:1s;
+box-shadow:
+0 0 15px rgba(0,185,214,.4);
+">
+</div>
+
+</div>
+
+</div>
+
+`;
+
+}).join("")
+const weeklyChartHTML =
+weeklyActivity.map(day=>{
+
+return `
+
+<div style="
+display:flex;
+align-items:center;
+gap:12px;
+margin-top:18px;
+">
+
+<div style="
+width:45px;
+font-weight:bold;
+color:#0B2137;
+">
+${day.day}
+</div>
+
+<div style="
+flex:1;
+height:18px;
+background:#edf1f5;
+border-radius:999px;
+overflow:hidden;
+">
+
+<div style="
+width:${day.value * 10}%;
+height:100%;
+background:
+linear-gradient(
+90deg,
+#28a745,
+#43c463
+);
+border-radius:999px;
+box-shadow:
+0 0 12px rgba(40,167,69,.35);
+transition:1s;
+">
+</div>
+
+</div>
+
+<div style="
+width:35px;
+font-weight:bold;
+color:#28a745;
+">
+${day.value}
+</div>
+
+</div>
+
+`;
+
+}).join("");
   // =========================
   // STATS GLOBALES
   // =========================
@@ -329,7 +502,64 @@ Object.entries(branchStats)
 })
 .sort((a,b)=>b.avg-a.avg)
 .slice(0,5);
+const riskUsers =
+users.map(user=>{
 
+const userScores =
+scores.find(
+s => s.id === user.id
+);
+
+const avg =
+userScores?.stats
+?.overallAverage || 0;
+
+const completedModules =
+Object.keys(
+userScores?.scores || {}
+).filter(
+key =>
+typeof userScores.scores[key]
+=== "object"
+).length;
+
+const lastLogin =
+user.lastLogin
+? new Date(user.lastLogin)
+: null;
+
+const diffDays =
+lastLogin
+? Math.floor(
+(new Date() - lastLogin)
+/
+(1000*60*60*24)
+)
+: 999;
+
+return {
+
+name:
+user.name ||
+user.email,
+
+avg,
+completedModules,
+diffDays
+
+};
+
+})
+.filter(user=>
+
+user.avg < 60 ||
+
+user.completedModules < 3 ||
+
+user.diffDays > 7
+
+)
+.slice(0,5);
 const bestUser =
 ranking[0];
 
@@ -524,6 +754,21 @@ color:#0B2137;
 </h2>
 
 ${branchHTML}
+<div style="
+margin-top:35px;
+background:#f8f9fb;
+padding:25px;
+border-radius:20px;
+">
+
+<h2 style="
+margin-bottom:20px;
+color:#0B2137;
+">
+🏆 Ranking de Sucursales
+</h2>
+
+${branchChartHTML}
 
 </div>
 
