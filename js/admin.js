@@ -1526,15 +1526,7 @@ border:1px solid #ccc;
 <select
 id="branch-${user.id}"
 style="
-padding:10px;
-border-radius:8px;
-border:1px solid #ccc;
-">
-
-<select
-id="branch-${user.id}"
-style="
-wwidth 100%;
+width:100%;
 padding:10px;
 border-radius:8px;
 border:1px solid #ccc;
