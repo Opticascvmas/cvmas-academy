@@ -1357,14 +1357,8 @@ if(
             font-weight:bold;
             color:#0B2137;
             ">
-📘 ${
-(
-window.MODULES || []
-).find(
-m => String(m.id)
-=== String(quiz)
-)?.title || `Quiz ${quiz}`
-}         
+📘 ${quiz}
+         
             </div>
 
             <div style="
