@@ -732,46 +732,6 @@ Requiere seguimiento
 
 </div>
 
-</div>
-
-`;
-html += `
-
-<div style="
-background:white;
-padding:25px;
-border-radius:22px;
-margin-bottom:30px;
-box-shadow:
-0 8px 20px rgba(0,0,0,.06);
-">
-
-<h2 style="
-margin-bottom:20px;
-color:#0B2137;
-">
-📊 Rendimiento por sucursal
-</h2>
-
-${branchHTML}
-<div style="
-margin-top:35px;
-background:#f8f9fb;
-padding:25px;
-border-radius:20px;
-">
-
-<h2 style="
-margin-bottom:20px;
-color:#0B2137;
-">
-🏆 Ranking de Sucursales
-</h2>
-
-${branchChartHTML}
-
-</div>
-
 `;
  html += `
 
@@ -1397,14 +1357,14 @@ if(
             font-weight:bold;
             color:#0B2137;
             ">
-          📘 ${
+📘 ${
 (
 window.MODULES || []
 ).find(
 m => String(m.id)
 === String(quiz)
 )?.title || `Quiz ${quiz}`
-}
+}         
             </div>
 
             <div style="
