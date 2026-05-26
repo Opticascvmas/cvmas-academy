@@ -574,6 +574,7 @@ display:grid;
 grid-template-columns:
 repeat(auto-fit,minmax(220px,1fr));
 gap:18px;
+align-items:start;
 margin-bottom:30px;
 ">
 
