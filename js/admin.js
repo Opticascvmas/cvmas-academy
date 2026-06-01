@@ -22,24 +22,24 @@
    "Módulo 1" y muestre el nombre de verdad.
    ========================================================================== */
 const MODULE_NAMES = {
-  "1":  "Introducción CV+",
-  "2":  "Atención al Cliente",
-  "3":  "Visión Binocular",
-  "4":  "Lentes y Materiales",
-  "5":  "Monturas",
-  "6":  "Lentes de Contacto",
-  "7":  "Protección Solar",
-  "8":  "Salud Visual",
-  "9":  "Ventas Consultivas",
-  "10": "Cierre de Venta",
-  "11": "Garantías",
-  "12": "Postventa",
-  "13": "Producto Premium",
-  "14": "Tecnología Óptica",
-  "15": "Manejo de Objeciones",
-  "16": "Imagen y Estilo",
-  "17": "Procesos Internos",
-  "18": "Examen Final"
+  "1":  "ADN CV+",
+  "2":  "Anatomía Ocular",
+  "3":  "Defectos visuales refractivos y fisiologicos",
+  "4":  "Lectura de recetas",
+  "5":  "Tipos de lentes Oftalmicos",
+  "6":  "Procesos de fabricacion",
+  "7":  "Materiales de lentes Oftalmicos",
+  "8":  "Tratamientos para lentes Oftalmicos",
+  "9":  "Lentes Vision Sencilla",
+  "10": "Lentes Progresivos",
+  "11": "Lentes Progresivos Akkurat",
+  "12": "Lentes Ocupacionales Akkurat",
+  "13": "Lente antifatiga Akkurat",
+  "14": "Lentes Vision Sencilla Akkurat",
+  "15": "Lentes de contacto",
+  "16": "Lentes Luminex",
+  "17": "Cierre de ventas",
+  "18": "Aros Oftalmicos y ficha de marca"
   // ...agrega o corrige los que necesites
 };
 
