@@ -2521,6 +2521,15 @@ try {
 
 }
 
+// 📅 Guardar este intento en el histórico (Plan B)
+try {
+  if (window.saveQuizHistory) {
+    window.saveQuizHistory(qs.module, pct, previousData.attempts);
+  }
+} catch(e) {
+  console.error(e);
+}
+
 try {
 
   if(pct >= 75 && !PROGRESS[qs.module]) {
@@ -2827,6 +2836,34 @@ window.saveUserData = async function(collection, data) {
     data
   );
 }
+
+// ═══════════════════════════════════════════════════════
+// 📅 HISTÓRICO DE QUIZZES (Plan B)
+// Guarda CADA intento como un documento nuevo con su fecha.
+// No reemplaza nada: es información adicional para poder
+// filtrar el panel de admin por mes/días con datos reales.
+// ═══════════════════════════════════════════════════════
+window.saveQuizHistory = async function(moduleId, score, attempt) {
+  try {
+    const user = window.auth && window.auth.currentUser;
+    if (!user || !window.firebaseReady) return;
+
+    const { collection, addDoc } = await import(
+      "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js"
+    );
+
+    await addDoc(collection(window.db, "quiz_history"), {
+      uid: user.uid,
+      email: user.email || "",
+      moduleId: moduleId,
+      score: score,
+      attempt: attempt || 1,
+      date: new Date().toISOString()
+    });
+  } catch (e) {
+    console.error("No se pudo guardar el histórico:", e);
+  }
+};
 
 window.loadUserData = async function(collection) {
 
