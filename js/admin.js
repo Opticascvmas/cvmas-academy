@@ -22,24 +22,24 @@
    "Módulo 1" y muestre el nombre de verdad.
    ========================================================================== */
 const MODULE_NAMES = {
-  "1":  "ADN CV+",
-  "2":  "Anatomía Ocular",
-  "3":  "Defectos visuales refractivos y fisiologicos",
-  "4":  "Lectura de recetas",
-  "5":  "Tipos de lentes Oftalmicos",
-  "6":  "Procesos de fabricacion",
-  "7":  "Materiales de lentes Oftalmicos",
-  "8":  "Tratamientos para lentes Oftalmicos",
-  "9":  "Lentes Vision Sencilla",
-  "10": "Lentes Progresivos",
-  "11": "Lentes Progresivos Akkurat",
-  "12": "Lentes Ocupacionales Akkurat",
-  "13": "Lente antifatiga Akkurat",
-  "14": "Lentes Vision Sencilla Akkurat",
-  "15": "Lentes de contacto",
-  "16": "Lentes Luminex",
-  "17": "Cierre de ventas",
-  "18": "Aros Oftalmicos y ficha de marca"
+  "1":  "Introducción CV+",
+  "2":  "Atención al Cliente",
+  "3":  "Visión Binocular",
+  "4":  "Lentes y Materiales",
+  "5":  "Monturas",
+  "6":  "Lentes de Contacto",
+  "7":  "Protección Solar",
+  "8":  "Salud Visual",
+  "9":  "Ventas Consultivas",
+  "10": "Cierre de Venta",
+  "11": "Garantías",
+  "12": "Postventa",
+  "13": "Producto Premium",
+  "14": "Tecnología Óptica",
+  "15": "Manejo de Objeciones",
+  "16": "Imagen y Estilo",
+  "17": "Procesos Internos",
+  "18": "Examen Final"
   // ...agrega o corrige los que necesites
 };
 
@@ -72,6 +72,8 @@ function esc(v) {
 const CVP = {
   users: [],
   scores: [],
+  history: [],
+  range: null,
   ready: false
 };
 
@@ -100,29 +102,38 @@ window.openAdminPanel = async function () {
   // --- Cargar datos ---
   if (window.CVP_MOCK) {
     // MODO DEMO: datos de ejemplo (para previsualizar sin Firebase)
-    CVP.users  = window.CVP_MOCK.users;
-    CVP.scores = window.CVP_MOCK.scores;
+    CVP.users   = window.CVP_MOCK.users;
+    CVP.scores  = window.CVP_MOCK.scores;
+    CVP.history = window.CVP_MOCK.history || [];
   } else {
     // MODO REAL: Firebase
     const { collection, getDocs } = await import(
       "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js"
     );
-    const usersSnap  = await getDocs(collection(window.db, "users"));
-    const scoresSnap = await getDocs(collection(window.db, "quiz_scores"));
-    CVP.users  = [];
-    CVP.scores = [];
+    const usersSnap   = await getDocs(collection(window.db, "users"));
+    const scoresSnap  = await getDocs(collection(window.db, "quiz_scores"));
+    CVP.users   = [];
+    CVP.scores  = [];
+    CVP.history = [];
     usersSnap.forEach(d => CVP.users.push({ id: d.id, ...d.data() }));
     scoresSnap.forEach(d => CVP.scores.push({ id: d.id, ...d.data() }));
+    // Histórico (Plan B). Si la colección no existe aún, queda vacío sin romper nada.
+    try {
+      const histSnap = await getDocs(collection(window.db, "quiz_history"));
+      histSnap.forEach(d => CVP.history.push({ id: d.id, ...d.data() }));
+    } catch (e) { console.warn("Sin histórico todavía:", e); }
   }
   CVP.ready = true;
+  CVP.range = null; // null = "Cualquier fecha" (comportamiento original)
 
   // --- Calcular todo y dibujar ---
-  const data = computeData();
+  const data = computeData(CVP.range);
   container.innerHTML = renderShell(data);
 
-  // --- Conectar eventos (pestañas, búsqueda, filtros) ---
+  // --- Conectar eventos (pestañas, búsqueda, filtros, fecha global) ---
   wireUpTabs();
   wireUpUserFilters();
+  wireUpGlobalDate();
 
   // --- Dibujar gráficas (carga Chart.js si hace falta) ---
   await loadChartJs();
@@ -136,11 +147,75 @@ window.closeAdminPanel = function () {
 
 /* ============================================================================
    4) CÁLCULOS  ·  toda la lógica de datos en un solo lugar
+   computeData(range) acepta un rango opcional de fechas (Plan B).
    ========================================================================== */
-function computeData() {
+/* ----------------------------------------------------------------------------
+   Reconstruye, por usuario, la misma estructura que tiene CVP.scores
+   (stats + scores por módulo) pero usando SOLO los intentos del histórico
+   que caen dentro del rango de fechas elegido. Así el panel completo
+   (dashboard, leaderboard, módulos, analíticas) refleja ese periodo real.
+   range = { from: Date, to: Date }
+---------------------------------------------------------------------------- */
+function buildScoresFromHistory(range) {
+  const inRange = CVP.history.filter(h => {
+    if (!h.date) return false;
+    const t = new Date(h.date).getTime();
+    return t >= range.from.getTime() && t <= range.to.getTime();
+  });
+
+  // Agrupar por usuario y por módulo
+  const byUser = {};
+  inRange.forEach(h => {
+    if (!byUser[h.uid]) byUser[h.uid] = {};
+    const mod = String(h.moduleId);
+    if (!byUser[h.uid][mod]) byUser[h.uid][mod] = [];
+    byUser[h.uid][mod].push(h);
+  });
+
+  // Para cada usuario, armar { id, scores:{mod:{...}}, stats:{...} }
+  return Object.entries(byUser).map(([uid, mods]) => {
+    const scoresObj = {};
+    let allScores = [];
+    let totalAttempts = 0;
+
+    Object.entries(mods).forEach(([mod, attempts]) => {
+      // ordenar por fecha para saber cuál fue la última nota del periodo
+      attempts.sort((a, b) => new Date(a.date) - new Date(b.date));
+      const notes = attempts.map(a => a.score);
+      const last = attempts[attempts.length - 1];
+      scoresObj[mod] = {
+        average: Math.round(notes.reduce((x, y) => x + y, 0) / notes.length),
+        lastScore: last.score,
+        attempts: attempts.length,
+        lastActivity: last.date
+      };
+      allScores = allScores.concat(notes);
+      totalAttempts += attempts.length;
+    });
+
+    const overall = allScores.length
+      ? Math.round(allScores.reduce((x, y) => x + y, 0) / allScores.length) : 0;
+
+    return {
+      id: uid,
+      scores: scoresObj,
+      stats: {
+        totalQuizzes: Object.keys(scoresObj).length,
+        overallAverage: overall,
+        totalAttempts
+      }
+    };
+  });
+}
+
+function computeData(range) {
   const users  = CVP.users;
-  const scores = CVP.scores;
   const now = new Date();
+
+  // Si hay un rango de fechas, reconstruimos los "scores" SOLO con los
+  // intentos del histórico que caen dentro del periodo. Si no hay rango,
+  // usamos los datos de siempre (comportamiento original, no cambia nada).
+  const scores = range ? buildScoresFromHistory(range) : CVP.scores;
 
   const scoreOf = (uid) => scores.find(s => s.id === uid);
   const daysSince = (iso) => {
@@ -313,6 +388,20 @@ function renderShell(d) {
       </div>
     </header>
 
+    <div class="cvp-daterow">
+      <span class="cvp-daterow-label">📅 Periodo:</span>
+      <select id="cvpGlobalDate">
+        <option value="">Cualquier fecha (todo)</option>
+        <option value="1">Hoy</option>
+        <option value="7">Últimos 7 días</option>
+        <option value="15">Últimos 15 días</option>
+        <option value="30">Últimos 30 días</option>
+        <option value="month">Este mes</option>
+        <option value="prevmonth">Mes pasado</option>
+      </select>
+      <span id="cvpDateNote" class="cvp-daterow-note">${d._rangeNote || ""}</span>
+    </div>
+
     <nav class="cvp-tabs">
       <button class="cvp-tab active" data-tab="dashboard">📊 Dashboard</button>
       <button class="cvp-tab" data-tab="usuarios">👥 Usuarios</button>
@@ -404,6 +493,14 @@ function renderUsers(d) {
         <option value="semana">Activos esta semana</option>
         <option value="inactivo">Inactivos</option>
       </select>
+      <select id="cvpFilterDate">
+        <option value="">📅 Cualquier fecha</option>
+        <option value="1">Último día</option>
+        <option value="7">Últimos 7 días</option>
+        <option value="15">Últimos 15 días</option>
+        <option value="30">Últimos 30 días</option>
+        <option value="month">Este mes</option>
+      </select>
     </div>`;
 
   const cards = d.enriched
@@ -441,7 +538,8 @@ function renderUserCard(u) {
        data-email="${esc(u.email).toLowerCase()}"
        data-branch="${esc(u.branch)}"
        data-position="${esc(u.position)}"
-       data-status="${u.status}">
+       data-status="${u.status}"
+       data-login="${u.lastLogin ? esc(u.lastLogin) : ''}">
 
     <div class="cvp-user-top">
       <h3>${esc(u.name)}</h3>
@@ -655,25 +753,118 @@ function wireUpTabs() {
   });
 }
 
+/* ----------------------------------------------------------------------------
+   Convierte la opción elegida en un rango { from, to } de fechas.
+   Devuelve null para "Cualquier fecha".
+---------------------------------------------------------------------------- */
+function rangeFromValue(value) {
+  if (!value) return null;
+  const now = new Date();
+  const to = new Date(now);
+
+  if (value === "month") {
+    const from = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0);
+    return { from, to, note: "Mostrando: este mes" };
+  }
+  if (value === "prevmonth") {
+    const from = new Date(now.getFullYear(), now.getMonth() - 1, 1, 0, 0, 0);
+    const end  = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59);
+    return { from, to: end, note: "Mostrando: mes pasado" };
+  }
+  const days = parseInt(value, 10);
+  const from = new Date(now.getTime() - days * 86400000);
+  return { from, to, note: `Mostrando: últimos ${days} día(s)` };
+}
+
+/* ----------------------------------------------------------------------------
+   Filtro de fecha GLOBAL: recalcula y redibuja TODO el panel (dashboard,
+   leaderboard, módulos, analíticas, alertas) usando el histórico del periodo.
+---------------------------------------------------------------------------- */
+function wireUpGlobalDate() {
+  const sel = document.getElementById("cvpGlobalDate");
+  if (!sel) return;
+
+  sel.addEventListener("change", async () => {
+    const range = rangeFromValue(sel.value);
+
+    // Aviso si se pide un periodo pero aún no hay histórico que mostrar
+    if (range && CVP.history.length === 0) {
+      const note = document.getElementById("cvpDateNote");
+      if (note) note.textContent = "Aún no hay histórico para este periodo (se irá llenando con cada quiz).";
+    }
+
+    CVP.range = range;
+    const data = computeData(range);
+    if (range && range.note) data._rangeNote = range.note;
+
+    // Redibujar el cuerpo completo, conservando la pestaña activa
+    const activeTab = document.querySelector(".cvp-tab.active");
+    const activeName = activeTab ? activeTab.dataset.tab : "dashboard";
+
+    const container = document.getElementById("admin-users");
+    container.innerHTML = renderShell(data);
+
+    // Restaurar pestaña activa
+    document.querySelectorAll(".cvp-tab").forEach(t => t.classList.remove("active"));
+    document.querySelectorAll(".cvp-panel").forEach(p => p.classList.remove("active"));
+    const tabBtn = document.querySelector(`.cvp-tab[data-tab="${activeName}"]`);
+    const panel = document.querySelector(`.cvp-panel[data-panel="${activeName}"]`);
+    if (tabBtn) tabBtn.classList.add("active");
+    if (panel) panel.classList.add("active");
+
+    // Mantener el selector en el valor elegido y la nota
+    const sel2 = document.getElementById("cvpGlobalDate");
+    if (sel2) sel2.value = sel.value;
+    const note = document.getElementById("cvpDateNote");
+    if (note && range) note.textContent = range.note;
+
+    // Reconectar eventos y gráficas
+    wireUpTabs();
+    wireUpUserFilters();
+    wireUpGlobalDate();
+    await loadChartJs();
+    drawCharts(data);
+  });
+}
+
 function wireUpUserFilters() {
   const search = document.getElementById("cvpSearch");
   const fBranch = document.getElementById("cvpFilterBranch");
   const fPos = document.getElementById("cvpFilterPos");
   const fStatus = document.getElementById("cvpFilterStatus");
+  const fDate = document.getElementById("cvpFilterDate");
   if (!search) return;
+
+  // ¿El login de la tarjeta cae dentro del rango de fecha elegido?
+  const matchesDate = (loginISO, value) => {
+    if (!value) return true;            // "Cualquier fecha"
+    if (!loginISO) return false;        // sin login no entra en ningún rango
+    const login = new Date(loginISO);
+    const now = new Date();
+    if (value === "month") {            // este mes calendario
+      return login.getFullYear() === now.getFullYear() &&
+             login.getMonth() === now.getMonth();
+    }
+    const days = parseInt(value, 10);   // últimos N días
+    const diff = (now - login) / 86400000;
+    return diff <= days;
+  };
 
   const apply = () => {
     const q = search.value.toLowerCase().trim();
     const b = fBranch.value, p = fPos.value, s = fStatus.value;
+    const dt = fDate ? fDate.value : "";
     document.querySelectorAll("#cvpUserList .cvp-user-card").forEach(card => {
       const okText = !q || card.dataset.name.includes(q) || card.dataset.email.includes(q);
       const okB = !b || card.dataset.branch === b;
       const okP = !p || card.dataset.position === p;
       const okS = !s || card.dataset.status === s;
-      card.style.display = (okText && okB && okP && okS) ? "" : "none";
+      const okD = matchesDate(card.dataset.login, dt);
+      card.style.display = (okText && okB && okP && okS && okD) ? "" : "none";
     });
   };
-  [search, fBranch, fPos, fStatus].forEach(el => {
+  [search, fBranch, fPos, fStatus, fDate].forEach(el => {
+    if (!el) return;
     el.addEventListener("input", apply);
     el.addEventListener("change", apply);
   });
@@ -802,6 +993,14 @@ function injectStyles() {
 .cvp-btn.close{background:#dc3545;color:#fff}
 .cvp-btn.save{background:#14A9C4;color:#fff;width:100%;margin-top:4px;padding:12px}
 .cvp-btn.save:hover{background:#0FA0BA}
+
+/* Barra de fecha global */
+.cvp-daterow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:#fff;
+  border-radius:14px;padding:12px 16px;margin-top:14px;box-shadow:0 2px 8px rgba(0,0,0,.05)}
+.cvp-daterow-label{font-weight:700;font-size:14px;color:#0B2137}
+.cvp-daterow select{padding:9px 12px;border-radius:10px;border:1px solid #d6dde6;
+  font-family:inherit;font-size:14px;background:#fff;font-weight:600}
+.cvp-daterow-note{font-size:12px;color:#00B9D6;font-weight:600}
 
 /* Tabs */
 .cvp-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0}
