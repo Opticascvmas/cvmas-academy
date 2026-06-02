@@ -2762,32 +2762,38 @@ user.email === "oskarmchdo@gmail.com"
 
 if(user) {
 
-  await window.saveUserData("users", {
+  // ─── Guardado seguro del usuario ───────────────────────────────
+  // Primera vez: se crea el documento con valores por defecto.
+  // Logins siguientes: SOLO se actualiza lastLogin, para NO borrar
+  // la sucursal, cargo ni rol que el administrador haya asignado.
+  // El rol ya NO se decide aquí; lo controla el panel de admin + las
+  // reglas de seguridad de Firebase.
+  try {
+    const { doc, getDoc, setDoc } = await import(
+      "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js"
+    );
+    const ref = doc(window.db, "users", user.uid);
+    const snap = await getDoc(ref);
 
-   email: user.email,
-
-name:
-user.email
-.split("@")[0],
-
-branch:
-"Pendiente",
-
-position:
-"Pendiente",
-
-role:
-[
-"oskarmchdo@gmail.com",
-"alevargas93@hotmail.com"
-].includes(user.email)
-? "admin"
-: "participant",
-
-lastLogin:
-new Date().toISOString()
-
-  });
+    if (!snap.exists()) {
+      // Primer ingreso: crear con valores por defecto (rol participante)
+      await setDoc(ref, {
+        email: user.email,
+        name: user.email.split("@")[0],
+        branch: "Pendiente",
+        position: "Pendiente",
+        role: "participant",
+        lastLogin: new Date().toISOString()
+      });
+    } else {
+      // Ingresos siguientes: actualizar solo la fecha (merge conserva el resto)
+      await setDoc(ref, {
+        lastLogin: new Date().toISOString()
+      }, { merge: true });
+    }
+  } catch(e) {
+    console.error("Error guardando usuario:", e);
+  }
 
 }
     document.getElementById("login-screen").style.display = "none";
