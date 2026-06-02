@@ -207,6 +207,10 @@ min-height:260px;
     .module-card:hover { border-color:var(--cyan); transform:translateY(-2px); box-shadow:0 8px 24px rgba(0,185,214,0.12); }
     .module-card.studied { border-color:rgba(0,200,83,0.4); }
     .module-card.studied::after { content:'✓'; position:absolute; top:10px; right:10px; width:20px; height:20px; background:var(--success); color:white; border-radius:50%; font-size:11px; display:flex; align-items:center; justify-content:center; }
+    .module-card.locked { opacity:0.55; background:#f3f5f7; cursor:not-allowed; }
+    .module-card.locked:hover { border-color:#e0e0e0; transform:none; box-shadow:none; }
+    .module-card.locked .card-title { color:var(--gray-mid); }
+    .module-card.locked .card-cat { color:var(--gray-mid); font-style:italic; }
     .module-card .card-num { font-size:10px; font-weight:700; color:var(--gray-mid); text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; }
     .module-card .card-icon { font-size:24px; margin-bottom:8px; display:block; }
     .module-card .card-title { font-size:12px; font-weight:600; color:var(--text); line-height:1.4; }
@@ -2119,6 +2123,38 @@ const CAT_INFO = {
 };
 const CAT_ICONS = { fundamentos:'🔬', fabricacion:'⚙️', akkurat:'✨', ventas:'💼' };
 
+// ═══════════════════════════════════════════════════════
+// 🔒 DESBLOQUEO PROGRESIVO DE MÓDULOS
+// El módulo 1 siempre está abierto. Cada módulo siguiente se
+// desbloquea SOLO si el anterior tiene última nota (lastScore) >= 80.
+// Para cambiar la nota mínima, edita PASSING_SCORE.
+// ═══════════════════════════════════════════════════════
+const PASSING_SCORE = 80;
+
+// Orden global de los módulos (tal como aparecen en el dashboard)
+function getModuleOrder() {
+  const order = [];
+  for (const cat of Object.values(CAT_INFO)) order.push(...cat.ids);
+  return order;
+}
+
+// Devuelve la última nota de un módulo (0 si no lo ha hecho)
+function getLastScore(id) {
+  const data = QUIZ_SCORES[id];
+  if (data && typeof data === 'object') return data.lastScore || 0;
+  if (typeof data === 'number') return data; // por si quedó algún dato viejo
+  return 0;
+}
+
+// ¿Está desbloqueado este módulo?
+function isModuleUnlocked(id) {
+  const order = getModuleOrder();
+  const pos = order.indexOf(id);
+  if (pos <= 0) return true;            // el primero siempre abierto
+  const prevId = order[pos - 1];        // módulo anterior en el orden
+  return getLastScore(prevId) >= PASSING_SCORE;
+}
+
 function buildNav() {
   const nav = document.getElementById('nav');
   nav.innerHTML = '';
@@ -2226,14 +2262,24 @@ function renderGrids(searchTerm='') {
         mod.content.toLowerCase().includes(searchTerm.toLowerCase());
       if(!matchSearch) continue;
       anyVisible = true;
+      const unlocked = isModuleUnlocked(mid);
       const card = document.createElement('div');
-      card.className = `module-card${studied?' studied':''}`;
-      card.innerHTML = `
-        <div class="card-num">Módulo ${mid}</div>
-        <span class="card-icon">${mod.icon}</span>
-        <div class="card-title">${mod.title}</div>
-        <span class="cat-badge cat-${catKey}">${catKey}</span>`;
-      card.onclick = () => showModule(mid);
+      card.className = `module-card${studied?' studied':''}${unlocked?'':' locked'}`;
+      if (unlocked) {
+        card.innerHTML = `
+          <div class="card-num">Módulo ${mid}</div>
+          <span class="card-icon">${mod.icon}</span>
+          <div class="card-title">${mod.title}</div>
+          <span class="cat-badge cat-${catKey}">${catKey}</span>`;
+        card.onclick = () => showModule(mid);
+      } else {
+        card.innerHTML = `
+          <div class="card-num">Módulo ${mid}</div>
+          <span class="card-icon">🔒</span>
+          <div class="card-title">${mod.title}</div>
+          <div class="card-cat">Aprueba el módulo anterior con ${PASSING_SCORE}%</div>`;
+        card.onclick = () => alert(`🔒 Módulo bloqueado.\n\nPrimero debes aprobar el módulo anterior con al menos ${PASSING_SCORE}% en el quiz.`);
+      }
       grid.appendChild(card);
     }
     if(!anyVisible && searchTerm){
@@ -2268,6 +2314,11 @@ function showDashboard() {
 function showModule(id) {
   const mod = MODULES.find(m=>m.id===id);
   if(!mod) return;
+  // 🔒 No permitir abrir módulos bloqueados
+  if(!isModuleUnlocked(id)){
+    alert(`🔒 Módulo bloqueado.\n\nPrimero debes aprobar el módulo anterior con al menos ${PASSING_SCORE}% en el quiz.`);
+    return;
+  }
   STATE.currentModule = id;
   STATE.currentView = 'module';
 
@@ -2496,7 +2547,22 @@ try {
 
 }
 
-  document.getElementById('quiz-prog-fill').style.width = '100%';
+// 🔓 Refrescar tarjetas para reflejar módulos recién desbloqueados
+try {
+  renderGrids(STATE.search || '');
+  // Avisar si este aprobado desbloqueó el siguiente módulo
+  if (pct >= PASSING_SCORE) {
+    const order = getModuleOrder();
+    const pos = order.indexOf(qs.module);
+    const nextId = order[pos + 1];
+    if (nextId) {
+      const nextMod = MODULES.find(m => m.id === nextId);
+      setTimeout(() => alert(`🔓 ¡Desbloqueaste el Módulo ${nextId}: ${nextMod ? nextMod.title : ''}!`), 300);
+    }
+  }
+} catch(e) {
+  console.error(e);
+}
 
   let scoreClass = pct>=80?'great':(pct>=60?'ok':'poor');
   let msg = pct>=80?'¡Excelente! Dominas este tema 🎉':pct>=60?'¡Bien! Sigue repasando 💪':'Necesitas repasar este módulo 📚';
