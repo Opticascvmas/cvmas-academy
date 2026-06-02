@@ -70,6 +70,21 @@ max-width:100%; }
       overflow:hidden; transition:transform 0.3s ease;
       position:relative; z-index:100;
     }
+    #sidebar-footer {
+      margin-top:auto; padding:14px 16px;
+      border-top:1px solid rgba(255,255,255,0.08);
+    }
+    #logout-user {
+      font-size:11px; color:rgba(255,255,255,0.5);
+      margin-bottom:8px; word-break:break-all;
+    }
+    #btn-logout {
+      width:100%; padding:11px; border:none; border-radius:10px;
+      background:rgba(255,255,255,0.08); color:rgba(255,255,255,0.9);
+      font-size:13px; font-weight:600; cursor:pointer;
+      font-family:inherit; transition:.2s;
+    }
+    #btn-logout:hover { background:#dc3545; color:#fff; }
     #sidebar-header {
       padding:20px 16px 16px;
       background:var(--dark2);
@@ -568,6 +583,11 @@ margin-bottom:15px;
     <nav id="nav">
       <!-- Populated by JS -->
     </nav>
+
+    <div id="sidebar-footer">
+      <div id="logout-user"></div>
+      <button id="btn-logout" onclick="cerrarSesion()">🚪 Cerrar sesión</button>
+    </div>
   </aside>
 
   <div id="sidebar-overlay" onclick="closeSidebar()"></div>
@@ -2113,6 +2133,36 @@ let QUIZ_SCORES = loadQuizScores();
 let QUIZ_ATTEMPTS = loadQuizAttempts();
 
 // ═══════════════════════════════════════════════════════
+// 🔄 CARGAR DATOS DEL USUARIO DESDE FIREBASE AL INICIAR SESIÓN
+// Reemplaza lo que haya quedado en este navegador (localStorage)
+// por los datos REALES de la cuenta que acaba de entrar. Así cada
+// usuario ve SOLO su propio progreso, aunque compartan computadora.
+// ═══════════════════════════════════════════════════════
+window.hydrateUserData = async function() {
+  try {
+    if (!window.firebaseReady || !window.loadUserData) return;
+
+    // Notas (quiz_scores)
+    const scoresDoc = await window.loadUserData("quiz_scores");
+    QUIZ_SCORES = (scoresDoc && scoresDoc.scores) ? scoresDoc.scores : {};
+
+    // Progreso (módulos estudiados)
+    const progressDoc = await window.loadUserData("progress");
+    PROGRESS = (progressDoc && progressDoc.progress) ? progressDoc.progress : {};
+
+    // Sincronizar el navegador con lo de Firebase (evita datos viejos pegados)
+    localStorage.setItem('cvplus_quiz_scores', JSON.stringify(QUIZ_SCORES));
+    localStorage.setItem('cvplus_progress', JSON.stringify(PROGRESS));
+
+    // Redibujar con los datos correctos
+    try { renderGrids(); } catch(e) {}
+    try { updateStats(); } catch(e) {}
+  } catch(e) {
+    console.error("Error cargando datos del usuario:", e);
+  }
+};
+
+// ═══════════════════════════════════════════════════════
 // BUILD SIDEBAR NAV
 // ═══════════════════════════════════════════════════════
 const CAT_INFO = {
@@ -2796,6 +2846,21 @@ if(user) {
   }
 
 }
+
+// 🔄 Cargar los datos REALES de esta cuenta desde Firebase
+// (reemplaza cualquier dato de otro usuario que haya quedado en el navegador)
+try {
+  await window.hydrateUserData();
+} catch(e) {
+  console.error("ERROR hydrateUserData:", e);
+}
+
+// Mostrar con qué cuenta se inició sesión (junto al botón cerrar sesión)
+try {
+  const lu = document.getElementById("logout-user");
+  if (lu && user) lu.textContent = "Sesión: " + user.email;
+} catch(e) {}
+
     document.getElementById("login-screen").style.display = "none";
 document.getElementById("login-screen").remove();
 
@@ -2842,6 +2907,37 @@ window.saveUserData = async function(collection, data) {
     data
   );
 }
+
+// ═══════════════════════════════════════════════════════
+// 🚪 CERRAR SESIÓN
+// Cierra sesión en Firebase y LIMPIA los datos de este navegador,
+// para que en computadoras compartidas el siguiente usuario no vea
+// el progreso del anterior.
+// ═══════════════════════════════════════════════════════
+window.cerrarSesion = async function() {
+  const ok = confirm("¿Cerrar sesión?");
+  if (!ok) return;
+  try {
+    // Borrar datos locales de esta cuenta
+    localStorage.removeItem("cvplus_user");
+    localStorage.removeItem("cvplus_quiz_scores");
+    localStorage.removeItem("cvplus_progress");
+    localStorage.removeItem("cvplus_quiz_attempts");
+
+    // Cerrar sesión en Firebase
+    if (window.auth) {
+      const { signOut } = await import(
+        "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js"
+      );
+      await signOut(window.auth);
+    }
+  } catch(e) {
+    console.error("Error al cerrar sesión:", e);
+  } finally {
+    // Recargar para volver a la pantalla de inicio de sesión
+    location.reload();
+  }
+};
 
 // ═══════════════════════════════════════════════════════
 // 📅 HISTÓRICO DE QUIZZES (Plan B)
