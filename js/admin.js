@@ -22,24 +22,24 @@
    "Módulo 1" y muestre el nombre de verdad.
    ========================================================================== */
 const MODULE_NAMES = {
-  "1":  "Introducción CV+",
-  "2":  "Atención al Cliente",
-  "3":  "Visión Binocular",
-  "4":  "Lentes y Materiales",
-  "5":  "Monturas",
-  "6":  "Lentes de Contacto",
-  "7":  "Protección Solar",
-  "8":  "Salud Visual",
-  "9":  "Ventas Consultivas",
-  "10": "Cierre de Venta",
-  "11": "Garantías",
-  "12": "Postventa",
-  "13": "Producto Premium",
-  "14": "Tecnología Óptica",
-  "15": "Manejo de Objeciones",
-  "16": "Imagen y Estilo",
-  "17": "Procesos Internos",
-  "18": "Examen Final"
+  "1":  "ADN CV+",
+  "2":  "Anatomia ocular",
+  "3":  "Defectos visuales",
+  "4":  "Lectura de recetas",
+  "5":  "Lentes oftalmicos",
+  "6":  "Procesos de fabricacion",
+  "7":  "Materiales de lentes oftalmicos",
+  "8":  "Tratamientos de lentes oftalmicos",
+  "9":  "Lentes vision sencilla",
+  "10": "Lentes progresivos",
+  "11": "Progresivos Akkurat",
+  "12": "Ocupacionales Akkurat",
+  "13": "Antifatiga Akkurat",
+  "14": "Vision sencilla Akkurat",
+  "15": "Lentes de contacto",
+  "16": "Lentes Luminex",
+  "17": "Cierre de ventas",
+  "18": "Aros oftalmicos y ficha de marca"
   // ...agrega o corrige los que necesites
 };
 
@@ -696,8 +696,8 @@ function renderAlerts(d) {
 /* ============================================================================
    6) OPCIONES DE SUCURSAL Y CARGO (para los selects de edición)
    ========================================================================== */
-const BRANCHES = ["Metrocentro 1","Metrocentro 2","Plaza Mundo","Metrocentro Santa Ana","Sonsonate","San Miguel","Aguilares","Apopa","Valle Dulce","San Gabriel","Metropolis","Galerias","El Paseo","Zona Rosa","El Casco","Multiplaza","Santa Rosa","Encuentro Zacatecoluca","Zacatecoluca Centro","Usulutan","San Francisco Gotera","San Martin","Unicentro Soyapango","Alta Vista","Encuentro Lourdes","Metrocentro Lourdes","Acajutla","Las Ramblas","Encuentro Santa Ana","Empresarial","SAC","Zaragoza","Puerto de La Libertad","Armenia","San Marcos","Recursos Humanos","Ventas","Mercadeo"];
-const POSITIONS = ["Asesor Visual","Optometrista","Capacitador","Supervisor","RRHH"];
+const BRANCHES = ["Metrocentro 1","Metrocentro 2","Plaza Mundo","Metrocentro Santa Ana","Sonsonate","San Miguel","Aguilares","Apopa","Valle Dulce","San Gabriel","Metropolis","Galerias","El Paseo","Zona Rosa","El Casco","Multiplaza","Santa Rosa","Encuentro Zacatecoluca","Zacatecoluca Centro","Usulutan","San Francisco Gotera","San Martin","Unicentro Soyapango","Alta Vista","Encuentro Lourdes","Metrocentro Lourdes","Acajutla","Las Ramblas","Encuentro Santa Ana","Empresarial","SAC","Zaragoza","Puerto de La Libertad","Armenia","San Marcos","Coberturas","Recursos Humanos","Ventas","Mercadeo"];
+const POSITIONS = ["Asesor/a Visual","Asesor/a de cobertura","Optometrista","Optometrista de cobertura","Capacitador","Gerente de ventas","Supervisor","RRHH"];
 
 function branchOptions(current) {
   const opts = BRANCHES.includes(current) ? BRANCHES : [current, ...BRANCHES];
