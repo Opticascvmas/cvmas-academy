@@ -22,24 +22,24 @@
    "Módulo 1" y muestre el nombre de verdad.
    ========================================================================== */
 const MODULE_NAMES = {
-  "1":  "ADN CV+",
-  "2":  "Anatomia ocular",
-  "3":  "Defectos visuales",
-  "4":  "Lectura de recetas",
-  "5":  "Lentes oftalmicos",
-  "6":  "Procesos de fabricacion",
-  "7":  "Materiales de lentes oftalmicos",
-  "8":  "Tratamientos de lentes oftalmicos",
-  "9":  "Lentes vision sencilla",
-  "10": "Lentes progresivos",
-  "11": "Progresivos Akkurat",
-  "12": "Ocupacionales Akkurat",
-  "13": "Antifatiga Akkurat",
-  "14": "Vision sencilla Akkurat",
-  "15": "Lentes de contacto",
-  "16": "Lentes Luminex",
-  "17": "Cierre de ventas",
-  "18": "Aros oftalmicos y ficha de marca"
+  "1":  "Introducción CV+",
+  "2":  "Atención al Cliente",
+  "3":  "Visión Binocular",
+  "4":  "Lentes y Materiales",
+  "5":  "Monturas",
+  "6":  "Lentes de Contacto",
+  "7":  "Protección Solar",
+  "8":  "Salud Visual",
+  "9":  "Ventas Consultivas",
+  "10": "Cierre de Venta",
+  "11": "Garantías",
+  "12": "Postventa",
+  "13": "Producto Premium",
+  "14": "Tecnología Óptica",
+  "15": "Manejo de Objeciones",
+  "16": "Imagen y Estilo",
+  "17": "Procesos Internos",
+  "18": "Examen Final"
   // ...agrega o corrige los que necesites
 };
 
@@ -50,6 +50,24 @@ const TOTAL_MODULES = 18;
 // window.CVP_CURRENT_ROLE, el panel solo abrirá para "admin".
 // Si no lo defines, el panel abre normalmente.
 const ENFORCE_ADMIN_ONLY = true;
+
+// ─────────────────────────────────────────────────────────────
+// 👑 ADMINS SUPREMOS (los ÚNICOS que pueden hacer cambios)
+// Los demás correos que tengan acceso al panel solo podrán VER,
+// no modificar nada. Agrega aquí los correos con permiso total.
+// ─────────────────────────────────────────────────────────────
+const SUPER_ADMINS = [
+  "oskarmchdo@gmail.com"
+];
+
+// ¿El usuario que está viendo el panel puede editar?
+// (true solo si su correo está en SUPER_ADMINS)
+function currentCanEdit() {
+  try {
+    const email = (window.auth && window.auth.currentUser && window.auth.currentUser.email) || "";
+    return SUPER_ADMINS.includes(email);
+  } catch (e) { return false; }
+}
 
 // Devuelve el nombre del módulo a partir de su clave
 function moduleName(key) {
@@ -83,10 +101,11 @@ const CVP = {
    ========================================================================== */
 window.openAdminPanel = async function () {
 
-  // --- Seguridad básica: solo admins ---
+  // --- Seguridad básica: solo admins o visores ---
   if (ENFORCE_ADMIN_ONLY &&
       typeof window.CVP_CURRENT_ROLE !== "undefined" &&
-      window.CVP_CURRENT_ROLE !== "admin") {
+      window.CVP_CURRENT_ROLE !== "admin" &&
+      window.CVP_CURRENT_ROLE !== "viewer") {
     alert("Acceso restringido: solo administradores.");
     return;
   }
@@ -378,7 +397,7 @@ function renderShell(d) {
         <span class="cvp-logo">CV+</span>
         <div>
           <h1>Panel Administrador</h1>
-          <p>Academia CV+ · ${d.totalUsers} usuarios</p>
+          <p>Academia CV+ · ${d.totalUsers} usuarios${currentCanEdit() ? "" : " · 👁️ Solo lectura"}</p>
         </div>
       </div>
       <div class="cvp-head-actions">
@@ -563,16 +582,18 @@ function renderUserCard(u) {
 
     <div class="cvp-history"><b>Historial de quizzes</b>${history}</div>
 
+    ${currentCanEdit() ? `
     <div class="cvp-edit">
       <input id="name-${u.id}" value="${esc(u.name)}" placeholder="Nombre">
       <select id="branch-${u.id}">${branchOptions(u.branch)}</select>
       <select id="position-${u.id}">${positionOptions(u.position)}</select>
       <select id="role-${u.id}">
         <option value="participant" ${u.role === "participant" ? "selected" : ""}>participant</option>
+        <option value="viewer" ${u.role === "viewer" ? "selected" : ""}>viewer (solo ver)</option>
         <option value="admin" ${u.role === "admin" ? "selected" : ""}>admin</option>
       </select>
       <button class="cvp-btn save" onclick="saveUserInfo('${u.id}')">💾 Guardar cambios</button>
-    </div>
+    </div>` : ``}
   </div>`;
 }
 
@@ -696,8 +717,8 @@ function renderAlerts(d) {
 /* ============================================================================
    6) OPCIONES DE SUCURSAL Y CARGO (para los selects de edición)
    ========================================================================== */
-const BRANCHES = ["Metrocentro 1","Metrocentro 2","Plaza Mundo","Metrocentro Santa Ana","Sonsonate","San Miguel","Aguilares","Apopa","Valle Dulce","San Gabriel","Metropolis","Galerias","El Paseo","Zona Rosa","El Casco","Multiplaza","Santa Rosa","Encuentro Zacatecoluca","Zacatecoluca Centro","Usulutan","San Francisco Gotera","San Martin","Unicentro Soyapango","Alta Vista","Encuentro Lourdes","Metrocentro Lourdes","Acajutla","Las Ramblas","Encuentro Santa Ana","Empresarial","SAC","Zaragoza","Puerto de La Libertad","Armenia","San Marcos","Coberturas","Recursos Humanos","Ventas","Mercadeo"];
-const POSITIONS = ["Asesor/a Visual","Asesor/a de cobertura","Optometrista","Optometrista de cobertura","Capacitador","Gerente de ventas","Supervisor","RRHH"];
+const BRANCHES = ["Metrocentro 1","Metrocentro 2","Plaza Mundo","Metrocentro Santa Ana","Sonsonate","San Miguel","Aguilares","Apopa","Valle Dulce","San Gabriel","Metropolis","Galerias","El Paseo","Zona Rosa","El Casco","Multiplaza","Santa Rosa","Encuentro Zacatecoluca","Zacatecoluca Centro","Usulutan","San Francisco Gotera","San Martin","Unicentro Soyapango","Alta Vista","Encuentro Lourdes","Metrocentro Lourdes","Acajutla","Las Ramblas","Encuentro Santa Ana","Empresarial","SAC","Zaragoza","Puerto de La Libertad","Armenia","San Marcos","Recursos Humanos","Ventas","Mercadeo","Coberturas"];
+const POSITIONS = ["Asesor Visual","Optometrista","Capacitador","Supervisor","RRHH","Asesor de Coberturas","Optómetra de Coberturas"];
 
 function branchOptions(current) {
   const opts = BRANCHES.includes(current) ? BRANCHES : [current, ...BRANCHES];
@@ -713,6 +734,12 @@ function positionOptions(current) {
    7) GUARDAR CAMBIOS  ·  rol, sucursal, cargo, nombre  (+ log de cambios)
    ========================================================================== */
 window.saveUserInfo = async function (userId) {
+  // Seguridad: solo los admins supremos pueden guardar cambios
+  if (!currentCanEdit()) {
+    alert("👁️ Tu cuenta es de solo lectura. No tienes permiso para hacer cambios.");
+    return;
+  }
+
   const name     = document.getElementById(`name-${userId}`).value;
   const branch   = document.getElementById(`branch-${userId}`).value;
   const position = document.getElementById(`position-${userId}`).value;
