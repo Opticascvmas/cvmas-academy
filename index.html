@@ -2226,7 +2226,7 @@ localStorage.getItem(
 );
 
 if(
-currentUserData.role !== "admin"
+currentUserData.role !== "admin" && currentUserData.role !== "viewer"
 ){
 return;
 }
@@ -2799,16 +2799,22 @@ window.checkPassword = async function() {
       password
     );
 const user = window.auth.currentUser;
+// Admin supremo (puede modificar) vs visores (solo ven el panel)
+const SUPER_ADMIN_EMAILS = ["oskarmchdo@gmail.com"];
+const VIEWER_EMAILS = ["alevargas93@hotmail.com", "erick.ramirez@opticascvmas.com"];
+let rolLocal = "participant";
+if (SUPER_ADMIN_EMAILS.includes(user.email)) rolLocal = "admin";
+else if (VIEWER_EMAILS.includes(user.email)) rolLocal = "viewer";
 localStorage.setItem(
 "cvplus_user",
 JSON.stringify({
 email:user.email,
-role:
-user.email === "oskarmchdo@gmail.com"
-? "admin"
-: "participant"
+role: rolLocal
 })
 );
+// Conectar con el panel de admin (control de acceso y registro de cambios)
+window.CVP_CURRENT_ROLE = rolLocal;
+window.CVP_CURRENT_EMAIL = user.email;
 
 if(user) {
 
