@@ -376,17 +376,22 @@ function computeData(range) {
   const hardestModule = moduleStats.length
     ? [...moduleStats].sort((a, b) => a.avg - b.avg)[0] : null;
 
-  // ---- Usuarios por día (últimos 7 días, dato real por lastLogin) ----
+  // ---- Quizzes realizados por día (últimos 7 días, dato real del histórico) ----
+  // Usa quiz_history (cada intento tiene fecha). El día se calcula en hora de
+  // El Salvador para que los quizzes caigan en el día correcto.
   const dayLabels = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
   const last7 = [];
+  // Conteo de intentos por día (clave "YYYY-MM-DD" en hora SV)
+  const porDia = {};
+  CVP.history.forEach(h => {
+    if (!h.date) return;
+    const k = svDayKey(h.date);
+    porDia[k] = (porDia[k] || 0) + 1;
+  });
   for (let i = 6; i >= 0; i--) {
     const day = new Date(now); day.setDate(now.getDate() - i);
-    const count = enriched.filter(u => {
-      if (!u.lastLogin) return false;
-      const l = new Date(u.lastLogin);
-      return l.toDateString() === day.toDateString();
-    }).length;
-    last7.push({ label: dayLabels[day.getDay()], count });
+    const key = day.toLocaleDateString("en-CA", { timeZone: "America/El_Salvador" });
+    last7.push({ label: dayLabels[day.getDay()], count: porDia[key] || 0 });
   }
 
   // ---- Distribución de notas (real) ----
@@ -513,7 +518,7 @@ function renderDashboard(d) {
 
     <div class="cvp-grid charts">
       <div class="cvp-card">
-        <h3>Usuarios conectados por día (últimos 7 días)</h3>
+        <h3>Quizzes realizados por día (últimos 7 días)</h3>
         <canvas id="cvpChartWeek" height="160"></canvas>
       </div>
       <div class="cvp-card">
