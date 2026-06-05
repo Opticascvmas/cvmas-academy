@@ -186,10 +186,10 @@ window.openAdminPanel = async function () {
   const data = computeData(CVP.range);
   container.innerHTML = renderShell(data);
 
-  // --- Conectar eventos (pestañas, búsqueda, filtros, fecha global) ---
+  // --- Conectar eventos (pestañas, búsqueda, filtros, calendario) ---
   wireUpTabs();
   wireUpUserFilters();
-  wireUpGlobalDate();
+  wireUpCalendar();
 
   // --- Dibujar gráficas (carga Chart.js si hace falta) ---
   await loadChartJs();
@@ -212,12 +212,29 @@ window.closeAdminPanel = function () {
    (dashboard, leaderboard, módulos, analíticas) refleja ese periodo real.
    range = { from: Date, to: Date }
 ---------------------------------------------------------------------------- */
+// Día calendario en hora de El Salvador, formato "YYYY-MM-DD"
+function svDayKey(iso) {
+  try {
+    return new Date(iso).toLocaleDateString("en-CA", { timeZone: "America/El_Salvador" });
+  } catch (e) { return ""; }
+}
+
 function buildScoresFromHistory(range) {
-  const inRange = CVP.history.filter(h => {
-    if (!h.date) return false;
-    const t = new Date(h.date).getTime();
-    return t >= range.from.getTime() && t <= range.to.getTime();
-  });
+  let inRange;
+  if (range && range.days) {
+    // Modo días/semana: solo los intentos cuyo día (hora El Salvador) está marcado
+    const set = new Set(range.days);
+    inRange = CVP.history.filter(h => h.date && set.has(svDayKey(h.date)));
+  } else if (range && range.from && range.to) {
+    // Modo rango por timestamp (compatibilidad)
+    inRange = CVP.history.filter(h => {
+      if (!h.date) return false;
+      const t = new Date(h.date).getTime();
+      return t >= range.from.getTime() && t <= range.to.getTime();
+    });
+  } else {
+    inRange = [];
+  }
 
   // Agrupar por usuario y por módulo
   const byUser = {};
@@ -444,19 +461,7 @@ function renderShell(d) {
       </div>
     </header>
 
-    <div class="cvp-daterow">
-      <span class="cvp-daterow-label">📅 Periodo:</span>
-      <select id="cvpGlobalDate">
-        <option value="">Cualquier fecha (todo)</option>
-        <option value="1">Hoy</option>
-        <option value="7">Últimos 7 días</option>
-        <option value="15">Últimos 15 días</option>
-        <option value="30">Últimos 30 días</option>
-        <option value="month">Este mes</option>
-        <option value="prevmonth">Mes pasado</option>
-      </select>
-      <span id="cvpDateNote" class="cvp-daterow-note">${d._rangeNote || ""}</span>
-    </div>
+    <div class="cvp-calbar" id="cvpCalArea"><!-- calendario: lo llena wireUpCalendar() --></div>
 
     <nav class="cvp-tabs">
       <button class="cvp-tab active" data-tab="dashboard">📊 Dashboard</button>
@@ -821,75 +826,200 @@ function wireUpTabs() {
    Convierte la opción elegida en un rango { from, to } de fechas.
    Devuelve null para "Cualquier fecha".
 ---------------------------------------------------------------------------- */
-function rangeFromValue(value) {
-  if (!value) return null;
-  const now = new Date();
-  const to = new Date(now);
 
-  if (value === "month") {
-    const from = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0);
-    return { from, to, note: "Mostrando: este mes" };
-  }
-  if (value === "prevmonth") {
-    const from = new Date(now.getFullYear(), now.getMonth() - 1, 1, 0, 0, 0);
-    const end  = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59);
-    return { from, to: end, note: "Mostrando: mes pasado" };
-  }
-  const days = parseInt(value, 10);
-  const from = new Date(now.getTime() - days * 86400000);
-  return { from, to, note: `Mostrando: últimos ${days} día(s)` };
+const CVP_MESES = ["Enero","Febrero","Marzo","Abril","Mayo","Junio",
+                   "Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+
+// Recalcula y redibuja TODO el panel según los días seleccionados en el calendario
+async function aplicarSeleccionCalendario() {
+  const dias = Array.from(CVP.selectedDays || []);
+  CVP.range = dias.length ? { days: dias } : null;
+
+  const data = computeData(CVP.range);
+
+  // Conservar la pestaña activa
+  const activeTab = document.querySelector(".cvp-tab.active");
+  const activeName = activeTab ? activeTab.dataset.tab : "dashboard";
+
+  const container = document.getElementById("admin-users");
+  container.innerHTML = renderShell(data);
+
+  document.querySelectorAll(".cvp-tab").forEach(t => t.classList.remove("active"));
+  document.querySelectorAll(".cvp-panel").forEach(p => p.classList.remove("active"));
+  const tabBtn = document.querySelector(`.cvp-tab[data-tab="${activeName}"]`);
+  const panel = document.querySelector(`.cvp-panel[data-panel="${activeName}"]`);
+  if (tabBtn) tabBtn.classList.add("active");
+  if (panel) panel.classList.add("active");
+
+  // Reconstruir el calendario, los filtros, las gráficas
+  wireUpTabs();
+  wireUpUserFilters();
+  wireUpCalendar();
+  await loadChartJs();
+  drawCharts(data);
+}
+
+// Texto resumen de la selección actual
+function textoSeleccion() {
+  const n = (CVP.selectedDays || new Set()).size;
+  if (n === 0) return "Mostrando: todo el histórico";
+  if (n === 1) return "Mostrando: 1 día seleccionado";
+  return `Mostrando: ${n} días seleccionados`;
 }
 
 /* ----------------------------------------------------------------------------
-   Filtro de fecha GLOBAL: recalcula y redibuja TODO el panel (dashboard,
-   leaderboard, módulos, analíticas, alertas) usando el histórico del periodo.
+   📅 CALENDARIO INTERACTIVO (reemplaza la barra de periodo)
+   Permite elegir mes/año, y seleccionar un RANGO o DÍAS SUELTOS.
+   Recalcula todo el panel con el histórico de los días elegidos.
 ---------------------------------------------------------------------------- */
-function wireUpGlobalDate() {
-  const sel = document.getElementById("cvpGlobalDate");
-  if (!sel) return;
+function wireUpCalendar() {
+  const area = document.getElementById("cvpCalArea");
+  if (!area) return;
 
-  sel.addEventListener("change", async () => {
-    const range = rangeFromValue(sel.value);
+  // Inicializar estado la primera vez
+  const now = new Date();
+  if (CVP.calYear == null)  CVP.calYear = now.getFullYear();
+  if (CVP.calMonth == null) CVP.calMonth = now.getMonth();
+  if (!CVP.calMode)         CVP.calMode = "range";   // 'range' | 'days'
+  if (!CVP.selectedDays)    CVP.selectedDays = new Set();
+  if (CVP.rangeStart === undefined) CVP.rangeStart = null;
 
-    // Aviso si se pide un periodo pero aún no hay histórico que mostrar
-    if (range && CVP.history.length === 0) {
-      const note = document.getElementById("cvpDateNote");
-      if (note) note.textContent = "Aún no hay histórico para este periodo (se irá llenando con cada quiz).";
-    }
+  area.innerHTML = renderCalendarHTML();
 
-    CVP.range = range;
-    const data = computeData(range);
-    if (range && range.note) data._rangeNote = range.note;
+  // --- Controles superiores ---
+  area.querySelector("#cvpCalPrevY").onclick = () => { CVP.calYear--; wireUpCalendar(); };
+  area.querySelector("#cvpCalNextY").onclick = () => { CVP.calYear++; wireUpCalendar(); };
+  area.querySelector("#cvpCalMonth").onchange = (e) => { CVP.calMonth = parseInt(e.target.value,10); wireUpCalendar(); };
 
-    // Redibujar el cuerpo completo, conservando la pestaña activa
-    const activeTab = document.querySelector(".cvp-tab.active");
-    const activeName = activeTab ? activeTab.dataset.tab : "dashboard";
-
-    const container = document.getElementById("admin-users");
-    container.innerHTML = renderShell(data);
-
-    // Restaurar pestaña activa
-    document.querySelectorAll(".cvp-tab").forEach(t => t.classList.remove("active"));
-    document.querySelectorAll(".cvp-panel").forEach(p => p.classList.remove("active"));
-    const tabBtn = document.querySelector(`.cvp-tab[data-tab="${activeName}"]`);
-    const panel = document.querySelector(`.cvp-panel[data-panel="${activeName}"]`);
-    if (tabBtn) tabBtn.classList.add("active");
-    if (panel) panel.classList.add("active");
-
-    // Mantener el selector en el valor elegido y la nota
-    const sel2 = document.getElementById("cvpGlobalDate");
-    if (sel2) sel2.value = sel.value;
-    const note = document.getElementById("cvpDateNote");
-    if (note && range) note.textContent = range.note;
-
-    // Reconectar eventos y gráficas
-    wireUpTabs();
-    wireUpUserFilters();
-    wireUpGlobalDate();
-    await loadChartJs();
-    drawCharts(data);
+  area.querySelectorAll(".cvp-calmode").forEach(btn => {
+    btn.onclick = () => {
+      CVP.calMode = btn.dataset.mode;
+      CVP.rangeStart = null;
+      wireUpCalendar();
+    };
   });
+
+  // --- Días ---
+  area.querySelectorAll(".cvp-calday[data-key]").forEach(cell => {
+    cell.onclick = () => onClickDay(cell.dataset.key);
+  });
+
+  // --- Botones de acción ---
+  area.querySelector("#cvpCalAll").onclick = () => {
+    // Seleccionar todo el mes visible
+    const keys = diasDelMes(CVP.calYear, CVP.calMonth);
+    keys.forEach(k => CVP.selectedDays.add(k));
+    CVP.rangeStart = null;
+    wireUpCalendar();
+  };
+  area.querySelector("#cvpCalClear").onclick = () => {
+    CVP.selectedDays = new Set();
+    CVP.rangeStart = null;
+    wireUpCalendar();
+  };
+  area.querySelector("#cvpCalApply").onclick = () => aplicarSeleccionCalendario();
 }
+
+// Lógica al hacer clic en un día, según el modo
+function onClickDay(key) {
+  if (CVP.calMode === "days") {
+    // Días sueltos: alternar
+    if (CVP.selectedDays.has(key)) CVP.selectedDays.delete(key);
+    else CVP.selectedDays.add(key);
+  } else {
+    // Rango: primer clic = inicio; segundo = fin (rellena entre ambos)
+    if (!CVP.rangeStart) {
+      CVP.selectedDays = new Set([key]);
+      CVP.rangeStart = key;
+    } else {
+      let a = CVP.rangeStart, b = key;
+      if (a > b) { const t = a; a = b; b = t; }   // ordenar
+      CVP.selectedDays = new Set(rangoDeDias(a, b));
+      CVP.rangeStart = null;                        // listo el rango
+    }
+  }
+  wireUpCalendar();
+}
+
+// Lista de "YYYY-MM-DD" de todos los días de un mes
+function diasDelMes(year, month) {
+  const total = new Date(year, month + 1, 0).getDate();
+  const out = [];
+  for (let d = 1; d <= total; d++) out.push(claveDia(year, month, d));
+  return out;
+}
+
+// Lista de "YYYY-MM-DD" entre dos fechas (inclusive)
+function rangoDeDias(a, b) {
+  const out = [];
+  let cur = new Date(a + "T00:00:00");
+  const end = new Date(b + "T00:00:00");
+  while (cur <= end) {
+    out.push(cur.toLocaleDateString("en-CA"));
+    cur.setDate(cur.getDate() + 1);
+  }
+  return out;
+}
+
+// Clave "YYYY-MM-DD" a partir de año, mes(0-11), día
+function claveDia(year, month, day) {
+  const mm = String(month + 1).padStart(2, "0");
+  const dd = String(day).padStart(2, "0");
+  return `${year}-${mm}-${dd}`;
+}
+
+// HTML del calendario
+function renderCalendarHTML() {
+  const year = CVP.calYear, month = CVP.calMonth;
+  const primerDia = new Date(year, month, 1).getDay();        // 0=Dom..6=Sab
+  const offset = (primerDia + 6) % 7;                          // para que la semana empiece en Lunes
+  const total = new Date(year, month + 1, 0).getDate();
+
+  let celdas = "";
+  for (let i = 0; i < offset; i++) celdas += `<div class="cvp-calday empty"></div>`;
+  for (let d = 1; d <= total; d++) {
+    const key = claveDia(year, month, d);
+    const sel = CVP.selectedDays.has(key) ? "sel" : "";
+    const ini = (CVP.rangeStart === key) ? "ini" : "";
+    celdas += `<div class="cvp-calday ${sel} ${ini}" data-key="${key}">${d}</div>`;
+  }
+
+  const opcionesMes = CVP_MESES.map((m, i) =>
+    `<option value="${i}" ${i === month ? "selected" : ""}>${m}</option>`).join("");
+
+  return `
+    <div class="cvp-cal-top">
+      <span class="cvp-cal-title">📅 Periodo a mostrar</span>
+      <div class="cvp-cal-modes">
+        <button class="cvp-calmode ${CVP.calMode==='range'?'on':''}" data-mode="range">Rango</button>
+        <button class="cvp-calmode ${CVP.calMode==='days'?'on':''}" data-mode="days">Días sueltos</button>
+      </div>
+      <div class="cvp-cal-nav">
+        <select id="cvpCalMonth">${opcionesMes}</select>
+        <button id="cvpCalPrevY">‹</button>
+        <b>${year}</b>
+        <button id="cvpCalNextY">›</button>
+      </div>
+    </div>
+
+    <div class="cvp-cal-hint">${CVP.calMode==='range'
+      ? 'Toca el día de inicio y luego el día final para marcar una semana o periodo.'
+      : 'Toca los días que quieras (se marcan/desmarcan uno por uno).'}</div>
+
+    <div class="cvp-cal-grid">
+      <div class="cvp-caldow">L</div><div class="cvp-caldow">M</div><div class="cvp-caldow">M</div>
+      <div class="cvp-caldow">J</div><div class="cvp-caldow">V</div><div class="cvp-caldow">S</div><div class="cvp-caldow">D</div>
+      ${celdas}
+    </div>
+
+    <div class="cvp-cal-actions">
+      <button id="cvpCalAll" class="cvp-btn ghost dark">Todo el mes</button>
+      <button id="cvpCalClear" class="cvp-btn ghost dark">Limpiar</button>
+      <span class="cvp-cal-count">${textoSeleccion()}</span>
+      <button id="cvpCalApply" class="cvp-btn apply">✓ Aplicar</button>
+    </div>`;
+}
+
 
 function wireUpUserFilters() {
   const search = document.getElementById("cvpSearch");
@@ -1057,14 +1187,40 @@ function injectStyles() {
 .cvp-btn.close{background:#dc3545;color:#fff}
 .cvp-btn.save{background:#14A9C4;color:#fff;width:100%;margin-top:4px;padding:12px}
 .cvp-btn.save:hover{background:#0FA0BA}
+.cvp-btn.ghost.dark{background:#eef2f7;color:#0B2137}
+.cvp-btn.ghost.dark:hover{background:#dde4ec}
+.cvp-btn.apply{background:linear-gradient(135deg,#00B9D6,#14A9C4);color:#fff;margin-left:auto}
+.cvp-btn.apply:hover{filter:brightness(1.05)}
 
-/* Barra de fecha global */
-.cvp-daterow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:#fff;
-  border-radius:14px;padding:12px 16px;margin-top:14px;box-shadow:0 2px 8px rgba(0,0,0,.05)}
-.cvp-daterow-label{font-weight:700;font-size:14px;color:#0B2137}
-.cvp-daterow select{padding:9px 12px;border-radius:10px;border:1px solid #d6dde6;
-  font-family:inherit;font-size:14px;background:#fff;font-weight:600}
-.cvp-daterow-note{font-size:12px;color:#00B9D6;font-weight:600}
+/* Calendario interactivo */
+.cvp-calbar{background:#fff;border-radius:16px;padding:16px;margin-top:14px;
+  box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.cvp-cal-top{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.cvp-cal-title{font-weight:800;font-size:15px;color:#0B2137}
+.cvp-cal-modes{display:flex;gap:6px;background:#eef2f7;border-radius:10px;padding:3px}
+.cvp-calmode{border:none;background:transparent;padding:7px 14px;border-radius:8px;
+  font-family:inherit;font-size:13px;font-weight:700;color:#5a6b7b;cursor:pointer}
+.cvp-calmode.on{background:#fff;color:#00B9D6;box-shadow:0 1px 4px rgba(0,0,0,.1)}
+.cvp-cal-nav{display:flex;align-items:center;gap:8px;margin-left:auto}
+.cvp-cal-nav select{padding:8px 10px;border-radius:9px;border:1px solid #d6dde6;
+  font-family:inherit;font-size:14px;font-weight:600;background:#fff}
+.cvp-cal-nav button{width:30px;height:30px;border:none;border-radius:8px;background:#eef2f7;
+  font-size:18px;font-weight:700;cursor:pointer;color:#0B2137}
+.cvp-cal-nav button:hover{background:#dde4ec}
+.cvp-cal-nav b{font-size:15px;min-width:46px;text-align:center}
+.cvp-cal-hint{font-size:12px;color:#6b7785;margin:10px 0}
+.cvp-cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.cvp-caldow{text-align:center;font-size:11px;font-weight:800;color:#9aa5b1;padding:4px 0}
+.cvp-calday{aspect-ratio:1;display:flex;align-items:center;justify-content:center;
+  border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;background:#f5f7fb;
+  color:#0B2137;transition:.12s;user-select:none}
+.cvp-calday:hover{background:#dceef2}
+.cvp-calday.empty{background:transparent;cursor:default}
+.cvp-calday.sel{background:linear-gradient(135deg,#00B9D6,#14A9C4);color:#fff}
+.cvp-calday.ini{outline:3px solid #0B2137;outline-offset:-3px}
+.cvp-cal-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:14px;
+  padding-top:14px;border-top:1px solid #eef2f7}
+.cvp-cal-count{font-size:13px;color:#00B9D6;font-weight:700}
 
 /* Tabs */
 .cvp-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0}
@@ -1199,7 +1355,7 @@ function injectStyles() {
 
 /* Impresión / PDF */
 @media print{
-  .cvp-head-actions,.cvp-tabs,.cvp-edit,.cvp-filters{display:none!important}
+  .cvp-head-actions,.cvp-tabs,.cvp-edit,.cvp-filters,.cvp-calbar{display:none!important}
   .cvp-panel{display:block!important}
   #admin-panel{position:static;background:#fff}
 }
