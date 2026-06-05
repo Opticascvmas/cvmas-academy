@@ -883,15 +883,62 @@ function wireUpCalendar() {
   if (!CVP.calMode)         CVP.calMode = "range";   // 'range' | 'days'
   if (!CVP.selectedDays)    CVP.selectedDays = new Set();
   if (CVP.rangeStart === undefined) CVP.rangeStart = null;
+  if (CVP.calOpen === undefined) CVP.calOpen = false; // empieza cerrado
 
-  area.innerHTML = renderCalendarHTML();
+  const n = CVP.selectedDays.size;
+  const etiqueta = n === 0 ? "Todo el histórico" : (n === 1 ? "1 día" : `${n} días`);
+
+  // Botón disparador + popover (oculto si calOpen=false)
+  area.innerHTML = `
+    <div class="cvp-cal-wrap">
+      <button id="cvpCalToggle" class="cvp-cal-trigger ${n>0?'active':''}">
+        📅 Periodo: <b>${etiqueta}</b> <span class="cvp-cal-caret">▾</span>
+      </button>
+      ${n>0 ? `<button id="cvpCalReset" class="cvp-cal-reset" title="Ver todo">✕</button>` : ``}
+      <div id="cvpCalPop" class="cvp-cal-pop" style="display:${CVP.calOpen?'block':'none'}">
+        ${renderCalendarHTML()}
+      </div>
+    </div>`;
+
+  // Abrir/cerrar el calendario
+  area.querySelector("#cvpCalToggle").onclick = (e) => {
+    e.stopPropagation();
+    CVP.calOpen = !CVP.calOpen;
+    wireUpCalendar();
+  };
+
+  // Botón rápido para quitar el filtro (✕ junto al disparador)
+  const resetBtn = area.querySelector("#cvpCalReset");
+  if (resetBtn) resetBtn.onclick = (e) => {
+    e.stopPropagation();
+    CVP.selectedDays = new Set();
+    CVP.rangeStart = null;
+    CVP.calOpen = false;
+    aplicarSeleccionCalendario();
+  };
+
+  // Si está cerrado, no hace falta conectar el resto
+  if (!CVP.calOpen) {
+    if (CVP._calOutside) { document.removeEventListener("click", CVP._calOutside); CVP._calOutside = null; }
+    return;
+  }
+
+  const pop = area.querySelector("#cvpCalPop");
+
+  // Cerrar al hacer clic fuera del calendario
+  if (CVP._calOutside) document.removeEventListener("click", CVP._calOutside);
+  CVP._calOutside = (ev) => {
+    if (!area.contains(ev.target)) { CVP.calOpen = false; wireUpCalendar(); }
+  };
+  setTimeout(() => document.addEventListener("click", CVP._calOutside), 0);
+  pop.onclick = (e) => e.stopPropagation();
 
   // --- Controles superiores ---
-  area.querySelector("#cvpCalPrevY").onclick = () => { CVP.calYear--; wireUpCalendar(); };
-  area.querySelector("#cvpCalNextY").onclick = () => { CVP.calYear++; wireUpCalendar(); };
-  area.querySelector("#cvpCalMonth").onchange = (e) => { CVP.calMonth = parseInt(e.target.value,10); wireUpCalendar(); };
+  pop.querySelector("#cvpCalPrevY").onclick = () => { CVP.calYear--; wireUpCalendar(); };
+  pop.querySelector("#cvpCalNextY").onclick = () => { CVP.calYear++; wireUpCalendar(); };
+  pop.querySelector("#cvpCalMonth").onchange = (e) => { CVP.calMonth = parseInt(e.target.value,10); wireUpCalendar(); };
 
-  area.querySelectorAll(".cvp-calmode").forEach(btn => {
+  pop.querySelectorAll(".cvp-calmode").forEach(btn => {
     btn.onclick = () => {
       CVP.calMode = btn.dataset.mode;
       CVP.rangeStart = null;
@@ -900,24 +947,26 @@ function wireUpCalendar() {
   });
 
   // --- Días ---
-  area.querySelectorAll(".cvp-calday[data-key]").forEach(cell => {
+  pop.querySelectorAll(".cvp-calday[data-key]").forEach(cell => {
     cell.onclick = () => onClickDay(cell.dataset.key);
   });
 
   // --- Botones de acción ---
-  area.querySelector("#cvpCalAll").onclick = () => {
-    // Seleccionar todo el mes visible
+  pop.querySelector("#cvpCalAll").onclick = () => {
     const keys = diasDelMes(CVP.calYear, CVP.calMonth);
     keys.forEach(k => CVP.selectedDays.add(k));
     CVP.rangeStart = null;
     wireUpCalendar();
   };
-  area.querySelector("#cvpCalClear").onclick = () => {
+  pop.querySelector("#cvpCalClear").onclick = () => {
     CVP.selectedDays = new Set();
     CVP.rangeStart = null;
     wireUpCalendar();
   };
-  area.querySelector("#cvpCalApply").onclick = () => aplicarSeleccionCalendario();
+  pop.querySelector("#cvpCalApply").onclick = () => {
+    CVP.calOpen = false;            // cerrar al aplicar
+    aplicarSeleccionCalendario();
+  };
 }
 
 // Lógica al hacer clic en un día, según el modo
@@ -1192,35 +1241,51 @@ function injectStyles() {
 .cvp-btn.apply{background:linear-gradient(135deg,#00B9D6,#14A9C4);color:#fff;margin-left:auto}
 .cvp-btn.apply:hover{filter:brightness(1.05)}
 
-/* Calendario interactivo */
-.cvp-calbar{background:#fff;border-radius:16px;padding:16px;margin-top:14px;
-  box-shadow:0 2px 8px rgba(0,0,0,.06)}
-.cvp-cal-top{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
-.cvp-cal-title{font-weight:800;font-size:15px;color:#0B2137}
-.cvp-cal-modes{display:flex;gap:6px;background:#eef2f7;border-radius:10px;padding:3px}
-.cvp-calmode{border:none;background:transparent;padding:7px 14px;border-radius:8px;
-  font-family:inherit;font-size:13px;font-weight:700;color:#5a6b7b;cursor:pointer}
+/* Calendario interactivo (botón + popover) */
+.cvp-calbar{margin-top:14px}
+.cvp-cal-wrap{position:relative;display:inline-flex;align-items:center;gap:6px}
+.cvp-cal-trigger{background:#fff;border:1px solid #d6dde6;border-radius:12px;
+  padding:10px 16px;font-family:inherit;font-size:14px;font-weight:600;color:#0B2137;
+  cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.05);transition:.15s}
+.cvp-cal-trigger:hover{border-color:#00B9D6}
+.cvp-cal-trigger.active{border-color:#00B9D6;color:#00B9D6}
+.cvp-cal-trigger b{color:#00B9D6}
+.cvp-cal-caret{margin-left:4px;font-size:11px;color:#9aa5b1}
+.cvp-cal-reset{width:34px;height:34px;border:1px solid #d6dde6;border-radius:10px;
+  background:#fff;cursor:pointer;color:#dc3545;font-weight:700;font-size:13px}
+.cvp-cal-reset:hover{background:#fdecec}
+
+/* Popover compacto */
+.cvp-cal-pop{position:absolute;top:46px;left:0;z-index:50;width:300px;
+  background:#fff;border-radius:14px;padding:14px;
+  box-shadow:0 12px 32px rgba(11,33,55,.18);border:1px solid #eef2f7}
+.cvp-cal-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.cvp-cal-title{font-weight:800;font-size:13px;color:#0B2137;width:100%}
+.cvp-cal-modes{display:flex;gap:4px;background:#eef2f7;border-radius:9px;padding:3px}
+.cvp-calmode{border:none;background:transparent;padding:6px 10px;border-radius:7px;
+  font-family:inherit;font-size:12px;font-weight:700;color:#5a6b7b;cursor:pointer}
 .cvp-calmode.on{background:#fff;color:#00B9D6;box-shadow:0 1px 4px rgba(0,0,0,.1)}
-.cvp-cal-nav{display:flex;align-items:center;gap:8px;margin-left:auto}
-.cvp-cal-nav select{padding:8px 10px;border-radius:9px;border:1px solid #d6dde6;
-  font-family:inherit;font-size:14px;font-weight:600;background:#fff}
-.cvp-cal-nav button{width:30px;height:30px;border:none;border-radius:8px;background:#eef2f7;
-  font-size:18px;font-weight:700;cursor:pointer;color:#0B2137}
+.cvp-cal-nav{display:flex;align-items:center;gap:5px;margin-left:auto}
+.cvp-cal-nav select{padding:6px 7px;border-radius:8px;border:1px solid #d6dde6;
+  font-family:inherit;font-size:12px;font-weight:600;background:#fff}
+.cvp-cal-nav button{width:26px;height:26px;border:none;border-radius:7px;background:#eef2f7;
+  font-size:15px;font-weight:700;cursor:pointer;color:#0B2137}
 .cvp-cal-nav button:hover{background:#dde4ec}
-.cvp-cal-nav b{font-size:15px;min-width:46px;text-align:center}
-.cvp-cal-hint{font-size:12px;color:#6b7785;margin:10px 0}
-.cvp-cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
-.cvp-caldow{text-align:center;font-size:11px;font-weight:800;color:#9aa5b1;padding:4px 0}
+.cvp-cal-nav b{font-size:13px;min-width:38px;text-align:center}
+.cvp-cal-hint{font-size:11px;color:#6b7785;margin:6px 0 10px}
+.cvp-cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.cvp-caldow{text-align:center;font-size:10px;font-weight:800;color:#9aa5b1;padding:2px 0}
 .cvp-calday{aspect-ratio:1;display:flex;align-items:center;justify-content:center;
-  border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;background:#f5f7fb;
+  border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;background:#f5f7fb;
   color:#0B2137;transition:.12s;user-select:none}
 .cvp-calday:hover{background:#dceef2}
 .cvp-calday.empty{background:transparent;cursor:default}
 .cvp-calday.sel{background:linear-gradient(135deg,#00B9D6,#14A9C4);color:#fff}
-.cvp-calday.ini{outline:3px solid #0B2137;outline-offset:-3px}
-.cvp-cal-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:14px;
-  padding-top:14px;border-top:1px solid #eef2f7}
-.cvp-cal-count{font-size:13px;color:#00B9D6;font-weight:700}
+.cvp-calday.ini{outline:2px solid #0B2137;outline-offset:-2px}
+.cvp-cal-actions{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:12px;
+  padding-top:12px;border-top:1px solid #eef2f7}
+.cvp-cal-actions .cvp-btn{padding:7px 10px;font-size:12px}
+.cvp-cal-count{font-size:11px;color:#00B9D6;font-weight:700;width:100%;order:5;margin-top:4px}
 
 /* Tabs */
 .cvp-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0}
