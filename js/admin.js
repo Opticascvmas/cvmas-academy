@@ -609,19 +609,22 @@ function renderUserCard(u) {
 
     return `
       <div class="cvp-quiz ${c}">
-        <div class="cvp-quiz-head">
+        <div class="cvp-quiz-head cvp-quiz-toggle" onclick="cvpToggleQuiz(this, event)">
           <div>
             <div class="cvp-quiz-name">📘 ${esc(m.name)}</div>
             <div class="cvp-quiz-status">${label}</div>
           </div>
-          <div class="cvp-quiz-avg">${m.average}%</div>
+          <div class="cvp-quiz-right">
+            <div class="cvp-quiz-avg">${m.average}%</div>
+            ${wrong.length ? `<span class="cvp-quiz-errbadge">${wrong.length} ❌</span>` : ``}
+          </div>
         </div>
         <div class="cvp-quiz-meta">
           <span>🎯 Última nota: <b>${m.lastScore}%</b></span>
           <span>🔄 Intentos: <b>${m.attempts}</b></span>
         </div>
         <div class="cvp-bar"><div style="width:${m.average}%"></div></div>
-        ${falladas}
+        <div class="cvp-quiz-wrongwrap" style="display:none">${falladas}</div>
       </div>`;
   }).join("") : `<p class="cvp-empty">Sin quizzes registrados</p>`;
 
@@ -686,6 +689,17 @@ window.cvpToggleCard = function(headEl) {
   detail.style.display = abierto ? "none" : "block";
   card.classList.toggle("open", !abierto);
   if (chev) chev.textContent = abierto ? "▾" : "▴";
+};
+
+// Expandir / colapsar las preguntas falladas de un módulo
+window.cvpToggleQuiz = function(headEl, ev) {
+  if (ev) ev.stopPropagation(); // no cerrar la ficha del usuario
+  const quiz = headEl.closest(".cvp-quiz");
+  const wrap = quiz.querySelector(".cvp-quiz-wrongwrap");
+  if (!wrap) return;
+  const abierto = wrap.style.display !== "none";
+  wrap.style.display = abierto ? "none" : "block";
+  quiz.classList.toggle("open", !abierto);
 };
 
 
@@ -1435,6 +1449,13 @@ function injectStyles() {
 .cvp-quiz.warn{background:#fff8e1;border-color:#f3b300}
 .cvp-quiz.danger{background:#fdecec;border-color:#dc3545}
 .cvp-quiz-head{display:flex;justify-content:space-between;align-items:center}
+.cvp-quiz-toggle{cursor:pointer;border-radius:8px;transition:.12s}
+.cvp-quiz-toggle:hover{opacity:.8}
+.cvp-quiz-right{display:flex;align-items:center;gap:8px}
+.cvp-quiz-right::after{content:"▾";font-size:12px;color:#9aa5b1}
+.cvp-quiz.open .cvp-quiz-right::after{content:"▴"}
+.cvp-quiz-errbadge{background:#fdecec;color:#b71c1c;font-size:11px;font-weight:800;
+  border-radius:999px;padding:3px 9px;white-space:nowrap}
 .cvp-quiz-name{font-weight:700;font-size:15px}
 .cvp-quiz-status{font-size:12px;font-weight:700;margin-top:2px;color:#555}
 .cvp-quiz-avg{font-size:22px;font-weight:800}
