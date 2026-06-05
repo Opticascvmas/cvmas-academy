@@ -219,6 +219,16 @@ function svDayKey(iso) {
   } catch (e) { return ""; }
 }
 
+// Preguntas falladas del ÚLTIMO intento de un usuario en un módulo (desde quiz_history)
+function latestWrongForModule(uid, moduleKey) {
+  const intentos = CVP.history.filter(h =>
+    h.uid === uid && String(h.moduleId) === String(moduleKey) && Array.isArray(h.wrong));
+  if (!intentos.length) return [];
+  // el más reciente por fecha
+  intentos.sort((a, b) => new Date(b.date) - new Date(a.date));
+  return intentos[0].wrong || [];
+}
+
 function buildScoresFromHistory(range) {
   let inRange;
   if (range && range.days) {
@@ -310,7 +320,8 @@ function computeData(range) {
         name: moduleName(key),
         average:   Math.round(v.average   || 0),
         lastScore: Math.round(v.lastScore || 0),
-        attempts:  v.attempts || 0
+        attempts:  v.attempts || 0,
+        wrong:     latestWrongForModule(u.id, key)   // preguntas falladas (último intento)
       }));
 
     const d = daysSince(u.lastLogin);
@@ -578,9 +589,24 @@ function renderUsers(d) {
 
 function renderUserCard(u) {
   const statusClass = u.status; // hoy / semana / inactivo
+
   const history = u.modules.length ? u.modules.map(m => {
     const c = m.average >= 80 ? "ok" : m.average >= 60 ? "warn" : "danger";
     const label = m.average >= 80 ? "Excelente" : m.average >= 60 ? "Regular" : "Necesita refuerzo";
+
+    // Preguntas falladas (último intento)
+    const wrong = Array.isArray(m.wrong) ? m.wrong : [];
+    const falladas = wrong.length ? `
+        <div class="cvp-wrong">
+          <div class="cvp-wrong-title">❌ Preguntas falladas (último intento): ${wrong.length}</div>
+          ${wrong.map(w => `
+            <div class="cvp-wrong-item">
+              <div class="cvp-wrong-q">${esc(w.q)}</div>
+              ${w.correcta ? `<div class="cvp-wrong-ok">✔️ Correcta: ${esc(w.correcta)}</div>` : ``}
+              ${w.tuRespuesta ? `<div class="cvp-wrong-bad">✖️ Respondió: ${esc(w.tuRespuesta)}</div>` : ``}
+            </div>`).join("")}
+        </div>` : `<div class="cvp-wrong-none">✅ Sin errores en el último intento</div>`;
+
     return `
       <div class="cvp-quiz ${c}">
         <div class="cvp-quiz-head">
@@ -595,6 +621,7 @@ function renderUserCard(u) {
           <span>🔄 Intentos: <b>${m.attempts}</b></span>
         </div>
         <div class="cvp-bar"><div style="width:${m.average}%"></div></div>
+        ${falladas}
       </div>`;
   }).join("") : `<p class="cvp-empty">Sin quizzes registrados</p>`;
 
@@ -607,42 +634,59 @@ function renderUserCard(u) {
        data-status="${u.status}"
        data-login="${u.lastLogin ? esc(u.lastLogin) : ''}">
 
-    <div class="cvp-user-top">
-      <h3>${esc(u.name)}</h3>
-      <span class="cvp-pill ${statusClass}">● ${u.statusLabel}</span>
+    <div class="cvp-user-head" onclick="cvpToggleCard(this)">
+      <div class="cvp-user-top">
+        <h3>${esc(u.name)}</h3>
+        <span class="cvp-pill ${statusClass}">● ${u.statusLabel}</span>
+      </div>
+      <p class="cvp-muted">${esc(u.email)}</p>
+      <p class="cvp-tags">🏢 ${esc(u.branch)} &nbsp;·&nbsp; 💼 ${esc(u.position)} &nbsp;·&nbsp; 🔑 ${esc(u.role)}</p>
+
+      <div class="cvp-mini-stats">
+        <div><b style="color:#00B9D6">${u.avg}%</b><span>Promedio</span></div>
+        <div><b>${u.totalQuizzes}</b><span>Quizzes</span></div>
+        <div><b style="color:#28a745">${u.totalAttempts}</b><span>Intentos</span></div>
+      </div>
+
+      <div class="cvp-progress">
+        <div class="cvp-progress-head"><b>📚 Progreso</b><span>${u.completed}/${TOTAL_MODULES}</span></div>
+        <div class="cvp-bar"><div style="width:${u.progress}%"></div></div>
+        <small>${u.progress}% completado</small>
+      </div>
+
+      <div class="cvp-expand-hint"><span class="cvp-chevron">▾</span> Ver detalle de quizzes</div>
     </div>
-    <p class="cvp-muted">${esc(u.email)}</p>
-    <p class="cvp-muted">Último login: ${fechaElSalvador(u.lastLogin)}</p>
-    <p class="cvp-tags">🏢 ${esc(u.branch)} &nbsp;·&nbsp; 💼 ${esc(u.position)} &nbsp;·&nbsp; 🔑 ${esc(u.role)}</p>
 
-    <div class="cvp-mini-stats">
-      <div><b style="color:#00B9D6">${u.avg}%</b><span>Promedio</span></div>
-      <div><b>${u.totalQuizzes}</b><span>Quizzes</span></div>
-      <div><b style="color:#28a745">${u.totalAttempts}</b><span>Intentos</span></div>
+    <div class="cvp-user-detail" style="display:none">
+      <p class="cvp-muted">Último login: ${fechaElSalvador(u.lastLogin)}</p>
+      <div class="cvp-history"><b>Historial de quizzes</b>${history}</div>
+
+      ${currentCanEdit() ? `
+      <div class="cvp-edit">
+        <input id="name-${u.id}" value="${esc(u.name)}" placeholder="Nombre">
+        <select id="branch-${u.id}">${branchOptions(u.branch)}</select>
+        <select id="position-${u.id}">${positionOptions(u.position)}</select>
+        <select id="role-${u.id}">
+          <option value="participant" ${u.role === "participant" ? "selected" : ""}>participant</option>
+          <option value="viewer" ${u.role === "viewer" ? "selected" : ""}>viewer (solo ver)</option>
+          <option value="admin" ${u.role === "admin" ? "selected" : ""}>admin</option>
+        </select>
+        <button class="cvp-btn save" onclick="saveUserInfo('${u.id}')">💾 Guardar cambios</button>
+      </div>` : ``}
     </div>
-
-    <div class="cvp-progress">
-      <div class="cvp-progress-head"><b>📚 Progreso</b><span>${u.completed}/${TOTAL_MODULES}</span></div>
-      <div class="cvp-bar"><div style="width:${u.progress}%"></div></div>
-      <small>${u.progress}% completado</small>
-    </div>
-
-    <div class="cvp-history"><b>Historial de quizzes</b>${history}</div>
-
-    ${currentCanEdit() ? `
-    <div class="cvp-edit">
-      <input id="name-${u.id}" value="${esc(u.name)}" placeholder="Nombre">
-      <select id="branch-${u.id}">${branchOptions(u.branch)}</select>
-      <select id="position-${u.id}">${positionOptions(u.position)}</select>
-      <select id="role-${u.id}">
-        <option value="participant" ${u.role === "participant" ? "selected" : ""}>participant</option>
-        <option value="viewer" ${u.role === "viewer" ? "selected" : ""}>viewer (solo ver)</option>
-        <option value="admin" ${u.role === "admin" ? "selected" : ""}>admin</option>
-      </select>
-      <button class="cvp-btn save" onclick="saveUserInfo('${u.id}')">💾 Guardar cambios</button>
-    </div>` : ``}
   </div>`;
 }
+
+// Expandir / colapsar la ficha de usuario
+window.cvpToggleCard = function(headEl) {
+  const card = headEl.closest(".cvp-user-card");
+  const detail = card.querySelector(".cvp-user-detail");
+  const chev = card.querySelector(".cvp-chevron");
+  const abierto = detail.style.display !== "none";
+  detail.style.display = abierto ? "none" : "block";
+  card.classList.toggle("open", !abierto);
+  if (chev) chev.textContent = abierto ? "▾" : "▴";
+};
 
 
 /* ---------- LEADERBOARD ---------- */
@@ -1346,6 +1390,23 @@ function injectStyles() {
 
 /* Tarjeta de usuario */
 .cvp-user-card{background:#fff;border-radius:18px;padding:20px;box-shadow:0 4px 16px rgba(0,0,0,.05);border:1px solid #eef2f7}
+.cvp-user-head{cursor:pointer}
+.cvp-user-card.open{box-shadow:0 8px 28px rgba(0,0,0,.12);border-color:#cfeaf0}
+.cvp-expand-hint{margin-top:12px;text-align:center;font-size:12px;font-weight:700;
+  color:#00B9D6;background:#f0fafc;border-radius:10px;padding:8px;transition:.15s}
+.cvp-user-head:hover .cvp-expand-hint{background:#dcf2f7}
+.cvp-chevron{font-weight:700}
+.cvp-user-detail{margin-top:16px;border-top:1px dashed #e0e7ee;padding-top:14px;animation:cvpfade .25s ease}
+
+/* Preguntas falladas */
+.cvp-wrong{margin-top:12px;background:#fff5f5;border:1px solid #f3d4d4;border-radius:10px;padding:10px 12px}
+.cvp-wrong-title{font-size:12px;font-weight:800;color:#b71c1c;margin-bottom:8px}
+.cvp-wrong-item{padding:8px 0;border-bottom:1px dashed #f0d0d0}
+.cvp-wrong-item:last-child{border-bottom:none}
+.cvp-wrong-q{font-size:13px;font-weight:700;color:#0B2137;margin-bottom:4px}
+.cvp-wrong-ok{font-size:12px;color:#1e7e34}
+.cvp-wrong-bad{font-size:12px;color:#b71c1c}
+.cvp-wrong-none{margin-top:10px;font-size:12px;color:#1e7e34;font-weight:600}
 .cvp-user-top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
 .cvp-user-card h3{margin:0;font-size:18px}
 .cvp-pill{font-size:11px;font-weight:700;padding:5px 12px;border-radius:999px;white-space:nowrap}
