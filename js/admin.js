@@ -22,24 +22,24 @@
    "Módulo 1" y muestre el nombre de verdad.
    ========================================================================== */
 const MODULE_NAMES = {
-  "1":  "ADN CV+",
-  "2":  "Anatomia ocular",
-  "3":  "Defectos visuales",
-  "4":  "Lectura de receta",
-  "5":  "Lentes oftalmicos",
-  "6":  "Procesos de fabricacion",
-  "7":  "Materiales de lentes oftalmicos",
-  "8":  "Tratamientos para lentes oftalmicos",
-  "9":  "Lentes vision sencilla",
-  "10": "Lentes progresivos",
-  "11": "Progresivos Akkurat",
-  "12": "Ocupacionales Akkurat",
-  "13": "Antifatiga Akkurat",
-  "14": "Vision sencilla Akkurat",
-  "15": "Lentes de contacto",
-  "16": "Lentes Luminex",
-  "17": "Cierre de ventas",
-  "18": "Aros oftalmicos y ficha de marca"
+  "1":  "Introducción CV+",
+  "2":  "Atención al Cliente",
+  "3":  "Visión Binocular",
+  "4":  "Lentes y Materiales",
+  "5":  "Monturas",
+  "6":  "Lentes de Contacto",
+  "7":  "Protección Solar",
+  "8":  "Salud Visual",
+  "9":  "Ventas Consultivas",
+  "10": "Cierre de Venta",
+  "11": "Garantías",
+  "12": "Postventa",
+  "13": "Producto Premium",
+  "14": "Tecnología Óptica",
+  "15": "Manejo de Objeciones",
+  "16": "Imagen y Estilo",
+  "17": "Procesos Internos",
+  "18": "Examen Final"
   // ...agrega o corrige los que necesites
 };
 
@@ -84,6 +84,21 @@ function currentCanEdit() {
 // Devuelve el nombre del módulo a partir de su clave
 function moduleName(key) {
   return MODULE_NAMES[key] || ("Módulo " + key);
+}
+
+// Muestra una fecha ISO (UTC) en hora de El Salvador (UTC-6), formato legible
+function fechaElSalvador(iso) {
+  if (!iso) return "No disponible";
+  try {
+    const f = new Date(iso);
+    return f.toLocaleString("es-SV", {
+      timeZone: "America/El_Salvador",
+      year: "numeric", month: "2-digit", day: "2-digit",
+      hour: "2-digit", minute: "2-digit", hour12: false
+    });
+  } catch (e) {
+    return iso.replace("T", " ").slice(0, 16);
+  }
 }
 
 // Pequeño escape para no romper el HTML con comillas en nombres
@@ -587,7 +602,7 @@ function renderUserCard(u) {
       <span class="cvp-pill ${statusClass}">● ${u.statusLabel}</span>
     </div>
     <p class="cvp-muted">${esc(u.email)}</p>
-    <p class="cvp-muted">Último login: ${u.lastLogin ? esc(u.lastLogin.replace("T", " ").slice(0, 16)) : "No disponible"}</p>
+    <p class="cvp-muted">Último login: ${fechaElSalvador(u.lastLogin)}</p>
     <p class="cvp-tags">🏢 ${esc(u.branch)} &nbsp;·&nbsp; 💼 ${esc(u.position)} &nbsp;·&nbsp; 🔑 ${esc(u.role)}</p>
 
     <div class="cvp-mini-stats">
