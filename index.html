@@ -471,6 +471,41 @@ min-height:260px;
   }
 
 }
+  /* ─── Simulador de anatomía ocular (Módulo 2) ─── */
+    .cv-ojo-cta {
+      background:linear-gradient(135deg,var(--dark),var(--dark2));
+      border-radius:12px; padding:18px 20px; margin:18px 0;
+      display:flex; align-items:center; justify-content:space-between;
+      gap:16px; flex-wrap:wrap;
+    }
+    .cv-ojo-cta .cv-ojo-txt strong { color:var(--cyan); font-size:14px; }
+    .cv-ojo-cta .cv-ojo-txt span { display:block; font-size:12px; color:rgba(255,255,255,.6); margin-top:3px; }
+    .cv-btn-ojo {
+      font-family:inherit; font-weight:600; font-size:13px; cursor:pointer;
+      background:var(--gold); color:var(--dark); border:none;
+      padding:12px 20px; border-radius:10px; white-space:nowrap;
+      display:inline-flex; align-items:center; gap:8px; transition:.2s;
+    }
+    .cv-btn-ojo:hover { background:#E5AA00; transform:translateY(-1px); }
+    #modal-ojo {
+      display:none; position:fixed; inset:0; z-index:100000;
+      flex-direction:column; background:#091214;
+    }
+    #modal-ojo.abierto { display:flex; }
+    #modal-ojo .cv-modal-bar {
+      display:flex; align-items:center; justify-content:space-between;
+      padding:12px 18px; background:var(--dark); color:#e9f2f2;
+      font-size:14px; font-weight:600; flex-shrink:0;
+    }
+    #modal-ojo .cv-cerrar {
+      background:var(--gold); color:var(--dark); border:none; cursor:pointer;
+      padding:9px 16px; border-radius:9px; font-weight:700; font-family:inherit;
+    }
+    #modal-ojo iframe { flex:1; width:100%; border:0; }
+    @media (max-width:768px){
+      .cv-ojo-cta { flex-direction:column; align-items:stretch; text-align:center; }
+      .cv-btn-ojo { width:100%; justify-content:center; }
+    }
   </style>
 </head>
 <body>
@@ -783,7 +818,13 @@ const MODULES = [
   content:`
     <h2>Concepto General del Ojo</h2>
     <p>El ojo es un <strong>órgano sensorial</strong> encargado de recibir la luz y transformarla en señales nerviosas que el cerebro interpreta, permitiendo así el proceso de la visión.</p>
-
+ <div class="cv-ojo-cta">
+      <div class="cv-ojo-txt">
+        <strong>👁️ El Ojo por Dentro — Simulador interactivo</strong>
+        <span>Explora cada parte del ojo siguiendo el recorrido de la luz, a tu ritmo.</span>
+      </div>
+      <button class="cv-btn-ojo" type="button" onclick="abrirSimuladorOjo()">Abrir simulador</button>
+    </div>
     <h2>Principales Estructuras del Ojo</h2>
     <p>En el mundo de la óptica es fundamental conocer las siguientes partes del ojo:</p>
     <ul>
@@ -3145,6 +3186,32 @@ Cerrar
 </button>
 
 </div>
+<!-- ═══ Simulador de anatomía ocular (Módulo 2) ═══ -->
+<div id="modal-ojo" role="dialog" aria-modal="true" aria-label="Simulador de anatomía ocular" aria-hidden="true">
+  <div class="cv-modal-bar">
+    <span>👁️ Anatomía ocular · El Ojo por Dentro</span>
+    <button class="cv-cerrar" type="button" onclick="cerrarSimuladorOjo()">✕ Cerrar</button>
+  </div>
+  <iframe id="ojo-frame" title="Simulador de anatomía ocular"></iframe>
+</div>
+<script>
+  window.abrirSimuladorOjo = function(){
+    var m = document.getElementById('modal-ojo');
+    document.getElementById('ojo-frame').src = 'herramientas/anatomia-ocular.html';
+    m.classList.add('abierto');
+    m.setAttribute('aria-hidden','false');
+  };
+  window.cerrarSimuladorOjo = function(){
+    var m = document.getElementById('modal-ojo');
+    m.classList.remove('abierto');
+    m.setAttribute('aria-hidden','true');
+    document.getElementById('ojo-frame').src = '';
+  };
+  document.addEventListener('keydown', function(e){
+    var m = document.getElementById('modal-ojo');
+    if(e.key === 'Escape' && m && m.classList.contains('abierto')) window.cerrarSimuladorOjo();
+  });
+</script>
 <script type="module" src="js/firebase.js"></script>
 <script type="module" src="js/auth.js"></script>
 <script type="module" src="js/dashboard.js"></script>
