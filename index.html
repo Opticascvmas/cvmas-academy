@@ -518,6 +518,41 @@ min-height:260px;
 #modal-ametropias .cv-modal-bar b{font-size:15px}
 #modal-ametropias .cv-cerrar{background:#FDC526;color:#404042;border:none;width:34px;height:34px;border-radius:8px;font-size:20px;font-weight:700;cursor:pointer;line-height:1}
 #modal-ametropias iframe{flex:1;width:100%;border:none}
+/* ─── Simulador de Lectura de Recetas (Módulo 4) ─── */
+    .cv-receta-cta {
+      background:linear-gradient(135deg,var(--dark),var(--dark2));
+      border-radius:12px; padding:18px 20px; margin:18px 0;
+      display:flex; align-items:center; justify-content:space-between;
+      gap:16px; flex-wrap:wrap;
+    }
+    .cv-receta-cta .cv-receta-txt strong { color:var(--cyan); font-size:14px; }
+    .cv-receta-cta .cv-receta-txt span { display:block; font-size:12px; color:rgba(255,255,255,.6); margin-top:3px; }
+    .cv-btn-receta {
+      font-family:inherit; font-weight:600; font-size:13px; cursor:pointer;
+      background:var(--gold); color:var(--dark); border:none;
+      padding:12px 20px; border-radius:10px; white-space:nowrap;
+      display:inline-flex; align-items:center; gap:8px; transition:.2s;
+    }
+    .cv-btn-receta:hover { background:#E5AA00; transform:translateY(-1px); }
+    #modal-recetas {
+      display:none; position:fixed; inset:0; z-index:100000;
+      flex-direction:column; background:#091214;
+    }
+    #modal-recetas.abierto { display:flex; }
+    #modal-recetas .cv-modal-bar {
+      display:flex; align-items:center; justify-content:space-between;
+      padding:12px 18px; background:var(--dark); color:#e9f2f2;
+      font-size:14px; font-weight:600; flex-shrink:0;
+    }
+    #modal-recetas .cv-cerrar {
+      background:var(--gold); color:var(--dark); border:none; cursor:pointer;
+      padding:9px 16px; border-radius:9px; font-weight:700; font-family:inherit;
+    }
+    #modal-recetas iframe { flex:1; width:100%; border:0; }
+    @media (max-width:768px){
+      .cv-receta-cta { flex-direction:column; align-items:stretch; text-align:center; }
+      .cv-btn-receta { width:100%; justify-content:center; }
+    }
   </style>
 </head>
 <body>
@@ -977,6 +1012,13 @@ const MODULES = [
       <tr><td><strong><span class="kw" data-term="Adición">Adición</span></strong></td><td>ADD</td><td>Graduación para presbicia. Debe ser igual en ambos ojos</td></tr>
     </table>
     <div class="info-box">📌 En algunas recetas también puede aparecer la columna de <strong>Prisma</strong>, utilizada en casos específicos.</div>
+<div class="cv-receta-cta">
+      <div class="cv-receta-txt">
+        <strong>📋 Lee la receta — Simulador interactivo</strong>
+        <span>Toca cada dato de una receta y aprende qué significa y qué tiene el paciente.</span>
+      </div>
+      <button class="cv-btn-receta" type="button" onclick="abrirSimuladorRecetas()">Abrir simulador</button>
+    </div>
 
     <h2>Interpretación General de una Receta</h2>
     <p>Al leer una receta oftálmica, se debe identificar:</p>
@@ -3249,6 +3291,32 @@ Cerrar
   }
   document.addEventListener('keydown',function(e){
     if(e.key==='Escape') cerrarSimuladorAmetropias();
+  });
+</script>
+<!-- ═══ Simulador de Lectura de Recetas (Módulo 4) ═══ -->
+<div id="modal-recetas" role="dialog" aria-modal="true" aria-label="Simulador de lectura de recetas" aria-hidden="true">
+  <div class="cv-modal-bar">
+    <span>📋 Lectura de recetas · Lee la receta</span>
+    <button class="cv-cerrar" type="button" onclick="cerrarSimuladorRecetas()">✕ Cerrar</button>
+  </div>
+  <iframe id="receta-frame" title="Simulador de lectura de recetas"></iframe>
+</div>
+<script>
+  window.abrirSimuladorRecetas = function(){
+    var m = document.getElementById('modal-recetas');
+    document.getElementById('receta-frame').src = 'herramientas/recetas.html';
+    m.classList.add('abierto');
+    m.setAttribute('aria-hidden','false');
+  };
+  window.cerrarSimuladorRecetas = function(){
+    var m = document.getElementById('modal-recetas');
+    m.classList.remove('abierto');
+    m.setAttribute('aria-hidden','true');
+    document.getElementById('receta-frame').src = '';
+  };
+  document.addEventListener('keydown', function(e){
+    var m = document.getElementById('modal-recetas');
+    if(e.key === 'Escape' && m && m.classList.contains('abierto')) window.cerrarSimuladorRecetas();
   });
 </script>
 <script type="module" src="js/firebase.js"></script>
