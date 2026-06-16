@@ -506,6 +506,18 @@ min-height:260px;
       .cv-ojo-cta { flex-direction:column; align-items:stretch; text-align:center; }
       .cv-btn-ojo { width:100%; justify-content:center; }
     }
+    /* ===== Simulador Ametropías (Módulo 3) ===== */
+.cv-ametro-cta{margin:24px 0;padding:20px;border:2px dashed #02ABC8;border-radius:14px;background:#E3F6FA;text-align:center}
+.cv-ametro-cta p{margin:0 0 12px;color:#404042;font-weight:600}
+.cv-btn-ametro{background:#02ABC8;color:#fff;border:none;padding:12px 24px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;transition:.18s}
+.cv-btn-ametro:hover{background:#017A8F;transform:translateY(-1px)}
+#modal-ametropias{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100000;display:none;align-items:center;justify-content:center;padding:20px}
+#modal-ametropias.abierto{display:flex}
+#modal-ametropias .cv-modal-box{background:#fff;border-radius:16px;width:100%;max-width:1200px;height:90vh;display:flex;flex-direction:column;overflow:hidden}
+#modal-ametropias .cv-modal-bar{display:flex;justify-content:space-between;align-items:center;padding:12px 18px;background:#404042;color:#fff}
+#modal-ametropias .cv-modal-bar b{font-size:15px}
+#modal-ametropias .cv-cerrar{background:#FDC526;color:#404042;border:none;width:34px;height:34px;border-radius:8px;font-size:20px;font-weight:700;cursor:pointer;line-height:1}
+#modal-ametropias iframe{flex:1;width:100%;border:none}
   </style>
 </head>
 <body>
@@ -888,6 +900,10 @@ const MODULES = [
       <tr><td><strong>Astigmatismo</strong></td><td>Visión borrosa a todas las distancias</td><td><strong>( – )</strong> + eje</td><td>Lentes cilíndricos</td></tr>
       <tr><td><strong>Presbicia</strong></td><td>Pérdida de enfoque cercano (edad)</td><td><strong>( + )</strong></td><td>Lentes con adición</td></tr>
     </table>
+    <div class="cv-ametro-cta">
+  <p>🔬 Explora cómo enfoca la luz en cada defecto visual</p>
+  <button class="cv-btn-ametro" onclick="abrirSimuladorAmetropias()">Abrir simulador de ametropías</button>
+</div>
 
     <h2>Miopía</h2>
     <p>La <strong><span class="kw" data-term="Miopía">miopía</span></strong> es la <strong>dificultad para ver de lejos</strong>. Se produce cuando el ojo es más largo de lo normal, lo que provoca que la imagen se enfoque <em>delante</em> de la retina.</p>
@@ -3210,6 +3226,29 @@ Cerrar
   document.addEventListener('keydown', function(e){
     var m = document.getElementById('modal-ojo');
     if(e.key === 'Escape' && m && m.classList.contains('abierto')) window.cerrarSimuladorOjo();
+  });
+</script>
+<div id="modal-ametropias">
+  <div class="cv-modal-box">
+    <div class="cv-modal-bar">
+      <b>Simulador de Ametropías · ¿Dónde enfoca la luz?</b>
+      <button class="cv-cerrar" onclick="cerrarSimuladorAmetropias()">×</button>
+    </div>
+    <iframe id="ametro-frame" title="Simulador de Ametropías"></iframe>
+  </div>
+</div>
+<script>
+  function abrirSimuladorAmetropias(){
+    var f=document.getElementById('ametro-frame');
+    f.src='herramientas/ametropias.html';
+    document.getElementById('modal-ametropias').classList.add('abierto');
+  }
+  function cerrarSimuladorAmetropias(){
+    document.getElementById('modal-ametropias').classList.remove('abierto');
+    document.getElementById('ametro-frame').src='';
+  }
+  document.addEventListener('keydown',function(e){
+    if(e.key==='Escape') cerrarSimuladorAmetropias();
   });
 </script>
 <script type="module" src="js/firebase.js"></script>
