@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lee la receta · Simulador de Lectura de Recetas · Academia CV+</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cyan:#02ABC8;
+    --cyan-deep:#017A8F;
+    --cyan-soft:#E3F6FA;
+    --gray:#404042;
+    --gray-2:#5C5C5F;
+    --yellow:#FDC526;
+    --yellow-deep:#C8930A;
+    --ink:#23262B;
+    --paper:#F4F6F7;
+    --card:#FFFFFF;
+    --line:#E2E7E9;
+    --bad:#D9534F;
+    --good:#2BA26B;
+    --rxpaper:#FCFBF6;
+    --rxline:#E7E2D2;
+    --shadow:0 18px 50px -20px rgba(2,43,52,.35);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    font-family:'Source Serif 4',Georgia,serif;
+    background:
+      radial-gradient(1200px 600px at 80% -10%, #EAF7FA 0%, transparent 55%),
+      radial-gradient(900px 500px at -5% 110%, #FDF3D6 0%, transparent 50%),
+      var(--paper);
+    color:var(--ink);
+    -webkit-font-smoothing:antialiased;
+    min-height:100%;
+  }
+  .wrap{max-width:1180px;margin:0 auto;padding:28px 22px 60px}
+
+  /* Header */
+  header.top{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;flex-wrap:wrap;margin-bottom:20px}
+  .eyebrow{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--cyan-deep);display:flex;align-items:center;gap:8px}
+  .eyebrow::before{content:"";width:26px;height:2px;background:var(--yellow);display:inline-block}
+  h1{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:clamp(26px,4vw,40px);line-height:1.04;letter-spacing:-.02em;color:var(--gray);margin-top:8px}
+  h1 em{font-style:normal;color:var(--cyan)}
+  .lede{font-size:15.5px;color:var(--gray-2);max-width:50ch;margin-top:8px;line-height:1.5}
+  .brandtag{font-family:'Space Mono',monospace;font-size:11px;color:var(--gray-2);text-align:right;line-height:1.7;white-space:nowrap}
+  .brandtag b{color:var(--gray);font-weight:700;letter-spacing:.04em}
+
+  /* Case selector */
+  .cases{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0 18px}
+  .case{
+    font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:13px;
+    border:1.5px solid var(--line);background:var(--card);color:var(--gray-2);
+    padding:9px 14px;border-radius:999px;cursor:pointer;transition:.16s;
+    display:flex;align-items:center;gap:8px;
+  }
+  .case .n{font-family:'Space Mono',monospace;font-size:11px;background:var(--line);color:var(--gray-2);border-radius:6px;padding:1px 6px;transition:.16s}
+  .case:hover{border-color:var(--cyan);color:var(--gray)}
+  .case[aria-pressed="true"]{background:var(--gray);color:#fff;border-color:var(--gray)}
+  .case[aria-pressed="true"] .n{background:var(--yellow);color:var(--gray)}
+
+  .stage{display:grid;grid-template-columns:1.15fr 1fr;gap:18px;align-items:start}
+  @media(max-width:900px){.stage{grid-template-columns:1fr}}
+  .panel{background:var(--card);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow)}
+
+  /* Prescription (Rx) card */
+  .rxwrap{padding:18px}
+  .hint{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.04em;color:var(--cyan-deep);background:var(--cyan-soft);border-radius:9px;padding:9px 12px;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+  .rx{
+    position:relative;background:
+      repeating-linear-gradient(0deg, transparent, transparent 33px, #F2EEDF 33px, #F2EEDF 34px),
+      var(--rxpaper);
+    border:1px solid var(--rxline);border-radius:14px;overflow:hidden;
+    box-shadow:0 10px 26px -16px rgba(80,70,40,.4);
+  }
+  .rx-head{padding:16px 18px 12px;border-bottom:2px solid var(--rxline);background:linear-gradient(180deg,#fff,rgba(255,255,255,.4))}
+  .rx-clinic{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .rx-logo{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:16px;color:var(--gray);letter-spacing:-.01em}
+  .rx-logo b{color:var(--cyan)}
+  .rx-kind{font-family:'Space Mono',monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--gray-2);text-align:right}
+  .rx-pt{display:flex;justify-content:space-between;gap:10px;margin-top:10px;font-family:'Space Mono',monospace;font-size:12px;color:var(--gray-2)}
+  .rx-pt b{color:var(--gray);font-weight:700}
+
+  table.rxt{width:100%;border-collapse:collapse;font-family:'Space Mono',monospace}
+  table.rxt th,table.rxt td{border:1px solid var(--rxline);text-align:center;padding:0}
+  .rxt thead th{background:#F1ECDC;color:var(--gray);font-size:12px;font-weight:700;letter-spacing:.04em}
+  .rxt thead th .full{display:block;font-size:9px;font-weight:400;color:var(--gray-2);letter-spacing:.08em;margin-top:1px}
+  .rxt .corner{background:transparent;border-top:none;border-left:none}
+  .rxt tbody th{background:var(--gray);color:#fff;font-size:14px;font-weight:700;width:60px}
+  .rxt td,.rxt thead th[data-col],.rxt tbody th[data-eye]{cursor:pointer;transition:.13s}
+  .cellbtn{display:block;width:100%;padding:16px 8px;font-size:16px;color:var(--ink);background:transparent;border:none;font-family:inherit;cursor:pointer}
+  .rxt thead th[data-col]{padding:11px 6px}
+  .rxt thead th[data-col]:hover,.rxt tbody th[data-eye]:hover{background:var(--cyan-soft)}
+  .rxt td:hover{background:var(--cyan-soft)}
+  .rxt td.sel,.rxt thead th[data-col].sel{background:var(--yellow)!important;color:var(--gray)}
+  .rxt tbody th[data-eye].sel{background:var(--yellow)!important;color:var(--gray)}
+  .rxt td.sel .cellbtn{color:var(--gray);font-weight:700}
+  .rx-note{padding:10px 16px 14px;font-family:'Space Mono',monospace;font-size:10.5px;color:var(--gray-2);line-height:1.6}
+
+  /* Side panel */
+  .side{padding:20px 22px 10px}
+  .blocktitle{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--gray-2);margin-bottom:8px;display:flex;align-items:center;gap:8px}
+  .blocktitle .pin{width:8px;height:8px;border-radius:50%;background:var(--cyan)}
+  .explain{
+    border:1.5px solid var(--line);border-radius:14px;padding:16px 17px;min-height:96px;
+    font-size:15px;line-height:1.6;color:var(--ink);transition:.15s;background:#fff;
+  }
+  .explain.active{border-color:var(--cyan);background:var(--cyan-soft)}
+  .explain .tag{font-family:'Space Mono',monospace;font-size:11px;font-weight:700;color:var(--cyan-deep);display:block;margin-bottom:6px;letter-spacing:.04em}
+  .explain.empty{color:var(--gray-2);display:flex;align-items:center;gap:10px;font-style:italic}
+  .explain.empty .big{font-size:22px;font-style:normal}
+
+  .human{margin-top:18px;border-top:1px dashed var(--line);padding-top:16px}
+  .human .htext{font-size:15.5px;line-height:1.62;color:var(--ink)}
+  .human .htext b{color:var(--gray);font-weight:600}
+  .chips{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:11px}
+  .chip{font-family:'Space Mono',monospace;font-size:11.5px;font-weight:700;padding:5px 10px;border-radius:8px;border:1px solid var(--line);background:#F1F3F4;color:var(--gray-2)}
+  .chip.on{background:var(--gray);color:#fff;border-color:var(--gray)}
+
+  /* Vision scenes */
+  .vision{margin:0 18px 16px;padding-top:6px}
+  .vision .vh{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+  .vision .vh span{font-family:'Space Mono',monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--gray-2)}
+  .vision .vh em{font-style:normal;font-family:'Space Mono',monospace;font-size:10px;color:var(--gray-2)}
+  .scenes{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .scene{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#fff}
+  .scene .lab{display:flex;align-items:center;justify-content:space-between;padding:8px 11px;border-bottom:1px solid var(--line);font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:12.5px;color:var(--gray)}
+  .scene .state{font-family:'Space Mono',monospace;font-size:10px;font-weight:700;padding:3px 7px;border-radius:6px}
+  .state.ok{background:#E4F5EC;color:var(--good)}
+  .state.blur{background:#FBE7E6;color:var(--bad)}
+  .viewport{height:96px;position:relative;display:grid;place-items:center;overflow:hidden;background:linear-gradient(180deg,#fbfdfe,#f2f6f7)}
+  .viewport .pic{transition:filter .4s ease}
+  .blurred .pic{filter:blur(4.4px)}
+
+  .foot{margin-top:22px;font-family:'Space Mono',monospace;font-size:11px;color:var(--gray-2);text-align:center;letter-spacing:.04em;line-height:1.8}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div>
+      <div class="eyebrow">Academia CV+ · Módulo 4</div>
+      <h1>Lee <em>la receta</em></h1>
+      <p class="lede">Una receta es el mapa de la visión del paciente. Elige un caso y <b>toca cada dato o encabezado</b> para entender qué dice.</p>
+    </div>
+    <div class="brandtag"><b>LECTURA DE RECETAS</b><br>Ópticas CV+ · Capacitación</div>
+  </header>
+
+  <div class="cases" id="cases" role="group" aria-label="Casos de ejemplo">
+    <button class="case" data-k="c1" aria-pressed="true"><span class="n">1</span>Joven miope</button>
+    <button class="case" data-k="c2" aria-pressed="false"><span class="n">2</span>Hipermétrope</button>
+    <button class="case" data-k="c3" aria-pressed="false"><span class="n">3</span>Astigmatismo</button>
+    <button class="case" data-k="c4" aria-pressed="false"><span class="n">4</span>Présbita</button>
+    <button class="case" data-k="c5" aria-pressed="false"><span class="n">5</span>Receta completa</button>
+  </div>
+
+  <div class="stage">
+
+    <!-- Rx CARD -->
+    <section class="panel rxwrap">
+      <div class="hint">👆 Toca un encabezado (ESF, CIL, EJE, ADD), un ojo (OD/OI) o cualquier valor.</div>
+      <div class="rx">
+        <div class="rx-head">
+          <div class="rx-clinic">
+            <div class="rx-logo">Ópticas <b>CV+</b></div>
+            <div class="rx-kind">Receta oftálmica<br>Examen visual</div>
+          </div>
+          <div class="rx-pt">
+            <span>Paciente: <b id="pt-name">—</b></span>
+            <span id="pt-extra">—</span>
+          </div>
+        </div>
+        <table class="rxt" id="rxt">
+          <thead>
+            <tr>
+              <th class="corner"></th>
+              <th data-col="sph">ESF<span class="full">SPH</span></th>
+              <th data-col="cyl">CIL<span class="full">CYL</span></th>
+              <th data-col="eje">EJE<span class="full">AXIS</span></th>
+              <th data-col="add">ADD<span class="full">ADD</span></th>
+            </tr>
+          </thead>
+          <tbody id="rxbody"><!-- filled by JS --></tbody>
+        </table>
+        <div class="rx-note">ESF/CIL/EJE/ADD en dioptrías (pasos de 0.25). EJE en grados (0°–180°). Datos filtrados con fines educativos.</div>
+      </div>
+    </section>
+
+    <!-- SIDE PANEL -->
+    <aside class="panel">
+      <div class="side">
+        <div class="blocktitle"><span class="pin"></span>¿Qué significa?</div>
+        <div class="explain empty" id="explain">
+          <span class="big">👆</span>
+          <span>Toca cualquier dato o encabezado de la receta para ver su explicación aquí.</span>
+        </div>
+
+        <div class="human">
+          <div class="blocktitle"><span class="pin" style="background:var(--yellow)"></span>Traducción a lenguaje humano</div>
+          <div class="chips" id="chips"></div>
+          <p class="htext" id="human"></p>
+        </div>
+      </div>
+
+      <div class="vision">
+        <div class="vh"><span>Cómo ve este paciente</span><em>sin sus lentes</em></div>
+        <div class="scenes">
+          <div class="scene" id="sceneFar">
+            <div class="lab">Visión de lejos <span class="state ok" id="stFar">Nítida</span></div>
+            <div class="viewport">
+              <svg class="pic" width="120" height="74" viewBox="0 0 120 74">
+                <rect x="6" y="44" width="108" height="26" rx="3" fill="#cfe0e4"/>
+                <rect x="6" y="44" width="108" height="8" fill="#b9d2d8"/>
+                <path d="M18 44 L36 16 L54 44 Z" fill="#8FB8C0"/>
+                <path d="M44 44 L66 10 L88 44 Z" fill="#A9CBD1"/>
+                <circle cx="96" cy="20" r="9" fill="var(--yellow)"/>
+                <rect x="55" y="30" width="6" height="14" fill="#7a9aa0"/>
+              </svg>
+            </div>
+          </div>
+          <div class="scene" id="sceneNear">
+            <div class="lab">Visión de cerca <span class="state ok" id="stNear">Nítida</span></div>
+            <div class="viewport">
+              <svg class="pic" width="120" height="74" viewBox="0 0 120 74">
+                <rect x="20" y="10" width="80" height="54" rx="4" fill="#fff" stroke="#cdd9dc"/>
+                <line x1="30" y1="24" x2="90" y2="24" stroke="#9fb2b7" stroke-width="4" stroke-linecap="round"/>
+                <line x1="30" y1="34" x2="84" y2="34" stroke="#b9c8cc" stroke-width="4" stroke-linecap="round"/>
+                <line x1="30" y1="44" x2="90" y2="44" stroke="#9fb2b7" stroke-width="4" stroke-linecap="round"/>
+                <line x1="30" y1="54" x2="72" y2="54" stroke="#b9c8cc" stroke-width="4" stroke-linecap="round"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
+  </div>
+
+  <div class="foot">Simulador educativo · Ópticas CV+ · La lectura correcta de la receta define el lente, material y tratamiento adecuados.</div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  // ── Datos de los 5 casos (valores de ejemplo, fines educativos) ──
+  const CASES = {
+    c1:{ name:"22 años", extra:"Estudiante",
+      rx:{ OD:{sph:"−2.00",cyl:"—",eje:"—",add:"—"}, OI:{sph:"−2.25",cyl:"—",eje:"—",add:"—"} },
+      chips:["Miopía"],
+      human:"Tiene <b>miopía</b> leve-moderada en ambos ojos (esfera con signo −). Ve <b>borroso de lejos</b> y bien de cerca. <b>No</b> tiene astigmatismo (cilindro vacío) ni presbicia (sin adición).",
+      far:"blur", near:"ok" },
+
+    c2:{ name:"31 años", extra:"Oficina",
+      rx:{ OD:{sph:"+1.75",cyl:"—",eje:"—",add:"—"}, OI:{sph:"+2.00",cyl:"—",eje:"—",add:"—"} },
+      chips:["Hipermetropía"],
+      human:"Tiene <b>hipermetropía</b> en ambos ojos (esfera con signo +). Le cuesta más la <b>visión de cerca</b> y puede sentir fatiga visual o dolor de cabeza. Sin astigmatismo ni presbicia.",
+      far:"ok", near:"blur" },
+
+    c3:{ name:"27 años", extra:"Diseñadora",
+      rx:{ OD:{sph:"−1.00",cyl:"−1.50",eje:"180",add:"—"}, OI:{sph:"−0.75",cyl:"−1.25",eje:"10",add:"—"} },
+      chips:["Miopía","Astigmatismo"],
+      human:"Tiene <b>miopía con astigmatismo</b> en ambos ojos (esfera − y cilindro −). La visión sale <b>borrosa y algo distorsionada</b>; el <b>eje</b> indica la orientación del astigmatismo. Sin presbicia.",
+      far:"blur", near:"blur" },
+
+    c4:{ name:"48 años", extra:"Contador",
+      rx:{ OD:{sph:"0.00",cyl:"—",eje:"—",add:"+2.00"}, OI:{sph:"0.00",cyl:"—",eje:"—",add:"+2.00"} },
+      chips:["Presbicia"],
+      human:"<b>No</b> tiene graduación de lejos (esfera 0.00), pero la <b>adición +2.00</b> indica <b>presbicia</b>. Ve bien de lejos y necesita ayuda para cerca. Candidato a lentes de lectura, ocupacionales o progresivos.",
+      far:"ok", near:"blur" },
+
+    c5:{ name:"52 años", extra:"Gerente",
+      rx:{ OD:{sph:"−1.50",cyl:"−0.75",eje:"90",add:"+1.75"}, OI:{sph:"−1.75",cyl:"−0.50",eje:"85",add:"+1.75"} },
+      chips:["Miopía","Astigmatismo","Presbicia"],
+      human:"Receta <b>completa</b>: <b>miopía + astigmatismo + presbicia</b> en ambos ojos. Necesita corrección para lejos y <b>adición</b> para cerca → candidato ideal a <b>lente progresivo</b>.",
+      far:"blur", near:"blur" }
+  };
+
+  // Explicación de cada columna / encabezado
+  const COLS = {
+    sph:{ t:"ESF · Esfera (SPH)", d:"Graduación esférica. El <b>signo (−)</b> indica <b>miopía</b> (no ve de lejos) y el <b>signo (+)</b> indica <b>hipermetropía</b> (no ve de cerca). Se mide en dioptrías." },
+    cyl:{ t:"CIL · Cilindro (CYL)", d:"Corrige el <b>astigmatismo</b>. Siempre va con <b>signo (−)</b>. Si está vacío o en 0.00, el ojo <b>no</b> tiene astigmatismo." },
+    eje:{ t:"EJE · Eje (AXIS)", d:"Orientación del astigmatismo, de <b>0° a 180°</b>. Solo tiene sentido si hay cilindro: indica en qué ángulo se coloca la corrección." },
+    add:{ t:"ADD · Adición", d:"Graduación <b>adicional para ver de cerca</b> (presbicia). Siempre es <b>(+)</b> y normalmente <b>igual en ambos ojos</b>. Si está vacía, no hay presbicia." }
+  };
+  const EYES = {
+    OD:{ t:"OD · Ojo Derecho", d:"Del latín <em>oculus dexter</em>. Esta fila contiene la graduación del <b>ojo derecho</b> del paciente." },
+    OI:{ t:"OI · Ojo Izquierdo", d:"Del latín <em>oculus sinister</em>. Esta fila contiene la graduación del <b>ojo izquierdo</b> del paciente." }
+  };
+
+  const $ = id => document.getElementById(id);
+  let current = "c1";
+
+  // Convierte el texto de una celda a número (maneja − unicode y vacío —)
+  function num(s){
+    if(!s || s==="—") return null;
+    return parseFloat(s.replace("−","-").replace("+",""));
+  }
+  function magSph(a){ return a<=2 ? "leve a moderada" : (a<=5 ? "moderada-alta" : "alta"); }
+  function magCyl(a){ return a<=0.75 ? "leve" : (a<=2 ? "moderado" : "alto"); }
+
+  // Explicación contextual de una celda concreta
+  function cellExplain(col, val, eye){
+    const ojo = eye==="OD" ? "ojo derecho" : "ojo izquierdo";
+    const n = num(val);
+    if(col==="sph"){
+      if(n===null || n===0) return {t:"Esfera 0.00", d:`Este ${ojo} <b>no necesita corrección esférica</b>: no hay miopía ni hipermetropía de lejos.`};
+      if(n<0) return {t:`Esfera ${val} · miopía`, d:`Esfera <b>${val}</b> en el ${ojo}: <b>miopía ${magSph(Math.abs(n))}</b>. El signo (−) siempre indica miopía.`};
+      return {t:`Esfera ${val} · hipermetropía`, d:`Esfera <b>${val}</b> en el ${ojo}: <b>hipermetropía ${magSph(Math.abs(n))}</b>. El signo (+) siempre indica hipermetropía.`};
+    }
+    if(col==="cyl"){
+      if(n===null) return {t:"Cilindro vacío", d:`Sin cilindro: este ${ojo} <b>no tiene astigmatismo</b>.`};
+      return {t:`Cilindro ${val} · astigmatismo`, d:`Cilindro <b>${val}</b> en el ${ojo}: <b>astigmatismo ${magCyl(Math.abs(n))}</b>. Siempre lleva signo (−) y se corrige con lente cilíndrico.`};
+    }
+    if(col==="eje"){
+      if(n===null) return {t:"Sin eje", d:`No hay eje porque este ${ojo} <b>no tiene astigmatismo</b>. El eje solo acompaña al cilindro.`};
+      return {t:`Eje ${val}°`, d:`Eje <b>${val}°</b>: orientación del astigmatismo (0°–180°). Indica en qué ángulo se coloca el cilindro en el ${ojo}.`};
+    }
+    if(col==="add"){
+      if(n===null) return {t:"Sin adición", d:`Este paciente <b>no necesita adición</b> para cerca: no es présbita.`};
+      return {t:`Adición ${val} · presbicia`, d:`Adición <b>${val}</b>: graduación extra para <b>ver de cerca</b> (presbicia). Suele ser igual en ambos ojos.`};
+    }
+    return {t:"",d:""};
+  }
+
+  function setExplain(t, d){
+    const e = $("explain");
+    e.className = "explain active";
+    e.innerHTML = `<span class="tag">${t}</span>${d}`;
+  }
+  function clearSel(){ document.querySelectorAll(".rxt .sel").forEach(el=>el.classList.remove("sel")); }
+
+  function renderCase(){
+    const c = CASES[current];
+    $("pt-name").textContent = c.name;
+    $("pt-extra").textContent = c.extra;
+
+    // build table body
+    const body = $("rxbody");
+    body.innerHTML = "";
+    ["OD","OI"].forEach(eye=>{
+      const r = c.rx[eye];
+      const tr = document.createElement("tr");
+      tr.innerHTML = `<th data-eye="${eye}">${eye}</th>`+
+        ["sph","cyl","eje","add"].map(col=>
+          `<td data-eye="${eye}" data-col="${col}"><button class="cellbtn" type="button">${r[col]}</button></td>`
+        ).join("");
+      body.appendChild(tr);
+    });
+
+    // chips
+    const chipWrap = $("chips"); chipWrap.innerHTML="";
+    ["Miopía","Hipermetropía","Astigmatismo","Presbicia"].forEach(name=>{
+      const on = c.chips.includes(name);
+      const s=document.createElement("span");
+      s.className="chip"+(on?" on":"");
+      s.textContent=name;
+      chipWrap.appendChild(s);
+    });
+
+    // human translation
+    $("human").innerHTML = c.human;
+
+    // vision scenes
+    setScene("sceneFar","stFar",c.far);
+    setScene("sceneNear","stNear",c.near);
+
+    // reset explanation
+    clearSel();
+    const e=$("explain");
+    e.className="explain empty";
+    e.innerHTML='<span class="big">👆</span><span>Toca cualquier dato o encabezado de la receta para ver su explicación aquí.</span>';
+  }
+
+  function setScene(sceneId,stId,state){
+    const sc=$(sceneId), st=$(stId);
+    if(state==="blur"){sc.classList.add("blurred");st.textContent="Borrosa";st.className="state blur";}
+    else{sc.classList.remove("blurred");st.textContent="Nítida";st.className="state ok";}
+  }
+
+  // ── eventos ──
+  $("cases").addEventListener("click",e=>{
+    const b=e.target.closest(".case"); if(!b)return;
+    document.querySelectorAll(".case").forEach(c=>c.setAttribute("aria-pressed", c===b));
+    current=b.dataset.k; renderCase();
+  });
+
+  $("rxt").addEventListener("click",e=>{
+    // column header
+    const colHead = e.target.closest("thead th[data-col]");
+    if(colHead){
+      clearSel(); colHead.classList.add("sel");
+      const info=COLS[colHead.dataset.col]; setExplain(info.t, info.d); return;
+    }
+    // eye row label
+    const eyeHead = e.target.closest("tbody th[data-eye]");
+    if(eyeHead){
+      clearSel(); eyeHead.classList.add("sel");
+      const info=EYES[eyeHead.dataset.eye]; setExplain(info.t, info.d); return;
+    }
+    // value cell
+    const cell = e.target.closest("td[data-col]");
+    if(cell){
+      clearSel(); cell.classList.add("sel");
+      const val = CASES[current].rx[cell.dataset.eye][cell.dataset.col];
+      const info = cellExplain(cell.dataset.col, val, cell.dataset.eye);
+      setExplain(info.t, info.d); return;
+    }
+  });
+
+  renderCase();
+})();
+</script>
+</body>
+</html>
