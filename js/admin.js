@@ -822,8 +822,8 @@ function renderAlerts(d) {
 /* ============================================================================
    6) OPCIONES DE SUCURSAL Y CARGO (para los selects de edición)
    ========================================================================== */
-const BRANCHES = ["Metrocentro 1","Metrocentro 2","Plaza Mundo","Metrocentro Santa Ana","Sonsonate","San Miguel","Aguilares","Apopa","Valle Dulce","San Gabriel","Metropolis","Galerias","El Paseo","Zona Rosa","El Casco","Multiplaza","Santa Rosa","Encuentro Zacatecoluca","Zacatecoluca Centro","Usulutan","San Francisco Gotera","San Martin","Unicentro Soyapango","Alta Vista","Encuentro Lourdes","Metrocentro Lourdes","Acajutla","Las Ramblas","Encuentro Santa Ana","Empresarial","SAC","Zaragoza","Puerto de La Libertad","Armenia","San Marcos","Recursos Humanos","Ventas","Mercadeo","Coberturas"];
-const POSITIONS = ["Asesor Visual","Optometrista","Capacitador","Supervisor","RRHH","Asesor de Coberturas","Optómetra de Coberturas"];
+const BRANCHES = ["Metrocentro 1","Metrocentro 2","Plaza Mundo","Metrocentro Santa Ana","Sonsonate","San Miguel","Aguilares","Apopa","Valle Dulce","San Gabriel","Metropolis","Galerias","El Paseo","Zona Rosa","El Casco","Multiplaza","Santa Rosa","Encuentro Zacatecoluca","Zacatecoluca Centro","Usulutan","San Francisco Gotera","San Martin","Unicentro Soyapango","Alta Vista","Encuentro Lourdes","Metrocentro Lourdes","Acajutla","Las Ramblas","Encuentro Santa Ana","Empresarial","SAC","Zaragoza","Puerto de La Libertad","Armenia","San Marcos","Recursos Humanos","Ventas","Mercadeo","Coberturas","Compras"];
+const POSITIONS = ["Asesor Visual","Optometrista","Capacitador","Supervisor","RRHH","Asesor de Coberturas","Optómetra de Coberturas","Auxiliar"];
 
 function branchOptions(current) {
   const opts = BRANCHES.includes(current) ? BRANCHES : [current, ...BRANCHES];
