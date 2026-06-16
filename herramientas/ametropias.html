@@ -141,6 +141,23 @@
   .lg-retina::before{background:var(--retina)}
   .lg-lens::before{background:var(--cyan-deep)}
 
+  /* Cristalino: animación de acomodación "con esfuerzo" (presbicia) */
+  #lensGroup{ transform-box:view-box; transform-origin:280px 235px; }
+  #lensGroup.lens-struggle{ animation:lensStruggle 3.2s ease-in-out infinite; }
+  @keyframes lensStruggle{
+    0%   { transform:scale(1, 1); }
+    12%  { transform:scale(1.06, 0.99); }
+    20%  { transform:scale(1.04, 0.992); }
+    34%  { transform:scale(1.17, 0.97); }
+    40%  { transform:scale(1.14, 0.975); }
+    46%  { transform:scale(1.22, 0.965); }
+    52%  { transform:scale(1.20, 0.967); }
+    62%  { transform:scale(1.08, 0.985); }
+    72%  { transform:scale(1.02, 0.996); }
+    80%  { transform:scale(1, 1); }
+    100% { transform:scale(1, 1); }
+  }
+
   @media (prefers-reduced-motion: reduce){
     *{transition:none !important;animation:none !important}
   }
@@ -246,8 +263,10 @@
         <path d="M250 314 Q286 320 300 282 Q292 264 270 264 L250 270 Z" fill="url(#irisg)" stroke="#4A2F18" stroke-width="1"/>
 
         <!-- crystalline lens (biconvex, translucent) -->
-        <ellipse id="lens" cx="280" cy="235" rx="22" ry="78" fill="url(#lensg)" stroke="#8FD2DF" stroke-width="1.5" opacity="0.92"/>
-        <path d="M270 180 Q286 210 270 235" fill="none" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round" opacity="0.55"/>
+        <g id="lensGroup">
+          <ellipse id="lens" cx="280" cy="235" rx="22" ry="78" fill="url(#lensg)" stroke="#8FD2DF" stroke-width="1.5" opacity="0.92"/>
+          <path d="M270 180 Q286 210 270 235" fill="none" stroke="#FFFFFF" stroke-width="2.4" stroke-linecap="round" opacity="0.55"/>
+        </g>
 
         <!-- cornea: transparent dome at the front, with specular highlight -->
         <path id="cornea" d="M250 150 Q150 235 250 320 Q236 235 250 150 Z" fill="url(#corneag)" stroke="#9BDCE8" stroke-width="2"/>
@@ -443,6 +462,14 @@
     $("opticNerve").setAttribute("d",
       `M ${backX-16} 208 q 48 4 62 27 q -14 23 -62 27 q 14 -27 0 -54 z`);
     $("lblRet").setAttribute("x", Math.min(760, backX-6));
+
+    // Córnea: en astigmatismo, curvatura más pronunciada/puntuda (curvatura irregular)
+    const corneaNormal = "M250 150 Q150 235 250 320 Q236 235 250 150 Z";
+    const corneaAstig  = "M250 150 Q160 195 150 235 Q160 275 250 320 Q236 235 250 150 Z";
+    $("cornea").setAttribute("d", current==="astigmatismo" ? corneaAstig : corneaNormal);
+
+    // Presbicia: el cristalino "lucha" por acomodar (pérdida de flexibilidad)
+    $("lensGroup").classList.toggle("lens-struggle", current==="presbicia" && !reduce);
 
     // badge + texts
     $("badge").textContent=d.badge;
