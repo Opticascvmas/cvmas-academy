@@ -711,17 +711,8 @@ margin-bottom:15px;
           </div>
         </div>
 
-        <div class="section-title">📚 Fundamentos de Óptica</div>
-        <div class="modules-grid" id="grid-fundamentos"></div>
+<div id="dash-sections"></div>
 
-        <div class="section-title">🔬 Fabricación y Materiales</div>
-        <div class="modules-grid" id="grid-fabricacion"></div>
-
-        <div class="section-title">✨ Portafolio Akkurat</div>
-        <div class="modules-grid" id="grid-akkurat"></div>
-
-        <div class="section-title">💼 Ventas y Productos</div>
-        <div class="modules-grid" id="grid-ventas"></div>
       </div>
 
       <!-- MODULE VIEW -->
@@ -790,7 +781,7 @@ document.getElementById('logo-img').src = 'data:image/png;base64,' + LOGO_B64;
 // Para actualizar contenido, editar el array MODULES
 // Cada módulo: { id, title, icon, category, content (HTML), quiz[] }
 // ═══════════════════════════════════════════════════════
-const MODULES = [
+const MODULES_ASESOR = [
 {
   id:1, title:"Ópticas CV+", icon:"🏢",
   category:"fundamentos",
@@ -2040,6 +2031,11 @@ const MODULES = [
 }
 ];
 
+// Lista de módulos para OPTOMETRISTAS (vacía por ahora; la llenamos luego)
+const MODULES_OPTO = [];
+// MODULES es la lista "activa"; por defecto la de asesores
+let MODULES = MODULES_ASESOR;
+
 // ═══════════════════════════════════════════════════════
 // GLOSARIO TÉCNICO
 // ═══════════════════════════════════════════════════════
@@ -2264,13 +2260,29 @@ window.hydrateUserData = async function() {
 // ═══════════════════════════════════════════════════════
 // BUILD SIDEBAR NAV
 // ═══════════════════════════════════════════════════════
-const CAT_INFO = {
-  fundamentos: { label:'Fundamentos de Óptica', ids:[1,2,3,4,5] },
-  fabricacion: { label:'Fabricación y Materiales', ids:[6,7,8] },
-  akkurat: { label:'Portafolio Akkurat', ids:[9,10,11,12,13,14] },
-  ventas: { label:'Ventas y Productos', ids:[15,16,17,18] },
+const CAT_INFO_ASESOR = {
+  fundamentos: { label:'Fundamentos de Óptica', dashTitle:'📚 Fundamentos de Óptica', ids:[1,2,3,4,5] },
+  fabricacion: { label:'Fabricación y Materiales', dashTitle:'🔬 Fabricación y Materiales', ids:[6,7,8] },
+  akkurat: { label:'Portafolio Akkurat', dashTitle:'✨ Portafolio Akkurat', ids:[9,10,11,12,13,14] },
+  ventas: { label:'Ventas y Productos', dashTitle:'💼 Ventas y Productos', ids:[15,16,17,18] },
 };
+// Categorías de Optometristas (vacío por ahora; se llena luego)
+const CAT_INFO_OPTO = {};
+let CAT_INFO = CAT_INFO_ASESOR;
 const CAT_ICONS = { fundamentos:'🔬', fabricacion:'⚙️', akkurat:'✨', ventas:'💼' };
+
+// Cambia el contenido (módulos + categorías) según el rol leído en Firebase
+window.aplicarRolContenido = function(role){
+  if (role === 'optometra') {
+    MODULES = MODULES_OPTO;
+    CAT_INFO = CAT_INFO_OPTO;
+    window.CVP_IS_OPTOMETRA = true;
+  } else {
+    MODULES = MODULES_ASESOR;
+    CAT_INFO = CAT_INFO_ASESOR;
+    window.CVP_IS_OPTOMETRA = false;
+  }
+};
 
 // ═══════════════════════════════════════════════════════
 // 🔒 DESBLOQUEO PROGRESIVO DE MÓDULOS
@@ -2389,14 +2401,33 @@ function updateStats() {
   document.getElementById('stat-studied').textContent = studied;
   document.getElementById('stat-quizzes').textContent = quizzesCount;
   document.getElementById('stat-score').textContent = avgScore !== null ? avgScore+'%' : '—';
-  document.getElementById('prog-text').textContent = `${studied} / 18 módulos`;
-  document.getElementById('prog-bar-inner').style.width = (studied/18*100)+'%';
+  var totalMods = MODULES.length || 18;
+  document.getElementById('prog-text').textContent = studied + ' / ' + totalMods + ' módulos';
+  document.getElementById('prog-bar-inner').style.width = (totalMods ? (studied/totalMods*100) : 0) + '%';
 }
 
 // ═══════════════════════════════════════════════════════
 // RENDER GRIDS
 // ═══════════════════════════════════════════════════════
+function renderDashSections(){
+  const wrap = document.getElementById('dash-sections');
+  if(!wrap) return;
+  const cats = Object.entries(CAT_INFO);
+  if(!cats.length || MODULES.length === 0){
+    wrap.innerHTML = `<div style="text-align:center;padding:48px 20px;color:var(--gray-text)">
+        <div style="font-size:42px;margin-bottom:12px">🚧</div>
+        <h3 style="margin-bottom:6px;color:var(--text)">Sección en construcción</h3>
+        <p style="font-size:13px">Los módulos para optometristas estarán disponibles muy pronto.</p>
+      </div>`;
+    return;
+  }
+  wrap.innerHTML = cats.map(([catKey, catData])=>`
+      <div class="section-title">${catData.dashTitle || ((CAT_ICONS[catKey]||'') + ' ' + catData.label)}</div>
+      <div class="modules-grid" id="grid-${catKey}"></div>`).join('');
+}
+
 function renderGrids(searchTerm='') {
+  renderDashSections();
   for(const [catKey, catData] of Object.entries(CAT_INFO)){
     const grid = document.getElementById(`grid-${catKey}`);
     if(!grid) continue;
@@ -2950,11 +2981,13 @@ if(user) {
         name: user.email.split("@")[0],
         branch: "Pendiente",
         position: "Pendiente",
-        role: "participant",
+       role: "participant",
         lastLogin: new Date().toISOString()
       });
-    } else {
+      window.CVP_CONTENT_ROLE = "participant";
+   } else {
       // Ingresos siguientes: actualizar solo la fecha (merge conserva el resto)
+      window.CVP_CONTENT_ROLE = snap.data().role || "participant";
       await setDoc(ref, {
         lastLogin: new Date().toISOString()
       }, { merge: true });
@@ -2964,6 +2997,11 @@ if(user) {
   }
 
 }
+
+// Mostrar la academia correcta según el rol guardado en Firebase
+try {
+  if (window.aplicarRolContenido) window.aplicarRolContenido(window.CVP_CONTENT_ROLE || "participant");
+} catch(e) { console.error(e); }
 
 // 🔄 Cargar los datos REALES de esta cuenta desde Firebase
 // (reemplaza cualquier dato de otro usuario que haya quedado en el navegador)
@@ -3319,11 +3357,6 @@ Cerrar
     if(e.key === 'Escape' && m && m.classList.contains('abierto')) window.cerrarSimuladorRecetas();
   });
 </script>
-<script type="module" src="js/firebase.js"></script>
-<script type="module" src="js/auth.js"></script>
-<script type="module" src="js/dashboard.js"></script>
-<script type="module" src="js/quizzes.js"></script>
-<script type="module" src="js/modules.js"></script>
 <script type="module" src="js/admin.js"></script>
 </body>
 </html>
