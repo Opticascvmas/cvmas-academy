@@ -683,6 +683,7 @@ margin-bottom:15px;
         <div id="topbar-breadcrumb">Bienvenido al portal de capacitación</div>
       </div>
       <div id="topbar-actions">
+        <button class="btn btn-secondary" id="btn-toggle-academia" onclick="toggleAcademiaAdmin()" style="display:none">👓 Ver academia: Asesores</button>
         <button class="btn btn-outline" onclick="showGlossary()">📖 Glosario</button>
       </div>
     </div>
@@ -2283,6 +2284,14 @@ window.aplicarRolContenido = function(role){
     window.CVP_IS_OPTOMETRA = false;
   }
 };
+// Solo para el admin: alternar entre las dos academias con un botón
+window.toggleAcademiaAdmin = function(){
+  const verOpto = !window.CVP_IS_OPTOMETRA;
+  window.aplicarRolContenido(verOpto ? 'optometra' : 'participant');
+  const btn = document.getElementById('btn-toggle-academia');
+  if (btn) btn.textContent = verOpto ? '👓 Ver academia: Optometristas' : '👓 Ver academia: Asesores';
+  showDashboard();
+};
 
 // ═══════════════════════════════════════════════════════
 // 🔒 DESBLOQUEO PROGRESIVO DE MÓDULOS
@@ -2485,10 +2494,16 @@ function showDashboard() {
   document.getElementById('topbar-title').textContent = 'Dashboard';
   document.getElementById('topbar-breadcrumb').textContent = 'Bienvenido al portal de capacitación';
   document.getElementById('topbar-actions').innerHTML = `<button class="btn btn-outline" onclick="showGlossary()">📖 Glosario</button>`;
-  renderGrids();
+renderGrids();
   updateStats();
   setView('dashboard');
   closeSidebar();
+  // Mostrar el selector de academia solo para el admin
+  try {
+    const u = JSON.parse(localStorage.getItem('cvplus_user') || '{}');
+    const btn = document.getElementById('btn-toggle-academia');
+    if (btn) btn.style.display = (u.role === 'admin') ? 'inline-flex' : 'none';
+  } catch(e) {}
 }
 
 function showModule(id) {
