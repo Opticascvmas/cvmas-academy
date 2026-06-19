@@ -2493,8 +2493,10 @@ function showDashboard() {
   STATE.currentView = 'dashboard';
   document.getElementById('topbar-title').textContent = 'Dashboard';
   document.getElementById('topbar-breadcrumb').textContent = 'Bienvenido al portal de capacitación';
-  document.getElementById('topbar-actions').innerHTML = `<button class="btn btn-outline" onclick="showGlossary()">📖 Glosario</button>`;
-renderGrids();
+  document.getElementById('topbar-actions').innerHTML = `
+    <button class="btn btn-secondary" id="btn-toggle-academia" onclick="toggleAcademiaAdmin()" style="display:none">👓 Ver academia: Asesores</button>
+    <button class="btn btn-outline" onclick="showGlossary()">📖 Glosario</button>`;
+  renderGrids();
   updateStats();
   setView('dashboard');
   closeSidebar();
@@ -2502,10 +2504,12 @@ renderGrids();
   try {
     const u = JSON.parse(localStorage.getItem('cvplus_user') || '{}');
     const btn = document.getElementById('btn-toggle-academia');
-    if (btn) btn.style.display = (u.role === 'admin') ? 'inline-flex' : 'none';
+    if (btn) {
+      btn.style.display = (u.role === 'admin') ? 'inline-flex' : 'none';
+      btn.textContent = window.CVP_IS_OPTOMETRA ? '👓 Ver academia: Optometristas' : '👓 Ver academia: Asesores';
+    }
   } catch(e) {}
 }
-
 function showModule(id) {
   const mod = MODULES.find(m=>m.id===id);
   if(!mod) return;
