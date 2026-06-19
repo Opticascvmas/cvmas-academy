@@ -671,6 +671,7 @@ function renderUserCard(u) {
         <select id="position-${u.id}">${positionOptions(u.position)}</select>
         <select id="role-${u.id}">
           <option value="participant" ${u.role === "participant" ? "selected" : ""}>participant</option>
+          <option value="optometra" ${u.role === "optometra" ? "selected" : ""}>optometra (academia óptica)</option>
           <option value="viewer" ${u.role === "viewer" ? "selected" : ""}>viewer (solo ver)</option>
           <option value="admin" ${u.role === "admin" ? "selected" : ""}>admin</option>
         </select>
