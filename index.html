@@ -2318,6 +2318,11 @@ function getLastScore(id) {
 
 // ¿Está desbloqueado este módulo?
 function isModuleUnlocked(id) {
+ // Admin y visores ven TODO desbloqueado, sin aprobar quizzes
+  try {
+    const u = JSON.parse(localStorage.getItem('cvplus_user') || '{}');
+    if (u.role === 'admin' || u.role === 'viewer') return true;
+  } catch(e) {}
   const order = getModuleOrder();
   const pos = order.indexOf(id);
   if (pos <= 0) return true;            // el primero siempre abierto
