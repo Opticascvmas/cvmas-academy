@@ -2033,7 +2033,168 @@ const MODULES_ASESOR = [
 ];
 
 // Lista de módulos para OPTOMETRISTAS (vacía por ahora; la llenamos luego)
-const MODULES_OPTO = [];
+const MODULES_OPTO = [
+{
+  id:1, title:"Lentes para el Control de la Miopía", icon:"👁️",
+  category:"fundamentos",
+  quizCount: 20,
+  content:`
+    <h2>¿Qué son los lentes para el control de la miopía?</h2>
+    <p>Los lentes de control de miopía son una tecnología óptica diseñada para <strong>corregir la visión</strong> y al mismo tiempo <strong>frenar la progresión</strong> del error refractivo. A diferencia de un lente monofocal convencional que solo compensa la graduación, estos lentes actúan sobre el mecanismo biológico que hace crecer el ojo más de lo normal.</p>
+    <p>El principio central es el <strong>desenfoque periférico miópico</strong>: el lente crea una señal óptica en la retina periférica que indica al ojo que no debe seguir creciendo, reduciendo la elongación axial que es la causa principal de la miopía progresiva.</p>
+
+    <h2>1. Perfil del paciente candidato</h2>
+    <p>Identificar correctamente al candidato es el primer paso clínico. No todos los pacientes miopes requieren este tipo de lente, y recetarlo sin criterio puede generar expectativas incorrectas.</p>
+
+    <h3>Rango de edad óptimo</h3>
+    <p>El tratamiento es más efectivo entre los <strong>6 y 16 años</strong>, con mayor impacto entre los <strong>6 y 12 años</strong>, que es la etapa de mayor crecimiento ocular. A mayor edad de inicio, menor será la ventana de intervención.</p>
+
+    <h3>Demografía y factores de riesgo a evaluar</h3>
+    <ul>
+      <li><strong>Antecedentes familiares:</strong> 1 padre miope = 30% de riesgo para el hijo. Ambos padres miopes = 60% de riesgo. Este es el factor predictivo más fuerte.</li>
+      <li><strong>Velocidad de progresión:</strong> Cambios de −0.50 D o más por año indican progresión activa que justifica intervención.</li>
+      <li><strong>Edad de inicio:</strong> Cuanto más temprano inicia la miopía, mayor será la graduación final. Un niño que empieza a los 7 años tiene mucho más por perder que uno que empieza a los 13.</li>
+      <li><strong>Hábitos visuales:</strong> Más de 3 horas diarias frente a pantallas (OR=1.83 para progresión), menos de 2 horas al aire libre diarias, alta demanda de visión próxima.</li>
+      <li><strong>Pre-miopía:</strong> Un niño de 6–7 años con refracción entre +0.75 D y 0.00 D está en estado de pre-miopía. Aún no es miope, pero está en la frontera. Debe monitorizarse cada 6 meses e iniciarse intervención ante factores de riesgo adicionales.</li>
+      <li><strong>Zona geográfica y entorno:</strong> Mayor prevalencia en zonas urbanas, colegios con alta carga académica y ambientes de poca luz natural.</li>
+    </ul>
+
+    <h3>Criterios de exclusión</h3>
+    <p>No son candidatos los pacientes con patología ocular activa (queratocono, uveítis, glaucoma), miopía estabilizada por más de 3 años sin cambio, ni pacientes sin apoyo familiar para garantizar el uso correcto del lente.</p>
+
+    <h2>2. Tecnología y antecedentes históricos</h2>
+    <p>Para entender el salto tecnológico que representan estos lentes, es útil conocer qué se usaba antes y por qué no funcionaba.</p>
+
+    <h3>Lo que se usaba antes</h3>
+    <ul>
+      <li><strong>Lentes monofocales convencionales:</strong> Corregían la visión pero no hacían nada para frenar la progresión. En algunos estudios, la corrección monofocal completa se asoció con mayor estimulación del crecimiento axial.</li>
+      <li><strong>Bifocales y multifocales estándar:</strong> Se intentaron en los años 90 y 2000 con resultados modestos e inconsistentes. El problema era que no generaban un desenfoque periférico suficientemente controlado.</li>
+      <li><strong>Subcorrección intencional:</strong> Se usó durante años bajo la hipótesis de que "forzar" el ojo a trabajar más lo detendría. Los estudios demostraron lo contrario: la subcorrección puede acelerar la progresión. <em>Nunca se debe dejar subcorregido a un paciente miope.</em></li>
+      <li><strong>Ortoqueratología (Orto-K):</strong> Primer tratamiento con evidencia sólida. Lentes rígidos de uso nocturno que remodelan temporalmente la córnea y generan desenfoque miópico periférico durante el día. Eficacia del 50–60%. Sigue siendo estándar de oro para ciertos perfiles.</li>
+    </ul>
+
+    <h3>La tecnología actual</h3>
+    <p>Los lentes oftálmicos modernos de control de miopía aplican el mismo principio que la Orto-K pero en formato de lente de uso diario normal, sin necesidad de uso nocturno ni manipulación corneal:</p>
+    <ul>
+      <li><strong>Stellest® (Essilor):</strong> Anillos concéntricos de alta adición que crean desenfoque simultáneo. Reduce la progresión entre un 38–67% según edad.</li>
+      <li><strong>MiYOSMART® (HOYA):</strong> Tecnología D.I.M.S. (Defocus Incorporated Multiple Segments) — microsegmentos distribuidos en el lente que crean la señal de frenado periférico. Eficacia similar a Stellest.</li>
+      <li><strong>MiSight® 1 day (CooperVision):</strong> Lente de contacto desechable con mayor evidencia clínica. Reduce la progresión en un 59% y la elongación axial en un 60% a 2 años de uso continuado.</li>
+    </ul>
+    <p>La combinación más potente documentada es <strong>atropina 0.01% + ortoqueratología</strong>, con efecto sinérgico especialmente en miopes de 1–4 D en los primeros 6–12 meses de tratamiento.</p>
+
+    <h2>3. Consejos para los padres de pacientes pediátricos con miopía alta</h2>
+    <p>El papel del equipo clínico no termina con la receta. Los padres son los aliados más importantes en el éxito del tratamiento.</p>
+
+    <h3>Mensajes clave para comunicar</h3>
+    <ul>
+      <li>La miopía <strong>no tiene cura</strong>, pero sí se puede frenar. El objetivo del tratamiento no es eliminar los lentes, sino evitar que la graduación siga subiendo y reducir el riesgo de complicaciones graves en la adultez.</li>
+      <li>Cada dioptría evitada importa: <strong>2× riesgo de maculopatía miópica</strong> por cada dioptría adicional; <strong>3× riesgo de desprendimiento de retina</strong>; hasta <strong>25× riesgo de discapacidad visual</strong> si la longitud axial supera 30 mm.</li>
+      <li>El éxito del tratamiento depende del <strong>uso consistente y correcto</strong> del lente. Un lente que no se usa no frena nada.</li>
+      <li>Los <strong>hábitos visuales</strong> son parte del tratamiento: 2 horas diarias al aire libre, regla 20-20-20, distancia de lectura correcta (regla del codo).</li>
+    </ul>
+
+    <h3>Sobre la biometría axial: cómo explicarla a los padres</h3>
+    <p>Los padres están acostumbrados a que "crecer más" es bueno. En el ojo es al revés. Explicar que <strong>bajar de percentil de longitud axial es una buena noticia</strong>, porque significa que el ojo está creciendo menos de lo esperado para su edad. Este mensaje, bien comunicado, genera confianza en el tratamiento.</p>
+    <p>Comunicar siempre también en dioptrías, ya que es el parámetro que los padres conocen de visitas anteriores.</p>
+
+    <h3>Los 7 pasos preventivos para padres</h3>
+    <ol>
+      <li>Si uno o ambos padres son miopes, hacer examen visual al niño antes de los 6 años.</li>
+      <li>Cuidado con hipermetropías bajas: menos de +0.75 D a los 6–7 años es zona de riesgo.</li>
+      <li>Garantizar <strong>al menos 2 horas al aire libre</strong> diarias.</li>
+      <li>Reducir el tiempo recreativo en pantallas.</li>
+      <li>Aplicar la <strong>regla 20-20-20</strong>: cada 20 minutos, mirar a 20 pies (6 metros) por 20 segundos.</li>
+      <li>Aplicar la <strong>regla del codo</strong>: la distancia mínima de lectura debe ser la longitud del antebrazo.</li>
+      <li>Usar siempre la corrección completa. Nunca subcorregir.</li>
+    </ol>
+
+    <h2>4. Frecuencia de controles</h2>
+    <p>El seguimiento semestral es el estándar de oro en el manejo del control de miopía. No es opcional: es parte del protocolo clínico.</p>
+
+    <h3>Cada 6 meses se evalúa:</h3>
+    <ul>
+      <li>Refracción manifiesta y ciclopléjica (obligatoria en menores de 14 años)</li>
+      <li>Agudeza visual corregida y no corregida</li>
+      <li>Longitud axial con biómetro óptico</li>
+      <li>Estado binocular y acomodativo</li>
+    </ul>
+
+    <h3>Indicadores de alarma que obligan a revisar el plan:</h3>
+    <ul>
+      <li>Progresión mayor de <strong>−0.50 D en 6 meses</strong></li>
+      <li>Crecimiento axial mayor de <strong>0.10 mm por semestre</strong></li>
+      <li>Empeoramiento de síntomas (cefaleas, fatiga visual, bajo rendimiento escolar)</li>
+    </ul>
+
+    <h3>Decisiones según resultado a los 6 meses:</h3>
+    <p>Si el cambio es de −0.25 D o menos: tranquilizar a los padres, reforzar hábitos, cita en 6 meses. Si el cambio es −0.50 D o más: revisar cumplimiento, ajustar la corrección y considerar intensificar el tratamiento.</p>
+    <p>Cada 12 meses se realiza topografía (si disponible) y evaluación integral de resultados. Si la progresión persiste a pesar del tratamiento correcto, se escala a una opción más eficaz según la evidencia clínica disponible.</p>
+
+    <h2>5. El examen de detección de candidatos</h2>
+    <p>La detección de un candidato al control de miopía es un protocolo estructurado que se realiza en una sola consulta. No es solo una refracción — es una evaluación integral.</p>
+
+    <h3>Paso 1 — Anamnesis dirigida</h3>
+    <p>Preguntar específicamente: edad de inicio de la miopía, antecedentes familiares (¿padre o madre miopes? ¿cuántas dioptrías?), velocidad de cambio en recetas anteriores, hábitos visuales (pantallas, lectura, tiempo al aire libre), síntomas (cefaleas, cansancio ocular, parpadeo, frotamiento de ojos), ambiente escolar (¿ve bien la pizarra? ¿se ha acercado más?) y hábitos nocturnos.</p>
+
+    <h3>Paso 2 — Evaluación refractiva completa</h3>
+    <p>Refracción manifiesta y <strong>ciclopléjica obligatoria en menores de 14 años</strong> (sin cicloplejia el resultado puede estar enmascarado por la acomodación). Agudeza visual binocular y monocular, con y sin corrección. Autorrefracción, retinoscopia y subjetivo con emborronamiento.</p>
+
+    <h3>Paso 3 — Biometría ocular</h3>
+    <p>La longitud axial es el parámetro más importante. Se mide con <strong>biómetro óptico</strong> (preferido: resolución ±0.01 mm, sin contacto ocular). Se registra el promedio de 3–5 mediciones y se compara con los percentiles normales para edad y género. Un percentil ≥75 indica riesgo moderado-alto; percentil >90 requiere intervención activa inmediata.</p>
+
+    <h3>Paso 4 — Estado motor y acomodativo</h3>
+    <p>Cover test a lejos y cerca, punto próximo de convergencia, flexibilidad acomodativa, evaluación fusional y estereopsis. Los niños miopes frecuentemente presentan AC/A elevado (los ojos se desvían hacia adentro más de lo necesario al enfocar), lo que puede afectar la comodidad visual y el rendimiento escolar.</p>
+
+    <h3>Paso 5 — Oftalmoscopía</h3>
+    <p>Revisión de segmento anterior, evaluación de retina y nervio óptico, e identificación de cambios asociados a progresión miópica (estiramiento macular, coroidosis miópica incipiente).</p>
+
+    <h3>Paso 6 — Prescripción y plan de manejo</h3>
+    <p>Selección del lente adecuado (convencional o de control miópico), recomendaciones de uso y cuidado, establecimiento de frecuencia de controles, y registro completo de parámetros en el expediente para seguimiento semestral comparativo.</p>
+
+    <div style="background:#e0f7fa;border-left:4px solid #00B9D6;padding:16px;border-radius:8px;margin-top:24px">
+      <strong>💡 Recuerda:</strong> El éxito del control de miopía depende de tres factores por igual: el lente correcto, los hábitos visuales adecuados y el seguimiento clínico constante. Los tres son responsabilidad del equipo de la clínica.
+    </div>
+  `,
+  quizBank:[
+    {q:"¿Entre qué edades es más efectivo el tratamiento con lentes de control de miopía?",opts:["3 a 6 años","6 a 16 años","10 a 20 años","15 a 25 años"],c:1,e:"El tratamiento es más efectivo entre los 6 y 16 años, con mayor impacto entre los 6 y 12 años, etapa de mayor crecimiento ocular."},
+    {q:"¿Qué riesgo de miopía tiene un niño si AMBOS padres son miopes?",opts:["15%","30%","60%","90%"],c:2,e:"Si ambos padres son miopes, el riesgo de miopía para el hijo es del 60%. Con un solo padre miope el riesgo es del 30%."},
+    {q:"¿Qué riesgo tiene un niño si solo UN padre es miope?",opts:["10%","30%","60%","80%"],c:1,e:"Con un padre miope el riesgo es del 30%. Con ambos padres miopes sube al 60%, siendo el factor predictivo más fuerte."},
+    {q:"¿Qué es la pre-miopía?",opts:["Miopía leve ya confirmada","Estado de riesgo donde la refracción no es negativa pero tampoco suficientemente positiva","Miopía alta estabilizada","Ausencia total de miopía"],c:1,e:"La pre-miopía es un estado de riesgo. El niño aún no es miope pero está en la frontera: refracción entre +0.75 D y 0.00 D a los 6–7 años."},
+    {q:"¿Cuál es el rango de refracción que define la pre-miopía en niños de 6–7 años?",opts:["Mayor de +1.00 D","Entre +0.75 D y 0.00 D sin llegar a negativo","Entre −0.25 D y −1.00 D","Mayor de +2.00 D"],c:1,e:"Un niño de 6–7 años con refracción entre +0.75 D y 0.00 D está en pre-miopía: no es hipermétrope sano ni miope, está en terreno peligroso."},
+    {q:"¿Cuál es el mecanismo principal por el que actúan los lentes de control de miopía?",opts:["Endurecer la córnea","Crear desenfoque periférico miópico que frena el crecimiento axial","Aumentar el índice de refracción del lente","Reducir la acomodación del cristalino"],c:1,e:"El principio es el desenfoque periférico miópico: el lente genera una señal en la retina periférica que indica al ojo que no debe seguir creciendo."},
+    {q:"¿Qué ocurre cuando la imagen periférica se forma DETRÁS de la retina?",opts:["El ojo se detiene en su crecimiento","Se estimula el alargamiento axial del ojo","Mejora la visión de cerca","Se reduce la miopía automáticamente"],c:1,e:"El desenfoque hipermetrópico periférico estimula el alargamiento axial. Los lentes de control crean desenfoque miópico periférico para revertir esta señal."},
+    {q:"¿Cuánto reduce la progresión de la miopía el lente MiSight® 1 day?",opts:["20%","40%","59%","80%"],c:2,e:"MiSight® 1 day reduce la progresión de la miopía en un 59% y la elongación axial en un 60% a 2 años de uso continuado."},
+    {q:"¿Cuánto reduce la elongación axial el lente MiSight® 1 day a 2 años?",opts:["25%","40%","60%","75%"],c:2,e:"MiSight® 1 day reduce la elongación axial en un 60% a 2 años, además de reducir la progresión refractiva en un 59%."},
+    {q:"¿Qué rango de reducción de progresión ofrecen los lentes Stellest® y MiYOSMART®?",opts:["10–25%","38–67%","70–85%","90–100%"],c:1,e:"Los lentes oftálmicos Stellest® y MiYOSMART® reducen la progresión entre un 38 y 67%, con mayor efecto en pacientes más jóvenes."},
+    {q:"¿Con qué frecuencia se recomienda revisar a los niños con miopía en tratamiento de control?",opts:["Cada 3 meses","Cada 6 meses","Cada 12 meses","Cada 2 años"],c:1,e:"El seguimiento semestral (cada 6 meses) es el estándar de oro. Incluye refracción, biometría axial, agudeza visual y estado binocular."},
+    {q:"¿Cuántas horas al aire libre diarias se recomiendan para reducir el riesgo de miopía?",opts:["Al menos 30 minutos","Al menos 1 hora","Al menos 2 horas","Al menos 4 horas"],c:2,e:"Se recomiendan al menos 2 horas al aire libre diarias. La luz solar aumenta la liberación de dopamina retiniana que regula el crecimiento ocular."},
+    {q:"¿En qué consiste la regla 20-20-20?",opts:["Estudiar 20 minutos, descansar 20 horas, leer 20 páginas","Cada 20 minutos mirar a 20 pies por 20 segundos","20 preguntas cada 20 días durante 20 semanas","Dormir 20 minutos, ver a 20 metros, descansar 20 horas"],c:1,e:"La regla 20-20-20: cada 20 minutos de trabajo de cerca, mirar a 20 pies (6 metros) durante 20 segundos. Reduce la fatiga acomodativa."},
+    {q:"¿Qué mide la biometría axial?",opts:["La presión intraocular","La longitud axial del globo ocular","El grosor de la córnea","La agudeza visual"],c:1,e:"La biometría axial mide la longitud axial (LA) del ojo, que es la medida más fiable para evaluar la progresión de la miopía y la eficacia del tratamiento."},
+    {q:"¿Qué instrumento se prefiere para medir la longitud axial?",opts:["Ultrasonido A-scan","Queratómetro","Biómetro óptico","Tonómetro"],c:2,e:"Se prefiere el biómetro óptico (resolución ±0.01 mm, sin contacto ocular). El ultrasonido A-scan es menos preciso y toca la superficie ocular."},
+    {q:"¿Cuál es el indicador de alarma en progresión refractiva?",opts:["Cambio mayor de −0.25 D/año","Cambio mayor de −0.50 D/año","Cambio mayor de −1.00 D/año","Cambio mayor de −2.00 D/año"],c:1,e:"Una progresión mayor de −0.50 D por año es un indicador de alarma que obliga a revisar y posiblemente intensificar el plan de tratamiento."},
+    {q:"¿Cuál es el indicador de alarma en crecimiento axial?",opts:["Más de 0.05 mm/semestre","Más de 0.10 mm/semestre","Más de 0.25 mm/semestre","Más de 0.50 mm/semestre"],c:1,e:"Un crecimiento axial mayor de 0.10 mm por semestre es un indicador de alarma que sugiere progresión activa y posible necesidad de intensificar el tratamiento."},
+    {q:"¿Qué significa que un niño baje de percentil de longitud axial?",opts:["Es una señal negativa, el ojo está creciendo demasiado","Es positivo, el tratamiento está funcionando","No tiene ningún significado clínico","Indica un error en la medición"],c:1,e:"En la biometría axial, bajar de percentil ES una buena noticia: significa que el ojo está creciendo menos de lo esperado para su edad y el tratamiento es efectivo."},
+    {q:"¿Cuál es la proyección de prevalencia global de miopía para el año 2050?",opts:["~25%","~35%","~50%","~70%"],c:2,e:"Se proyecta que el 50% de la población mundial será miope para el año 2050, lo que la convierte en una epidemia visual global de salud pública."},
+    {q:"¿Cuál es la causa más frecuente de miopía?",opts:["Mayor potencia de la córnea","Aumento de la longitud axial del globo ocular","Cristalino más curvo de lo normal","Retina demasiado sensible a la luz"],c:1,e:"La causa más común es el aumento de la longitud axial del globo ocular. El ojo crece más de lo normal y la imagen se enfoca delante de la retina."},
+    {q:"¿Qué hace la ortoqueratología para controlar la miopía?",opts:["Aplana la córnea de día con lentes blandos","Se usa de noche y produce desenfoque miópico periférico durante el día","Aplica gotas que reducen la presión ocular","Corrige permanentemente la miopía"],c:1,e:"La orto-K usa lentes rígidos nocturnos que remodelan temporalmente la córnea. Durante el día, el efecto genera desenfoque miópico periférico que frena la progresión."},
+    {q:"¿Cuál es la eficacia de la ortoqueratología en la reducción de progresión?",opts:["20–30%","35–45%","50–60%","80–90%"],c:2,e:"La ortoqueratología tiene una eficacia del 50–60% en la reducción de la progresión miópica, con fuerte evidencia clínica acumulada."},
+    {q:"¿Para qué sirve la atropina en bajas concentraciones en el control de miopía?",opts:["Dilatar la pupila para exámenes","Reducir la progresión de la miopía","Eliminar la miopía permanentemente","Tratar infecciones oculares"],c:1,e:"La atropina en concentraciones de 0.01–0.05% es altamente efectiva para reducir la progresión de la miopía, especialmente en menores de 10 años."},
+    {q:"¿Cuál es la combinación de tratamiento con efecto sinérgico documentado?",opts:["Stellest + MiYOSMART","Atropina 0.01% + ortoqueratología","MiSight + antirreflejo","Lentes bifocales + terapia visual"],c:1,e:"La combinación atropina 0.01% + ortoqueratología ofrece efecto sinérgico especialmente en miopes de 1–4 D en los primeros 6–12 meses."},
+    {q:"¿Cuál de estos es un criterio de EXCLUSIÓN para el control de miopía?",opts:["Niño de 8 años con miopía progresiva","Miopía estacionaria confirmada por más de 3 años","Ambos padres con miopía alta","Niño con más de 3 horas frente a pantallas"],c:1,e:"La miopía estacionaria confirmada por más de 3 años sin cambio es un criterio de exclusión. El tratamiento está indicado en miopía activa y progresiva."},
+    {q:"¿Qué refracción es OBLIGATORIA en menores de 14 años?",opts:["Solo la refracción manifiesta","Refracción ciclopléjica","Solo autorrefracción","Retinoscopia sin cicloplejia"],c:1,e:"La refracción ciclopléjica es obligatoria en menores de 14 años porque sin cicloplejia la acomodación puede enmascarar el resultado real."},
+    {q:"¿Qué indica un AC/A elevado en un niño miope?",opts:["Los ojos se desvían hacia afuera al enfocar","Los ojos se desvían hacia adentro más de lo necesario al enfocar","La acomodación es insuficiente","El cristalino es demasiado rígido"],c:1,e:"Un AC/A elevado indica que los ojos se desvían hacia adentro más de lo necesario al enfocar de cerca, lo que afecta la comodidad visual y el rendimiento escolar."},
+    {q:"¿Por qué la luz natural actúa como factor protector frente a la miopía?",opts:["Endurece la córnea","Aumenta la liberación de dopamina retiniana que regula el crecimiento ocular","Reduce la demanda de visión próxima","Mejora la agudeza visual temporalmente"],c:1,e:"La exposición a luz solar aumenta la liberación de dopamina retiniana, que actúa como freno del crecimiento axial excesivo del ojo."},
+    {q:"¿Qué riesgo de maculopatía miópica implica cada dioptría adicional?",opts:["1.5 veces más","2 veces más","3 veces más","5 veces más"],c:1,e:"Cada dioptría adicional implica 2 veces más riesgo de maculopatía miópica. También hay 3 veces más riesgo de desprendimiento de retina."},
+    {q:"¿Por qué NUNCA se debe dejar subcorregido a un paciente miope?",opts:["Los lentes se dañan sin graduación correcta","La subcorrección puede estimular y acelerar la progresión","Afecta el rendimiento del armazón","La seguridad social no cubre subcorrecciones"],c:1,e:"La subcorrección intencional fue desacreditada por los estudios. Puede acelerar la progresión de la miopía. Siempre se debe prescribir la corrección completa."},
+    {q:"¿Qué tecnología usa el lente MiYOSMART® de HOYA?",opts:["Anillos de alta adición","D.I.M.S. (Defocus Incorporated Multiple Segments)","Difusores de luz integrados DOT","Microesferas de gel"],c:1,e:"MiYOSMART® usa la tecnología D.I.M.S. (Defocus Incorporated Multiple Segments): microsegmentos distribuidos en el lente que crean la señal de frenado periférico."},
+    {q:"¿Qué percentil de longitud axial indica alto riesgo y necesidad de iniciar intervención preventiva?",opts:["Percentil ≥ 25","Percentil ≥ 50","Percentil ≥ 75","Solo percentil 100"],c:2,e:"Un percentil ≥75 indica alto riesgo de miopía alta y se debe iniciar intervención preventiva. Percentil >90 requiere tratamiento activo inmediato."},
+    {q:"¿Qué incluye la evaluación del estado motor y acomodativo?",opts:["Solo la agudeza visual de lejos","Cover test, convergencia, flexibilidad acomodativa y estereopsis","Únicamente la longitud axial","Solo la refracción subjetiva"],c:1,e:"La evaluación motor y acomodativa incluye cover test (lejos y cerca), punto próximo de convergencia, flexibilidad acomodativa, evaluación fusional y estereopsis."},
+    {q:"¿Cuál fue uno de los problemas de la subcorrección intencional que se usaba antes?",opts:["Era demasiado costosa","Los estudios demostraron que puede acelerar la progresión","Solo funcionaba en adultos","Causaba queratocono"],c:1,e:"La subcorrección intencional (dar menos graduación de la necesaria) se usó durante años pero los estudios demostraron que puede acelerar la progresión. Está contraindicada."},
+    {q:"¿A qué pico de edad es más frecuente el inicio de la miopía?",opts:["Entre 3 y 5 años","Entre 8 y 14 años","Entre 15 y 18 años","Después de los 20 años"],c:1,e:"El pico de inicio más frecuente de la miopía es entre los 8 y 14 años, aunque puede iniciarse antes. Cuanto más temprano inicie, mayor será la graduación final."},
+    {q:"¿Qué representa el percentil de longitud axial en el seguimiento del control de miopía?",opts:["La capacidad visual del niño respecto a su edad","La longitud axial del ojo en comparación con niños de la misma edad y género","El porcentaje de mejoría del tratamiento","La graduación en dioptrías equivalentes"],c:1,e:"El percentil de longitud axial compara el crecimiento del ojo del paciente con niños de su misma edad y género. Bajar de percentil significa que el ojo crece menos que sus pares, lo cual es el objetivo del tratamiento."}
+  ]
+}
+];
 // MODULES es la lista "activa"; por defecto la de asesores
 let MODULES = MODULES_ASESOR;
 
@@ -2587,8 +2748,10 @@ function startQuiz() {
   const id = STATE.currentModule;
   const mod = MODULES.find(m=>m.id===id);
   STATE.quizState = { module: id, qIndex: 0, answers: [], answered: false };
-  const shuffledQuiz = [...mod.quiz].sort(() => Math.random() - 0.5);
-mod.quiz = shuffledQuiz.slice(0, 10);
+  const bank = mod.quizBank || mod.quiz;
+  const quizCount = mod.quizCount || 10;
+  const shuffledQuiz = [...bank].sort(() => Math.random() - 0.5);
+  mod.quiz = shuffledQuiz.slice(0, quizCount);
   document.getElementById('quiz-module-title').textContent = `Quiz: ${mod.title}`;
   document.getElementById('quiz-subtitle').textContent = `${mod.quiz.length} preguntas sobre este módulo`;
   document.getElementById('topbar-title').textContent = `Quiz — ${mod.title}`;
