@@ -3154,15 +3154,17 @@ if(user) {
         name: user.email.split("@")[0],
         branch: "Pendiente",
         position: "Pendiente",
-       role: "participant",
-        lastLogin: new Date().toISOString()
+        role: "participant",
+        lastLogin: new Date().toISOString(),
+        sessionStart: new Date().toISOString()
       });
       window.CVP_CONTENT_ROLE = "participant";
    } else {
       // Ingresos siguientes: actualizar solo la fecha (merge conserva el resto)
       window.CVP_CONTENT_ROLE = snap.data().role || "participant";
       await setDoc(ref, {
-        lastLogin: new Date().toISOString()
+        lastLogin: new Date().toISOString(),
+        sessionStart: new Date().toISOString()
       }, { merge: true });
     }
   } catch(e) {
@@ -3252,6 +3254,27 @@ window.cerrarSesion = async function() {
     localStorage.removeItem("cvplus_quiz_scores");
     localStorage.removeItem("cvplus_progress");
     localStorage.removeItem("cvplus_quiz_attempts");
+
+    // Guardar duración de la sesión antes de cerrar
+    try {
+      if (window.db && window.auth && window.auth.currentUser) {
+        const { doc: fsDoc, getDoc, updateDoc } = await import(
+          "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js"
+        );
+        const uid = window.auth.currentUser.uid;
+        const snap = await getDoc(fsDoc(window.db, "users", uid));
+        if (snap.exists() && snap.data().sessionStart) {
+          const mins = Math.round(
+            (Date.now() - new Date(snap.data().sessionStart).getTime()) / 60000
+          );
+          if (mins > 0) {
+            await updateDoc(fsDoc(window.db, "users", uid), {
+              lastSessionDuration: mins
+            });
+          }
+        }
+      }
+    } catch(e) { console.error("Error guardando duración de sesión:", e); }
 
     // Cerrar sesión en Firebase
     if (window.auth) {
