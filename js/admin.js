@@ -46,6 +46,16 @@ const MODULE_NAMES = {
 // Total de módulos del curso (para la barra de progreso)
 const TOTAL_MODULES = 18;
 
+// Módulos para optometristas
+// ✏️ SOLO EDITA ESTO al agregar un módulo nuevo: agrega una línea con el ID y el nombre.
+// El total de módulos se calcula automáticamente.
+const MODULE_NAMES_OPTO = {
+  "1": "Lentes para el Control de la Miopía",
+  // "2": "Nombre del siguiente módulo",
+  // "3": "Nombre del módulo 3",
+};
+const TOTAL_MODULES_OPTO = Object.keys(MODULE_NAMES_OPTO).length;
+
 // (Opcional) Seguridad: si en tu app guardas el rol del usuario logueado en
 // window.CVP_CURRENT_ROLE, el panel solo abrirá para "admin".
 // Si no lo defines, el panel abre normalmente.
@@ -81,9 +91,18 @@ function currentCanEdit() {
   } catch (e) { return false; }
 }
 
-// Devuelve el nombre del módulo a partir de su clave
+// Devuelve el nombre del módulo a partir de su clave (según la vista activa)
 function moduleName(key) {
-  return MODULE_NAMES[key] || ("Módulo " + key);
+  const names = CVP.view === "optometras" ? MODULE_NAMES_OPTO : MODULE_NAMES;
+  return names[key] || ("Módulo " + key);
+}
+
+// Devuelve todos los intentos de un módulo para un usuario (ordenados por fecha)
+function allAttemptsForModule(uid, moduleKey) {
+  const intentos = CVP.history.filter(h =>
+    h.uid === uid && String(h.moduleId) === String(moduleKey) && h.score != null);
+  intentos.sort((a, b) => new Date(a.date) - new Date(b.date));
+  return intentos;
 }
 
 // Muestra una fecha ISO (UTC) en hora de El Salvador (UTC-6), formato legible
@@ -119,7 +138,8 @@ const CVP = {
   scores: [],
   history: [],
   range: null,
-  ready: false
+  ready: false,
+  view: "asesores"   // "asesores" | "optometras"
 };
 
 
@@ -198,6 +218,24 @@ window.openAdminPanel = async function () {
 
 window.closeAdminPanel = function () {
   document.getElementById("admin-panel").style.display = "none";
+};
+
+// Cambia entre vista de Asesores y Optometristas
+window.cvpSetView = async function(view) {
+  CVP.view = view;
+  CVP.range = null;
+  if (CVP.selectedDays) CVP.selectedDays = new Set();
+  CVP.calOpen = false;
+
+  const data = computeData(CVP.range);
+  const container = document.getElementById("admin-users");
+  container.innerHTML = renderShell(data);
+
+  wireUpTabs();
+  wireUpUserFilters();
+  wireUpCalendar();
+  await loadChartJs();
+  drawCharts(data);
 };
 
 
@@ -292,7 +330,11 @@ function buildScoresFromHistory(range) {
 }
 
 function computeData(range) {
-  const users  = CVP.users;
+  // Filtrar usuarios según la vista activa
+  const users = CVP.view === "optometras"
+    ? CVP.users.filter(u => u.role === "optometra")
+    : CVP.users.filter(u => u.role !== "optometra");
+  const TOTAL_MOD = CVP.view === "optometras" ? TOTAL_MODULES_OPTO : TOTAL_MODULES;
   const now = new Date();
 
   // Si hay un rango de fechas, reconstruimos los "scores" SOLO con los
@@ -344,7 +386,8 @@ function computeData(range) {
       totalAttempts: stats.totalAttempts ||
                      moduleEntries.reduce((a, m) => a + m.attempts, 0),
       completed: moduleEntries.length,
-      progress: Math.round((moduleEntries.length / TOTAL_MODULES) * 100),
+      totalMod: TOTAL_MOD,
+      progress: Math.round((moduleEntries.length / TOTAL_MOD) * 100),
       modules: moduleEntries
     };
   });
@@ -467,7 +510,7 @@ function renderShell(d) {
         <span class="cvp-logo">CV+</span>
         <div>
           <h1>Panel Administrador</h1>
-          <p>Academia CV+ · ${d.totalUsers} usuarios${currentCanEdit() ? "" : " · 👁️ Solo lectura"}</p>
+          <p>Academia CV+ · ${CVP.view === 'optometras' ? '👁️ Optometristas' : '👓 Asesores'} · ${d.totalUsers} usuarios${currentCanEdit() ? "" : " · Solo lectura"}</p>
         </div>
       </div>
       <div class="cvp-head-actions">
@@ -478,6 +521,11 @@ function renderShell(d) {
     </header>
 
     <div class="cvp-calbar" id="cvpCalArea"><!-- calendario: lo llena wireUpCalendar() --></div>
+
+    <div class="cvp-role-toggle">
+      <button class="cvp-role-btn ${CVP.view === 'asesores' ? 'active' : ''}" onclick="cvpSetView('asesores')">👓 Asesores</button>
+      <button class="cvp-role-btn ${CVP.view === 'optometras' ? 'active' : ''}" onclick="cvpSetView('optometras')">👁️ Optometristas</button>
+    </div>
 
     <nav class="cvp-tabs">
       <button class="cvp-tab active" data-tab="dashboard">📊 Dashboard</button>
@@ -590,9 +638,13 @@ function renderUsers(d) {
 function renderUserCard(u) {
   const statusClass = u.status; // hoy / semana / inactivo
 
+  const isOpto = CVP.view === "optometras";
+
   const history = u.modules.length ? u.modules.map(m => {
-    const c = m.average >= 80 ? "ok" : m.average >= 60 ? "warn" : "danger";
-    const label = m.average >= 80 ? "Excelente" : m.average >= 60 ? "Regular" : "Necesita refuerzo";
+    // Para optometristas usamos lastScore como nota principal
+    const mainScore = isOpto ? m.lastScore : m.average;
+    const c = mainScore >= 80 ? "ok" : mainScore >= 60 ? "warn" : "danger";
+    const label = mainScore >= 80 ? "Excelente" : mainScore >= 60 ? "Regular" : "Necesita refuerzo";
 
     // Preguntas falladas (último intento)
     const wrong = Array.isArray(m.wrong) ? m.wrong : [];
@@ -607,6 +659,20 @@ function renderUserCard(u) {
             </div>`).join("")}
         </div>` : `<div class="cvp-wrong-none">✅ Sin errores en el último intento</div>`;
 
+    // Historial de intentos individuales (solo para optometristas)
+    const allAttempts = isOpto ? allAttemptsForModule(u.id, m.key) : [];
+    const attemptsHTML = isOpto ? `
+      <div class="cvp-attempts">
+        <div class="cvp-attempts-title">📋 Historial de intentos (${allAttempts.length})</div>
+        ${allAttempts.length ? allAttempts.map((a, i) => {
+          const ac = a.score >= 80 ? "ok" : a.score >= 60 ? "warn" : "danger";
+          return `<div class="cvp-attempt-row ${ac}">
+            <span>Intento ${i + 1} &nbsp;<small>${fechaElSalvador(a.date)}</small></span>
+            <b>${a.score}%</b>
+          </div>`;
+        }).join("") : `<div class="cvp-wrong-none">Sin intentos en el historial aún</div>`}
+      </div>` : "";
+
     return `
       <div class="cvp-quiz ${c}">
         <div class="cvp-quiz-head cvp-quiz-toggle" onclick="cvpToggleQuiz(this, event)">
@@ -615,15 +681,20 @@ function renderUserCard(u) {
             <div class="cvp-quiz-status">${label}</div>
           </div>
           <div class="cvp-quiz-right">
-            <div class="cvp-quiz-avg">${m.average}%</div>
+            <div class="cvp-quiz-avg">${mainScore}%</div>
             ${wrong.length ? `<span class="cvp-quiz-errbadge">${wrong.length} ❌</span>` : ``}
           </div>
         </div>
         <div class="cvp-quiz-meta">
-          <span>🎯 Última nota: <b>${m.lastScore}%</b></span>
-          <span>🔄 Intentos: <b>${m.attempts}</b></span>
+          ${isOpto
+            ? `<span>🎯 Última nota: <b>${m.lastScore}%</b></span>
+               <span>🔄 Intentos: <b>${m.attempts}</b></span>`
+            : `<span>🎯 Última nota: <b>${m.lastScore}%</b></span>
+               <span>📊 Promedio: <b>${m.average}%</b></span>
+               <span>🔄 Intentos: <b>${m.attempts}</b></span>`}
         </div>
-        <div class="cvp-bar"><div style="width:${m.average}%"></div></div>
+        <div class="cvp-bar"><div style="width:${mainScore}%"></div></div>
+        ${attemptsHTML}
         <div class="cvp-quiz-wrongwrap" style="display:none">${falladas}</div>
       </div>`;
   }).join("") : `<p class="cvp-empty">Sin quizzes registrados</p>`;
@@ -652,7 +723,7 @@ function renderUserCard(u) {
       </div>
 
       <div class="cvp-progress">
-        <div class="cvp-progress-head"><b>📚 Progreso</b><span>${u.completed}/${TOTAL_MODULES}</span></div>
+        <div class="cvp-progress-head"><b>📚 Progreso</b><span>${u.completed}/${u.totalMod}</span></div>
         <div class="cvp-bar"><div style="width:${u.progress}%"></div></div>
         <small>${u.progress}% completado</small>
       </div>
@@ -824,7 +895,7 @@ function renderAlerts(d) {
    6) OPCIONES DE SUCURSAL Y CARGO (para los selects de edición)
    ========================================================================== */
 const BRANCHES = ["Metrocentro 1","Metrocentro 2","Plaza Mundo","Metrocentro Santa Ana","Sonsonate","San Miguel","Aguilares","Apopa","Valle Dulce","San Gabriel","Metropolis","Galerias","El Paseo","Zona Rosa","El Casco","Multiplaza","Santa Rosa","Encuentro Zacatecoluca","Zacatecoluca Centro","Usulutan","San Francisco Gotera","San Martin","Unicentro Soyapango","Alta Vista","Encuentro Lourdes","Metrocentro Lourdes","Acajutla","Las Ramblas","Encuentro Santa Ana","Empresarial","SAC","Zaragoza","Puerto de La Libertad","Armenia","San Marcos","Recursos Humanos","Ventas","Mercadeo","Coberturas","Compras"];
-const POSITIONS = ["Asesor Visual","Optometrista","Capacitador","Supervisor","RRHH","Asesor de Coberturas","Optómetra de Coberturas","Auxiliar"];
+const POSITIONS = ["Asesor Visual","Optometra","Capacitador","Supervisor","RRHH","Asesor de Coberturas","Auxiliar"];
 
 function branchOptions(current) {
   const opts = BRANCHES.includes(current) ? BRANCHES : [current, ...BRANCHES];
@@ -1497,6 +1568,28 @@ function injectStyles() {
 /* Roadmap */
 .cvp-roadmap{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
 .cvp-roadmap span{background:#f0f4f8;border:1px dashed #c3ccd6;border-radius:999px;padding:8px 14px;font-size:13px;color:#5a6b7b}
+
+/* Toggle de vista Asesores / Optometristas */
+.cvp-role-toggle{display:flex;gap:8px;margin:14px 0 0}
+.cvp-role-btn{border:2px solid #d6dde6;background:#fff;color:#5a6b7b;padding:10px 22px;
+  border-radius:999px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;transition:.2s}
+.cvp-role-btn:hover{border-color:#00B9D6;color:#00B9D6}
+.cvp-role-btn.active{background:linear-gradient(135deg,#0B2137,#1f3b57);color:#fff;
+  border-color:transparent;box-shadow:0 4px 14px rgba(11,33,55,.25)}
+
+/* Historial de intentos (optometristas) */
+.cvp-attempts{margin-top:12px;background:#f5f7fb;border-radius:10px;padding:10px 12px}
+.cvp-attempts-title{font-size:12px;font-weight:800;color:#0B2137;margin-bottom:8px}
+.cvp-attempt-row{display:flex;justify-content:space-between;align-items:center;
+  padding:7px 10px;border-radius:8px;margin-bottom:5px;font-size:13px;font-weight:600}
+.cvp-attempt-row:last-child{margin-bottom:0}
+.cvp-attempt-row small{font-weight:400;color:#6b7785;font-size:11px}
+.cvp-attempt-row.ok{background:#eaf7ee;color:#1e7e34}
+.cvp-attempt-row.ok b{color:#28a745}
+.cvp-attempt-row.warn{background:#fff8e1;color:#8a6d00}
+.cvp-attempt-row.warn b{color:#c79100}
+.cvp-attempt-row.danger{background:#fdecec;color:#a71d2a}
+.cvp-attempt-row.danger b{color:#dc3545}
 
 /* Móvil */
 @media(max-width:600px){
