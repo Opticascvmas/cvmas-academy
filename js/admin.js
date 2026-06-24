@@ -343,9 +343,17 @@ function computeData(range) {
   const scores = range ? buildScoresFromHistory(range) : CVP.scores;
 
   const scoreOf = (uid) => scores.find(s => s.id === uid);
+  // Compara días calendario en El Salvador (no solo horas transcurridas)
+  // Así "ayer a las 23:59" siempre cuenta como 1 día atrás, no 0.
   const daysSince = (iso) => {
     if (!iso) return Infinity;
-    return Math.floor((now - new Date(iso)) / 86400000);
+    try {
+      const loginDay = new Date(iso).toLocaleDateString("en-CA", { timeZone: "America/El_Salvador" });
+      const todayDay = now.toLocaleDateString("en-CA", { timeZone: "America/El_Salvador" });
+      return Math.round((new Date(todayDay) - new Date(loginDay)) / 86400000);
+    } catch(e) {
+      return Math.floor((now - new Date(iso)) / 86400000);
+    }
   };
 
   // ---- Enriquecer cada usuario ----
@@ -369,7 +377,7 @@ function computeData(range) {
 
     const d = daysSince(u.lastLogin);
     let status = "inactivo", statusLabel = "Inactivo";
-    if (d <= 1)      { status = "hoy";    statusLabel = "Activo hoy"; }
+    if (d === 0)     { status = "hoy";    statusLabel = "Activo hoy"; }
     else if (d <= 7) { status = "semana"; statusLabel = "Activo esta semana"; }
 
     return {
