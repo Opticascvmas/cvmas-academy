@@ -386,9 +386,19 @@ function computeData(range) {
       email: u.email || "Sin correo",
       branch: u.branch || "Sin sucursal",
       position: u.position || "Sin cargo",
-      role: u.role || "participant",
+      role: u.role || u.rol || "participant",  // tolera 'rol' y 'role'
       lastLogin: u.lastLogin || null,
-      lastSessionDuration: u.lastSessionDuration || null,
+      lastSessionDuration: (() => {
+        // Preferir cálculo en tiempo real: lastSeen - sessionStart
+        if (u.lastSeen && u.sessionStart) {
+          const mins = Math.round(
+            (new Date(u.lastSeen) - new Date(u.sessionStart)) / 60000
+          );
+          return mins > 0 ? mins : null;
+        }
+        // Fallback: duración guardada al cerrar sesión
+        return u.lastSessionDuration || null;
+      })(),
       daysSince: d,
       status, statusLabel,
       avg: Math.round(stats.overallAverage || 0),
