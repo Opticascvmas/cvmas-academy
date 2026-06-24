@@ -354,9 +354,10 @@ function computeData(range) {
     const stats = sc.stats || {};
     const scoreMap = sc.scores || {};
 
-    // módulos completados = entradas tipo objeto en scores
+    // Solo mostrar módulos que pertenecen a la vista activa (evita mezcla de IDs)
+    const validKeys = new Set(Object.keys(CVP.view === "optometras" ? MODULE_NAMES_OPTO : MODULE_NAMES));
     const moduleEntries = Object.entries(scoreMap)
-      .filter(([, v]) => typeof v === "object" && v !== null)
+      .filter(([key, v]) => typeof v === "object" && v !== null && validKeys.has(key))
       .map(([key, v]) => ({
         key,
         name: moduleName(key),
@@ -379,6 +380,7 @@ function computeData(range) {
       position: u.position || "Sin cargo",
       role: u.role || "participant",
       lastLogin: u.lastLogin || null,
+      lastSessionDuration: u.lastSessionDuration || null,
       daysSince: d,
       status, statusLabel,
       avg: Math.round(stats.overallAverage || 0),
@@ -726,6 +728,15 @@ function renderUserCard(u) {
         <div class="cvp-progress-head"><b>📚 Progreso</b><span>${u.completed}/${u.totalMod}</span></div>
         <div class="cvp-bar"><div style="width:${u.progress}%"></div></div>
         <small>${u.progress}% completado</small>
+      </div>
+
+      <div class="cvp-login-info">
+        <span>🕐 Último acceso: <b>${fechaElSalvador(u.lastLogin)}</b></span>
+        ${u.lastSessionDuration != null
+          ? `<span>⏱️ Duración: <b>${u.lastSessionDuration >= 60
+              ? Math.floor(u.lastSessionDuration / 60) + 'h ' + (u.lastSessionDuration % 60) + 'min'
+              : u.lastSessionDuration + ' min'}</b></span>`
+          : `<span class="cvp-muted">⏱️ Sin dato de duración aún</span>`}
       </div>
 
       <div class="cvp-expand-hint"><span class="cvp-chevron">▾</span> Ver detalle de quizzes</div>
@@ -1478,6 +1489,10 @@ function injectStyles() {
 .cvp-user-card{background:#fff;border-radius:18px;padding:20px;box-shadow:0 4px 16px rgba(0,0,0,.05);border:1px solid #eef2f7}
 .cvp-user-head{cursor:pointer}
 .cvp-user-card.open{box-shadow:0 8px 28px rgba(0,0,0,.12);border-color:#cfeaf0}
+.cvp-login-info{display:flex;gap:16px;flex-wrap:wrap;align-items:center;
+  background:#f5f7fb;border-radius:10px;padding:9px 12px;margin:10px 0;font-size:12px;color:#5a6b7b}
+.cvp-login-info b{color:#0B2137}
+
 .cvp-expand-hint{margin-top:12px;text-align:center;font-size:12px;font-weight:700;
   color:#00B9D6;background:#f0fafc;border-radius:10px;padding:8px;transition:.15s}
 .cvp-user-head:hover .cvp-expand-hint{background:#dcf2f7}
