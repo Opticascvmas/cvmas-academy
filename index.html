@@ -3161,7 +3161,7 @@ if(user) {
       window.CVP_CONTENT_ROLE = "participant";
    } else {
       // Ingresos siguientes: actualizar solo la fecha (merge conserva el resto)
-      window.CVP_CONTENT_ROLE = snap.data().role || "participant";
+      window.CVP_CONTENT_ROLE = snap.data().role || snap.data().rol || "participant";
       await setDoc(ref, {
         lastLogin: new Date().toISOString(),
         sessionStart: new Date().toISOString()
@@ -3177,6 +3177,26 @@ if(user) {
 try {
   if (window.aplicarRolContenido) window.aplicarRolContenido(window.CVP_CONTENT_ROLE || "participant");
 } catch(e) { console.error(e); }
+
+// ═══════════════════════════════════════════════════════
+// ⏱️ HEARTBEAT DE SESIÓN
+// Actualiza "lastSeen" en Firestore cada 2 minutos mientras
+// el usuario esté en la página. Así el admin puede saber
+// cuánto tiempo estuvo, aunque cierre el navegador sin logout.
+// La duración se calcula como: lastSeen - sessionStart
+// ═══════════════════════════════════════════════════════
+try {
+  if (user && window.db) {
+    const _hbRef = doc(window.db, "users", user.uid);
+    const _hbFn = async () => {
+      try {
+        await setDoc(_hbRef, { lastSeen: new Date().toISOString() }, { merge: true });
+      } catch(e) {}
+    };
+    _hbFn(); // primer ping inmediato
+    setInterval(_hbFn, 2 * 60 * 1000); // cada 2 minutos
+  }
+} catch(e) { console.error("Error heartbeat:", e); }
 
 // 🔄 Cargar los datos REALES de esta cuenta desde Firebase
 // (reemplaza cualquier dato de otro usuario que haya quedado en el navegador)
