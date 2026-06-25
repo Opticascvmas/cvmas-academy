@@ -1368,7 +1368,8 @@ function drawCharts(d) {
     .filter(u => u.avg > 0)
     .sort((a, b) => b.avg - a.avg);
   const posEl = document.getElementById("cvpChartPos");
-  if (posEl) posEl.style.height = Math.max(160, usersChart.length * 34) + "px";
+  const BAR_H = 28, BAR_GAP = 14;
+  if (posEl) posEl.style.height = Math.max(120, usersChart.length * (BAR_H + BAR_GAP) + 40) + "px";
   mk("cvpChartPos", {
     type: "bar",
     data: {
@@ -1377,7 +1378,8 @@ function drawCharts(d) {
         data: usersChart.map(u => u.avg),
         backgroundColor: usersChart.map(u =>
           u.avg >= 80 ? "#28a745" : u.avg >= 60 ? amber : "#dc3545"),
-        borderRadius: 6
+        borderRadius: 6,
+        barThickness: BAR_H
       }]
     },
     options: {
@@ -1388,7 +1390,7 @@ function drawCharts(d) {
       scales: {
         x: { min: 0, max: 100, grid: { color: "#eef2f7" },
              ticks: { callback: v => v + "%" } },
-        y: { grid: { display: false } }
+        y: { grid: { display: false }, ticks: { font: { size: 12 } } }
       }
     }
   });
