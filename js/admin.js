@@ -1368,8 +1368,8 @@ function drawCharts(d) {
     .filter(u => u.avg > 0)
     .sort((a, b) => b.avg - a.avg);
   const posEl = document.getElementById("cvpChartPos");
-  const BAR_H = 28, BAR_GAP = 14;
-  if (posEl) posEl.style.height = Math.max(120, usersChart.length * (BAR_H + BAR_GAP) + 40) + "px";
+  const BAR_H = 28, BAR_GAP = 12;
+  if (posEl) posEl.style.height = (usersChart.length * (BAR_H + BAR_GAP) + 56) + "px";
   mk("cvpChartPos", {
     type: "bar",
     data: {
@@ -1387,6 +1387,7 @@ function drawCharts(d) {
       responsive: true,
       maintainAspectRatio: false,
       plugins: { legend: { display: false } },
+      layout: { padding: { top: 4, bottom: 4 } },
       scales: {
         x: { min: 0, max: 100, grid: { color: "#eef2f7" },
              ticks: { callback: v => v + "%" } },
