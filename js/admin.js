@@ -394,7 +394,7 @@ function computeData(range) {
           const mins = Math.round(
             (new Date(u.lastSeen) - new Date(u.sessionStart)) / 60000
           );
-          return mins > 0 ? mins : null;
+          return mins >= 0 ? mins : null;
         }
         // Fallback: duración guardada al cerrar sesión
         return u.lastSessionDuration || null;
@@ -788,9 +788,11 @@ function renderUserCard(u) {
       <div class="cvp-login-info">
         <span>🕐 Último acceso: <b>${fechaElSalvador(u.lastLogin)}</b></span>
         ${u.lastSessionDuration != null
-          ? `<span>⏱️ Duración: <b>${u.lastSessionDuration >= 60
-              ? Math.floor(u.lastSessionDuration / 60) + 'h ' + (u.lastSessionDuration % 60) + 'min'
-              : u.lastSessionDuration + ' min'}</b></span>`
+          ? `<span>⏱️ Duración: <b>${u.lastSessionDuration === 0
+              ? '< 2 min'
+              : u.lastSessionDuration >= 60
+                ? Math.floor(u.lastSessionDuration / 60) + 'h ' + (u.lastSessionDuration % 60) + 'min'
+                : u.lastSessionDuration + ' min'}</b></span>`
           : `<span class="cvp-muted">⏱️ Sin dato de duración aún</span>`}
       </div>
 
