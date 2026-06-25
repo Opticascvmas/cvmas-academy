@@ -419,9 +419,38 @@ function computeData(range) {
 
   const totalQuizzes  = enriched.reduce((a, u) => a + u.totalQuizzes, 0);
   const totalAttempts = enriched.reduce((a, u) => a + u.totalAttempts, 0);
-  const activeToday   = enriched.filter(u => u.daysSince <= 1).length;
+  const activeToday   = enriched.filter(u => u.daysSince === 0).length;
   const activeWeek    = enriched.filter(u => u.daysSince <= 7).length;
   const inactive      = enriched.length - activeWeek;
+
+  // ── Tasa de participación ──────────────────────────────────────────────────
+  const participating    = enriched.filter(u => u.completed > 0).length;
+  const participationRate = enriched.length > 0
+    ? Math.round((participating / enriched.length) * 100) : 0;
+
+  // ── Tasa de aprobación (intentos con score ≥80 / total intentos) ──────────
+  const relevantUids    = new Set(users.map(u => u.id));
+  const relevantHistory = CVP.history.filter(h => relevantUids.has(h.uid) && h.score != null);
+  const approvedCount   = relevantHistory.filter(h => h.score >= 80).length;
+  const approvalRate    = relevantHistory.length > 0
+    ? Math.round((approvedCount / relevantHistory.length) * 100) : 0;
+
+  // ── Tendencia semanal (últimas 6 semanas, promedio de notas) ──────────────
+  const weeklyTrend = [];
+  for (let i = 5; i >= 0; i--) {
+    const end   = new Date(now); end.setDate(now.getDate() - i * 7);
+    const start = new Date(end); start.setDate(end.getDate() - 6);
+    const entries = relevantHistory.filter(h => {
+      const d = new Date(h.date); return d >= start && d <= end;
+    });
+    const avg = entries.length > 0
+      ? Math.round(entries.reduce((s, h) => s + h.score, 0) / entries.length)
+      : null;
+    const label = start.toLocaleDateString("es-SV", {
+      day: "numeric", month: "short", timeZone: "America/El_Salvador"
+    });
+    weeklyTrend.push({ label, avg, count: entries.length });
+  }
 
   // ---- Ranking (top 10) ----
   const ranking = [...enriched].sort((a, b) => b.avg - a.avg).slice(0, 10);
@@ -499,6 +528,7 @@ function computeData(range) {
   return {
     enriched, globalAverage, totalQuizzes, totalAttempts,
     activeToday, activeWeek, inactive, totalUsers: enriched.length,
+    participating, participationRate, approvalRate, weeklyTrend,
     ranking, bestUser, branchStats, positionStats, moduleStats, hardestModule,
     last7, buckets, lowPerformers, noActivity7, neverLogged, alerts
   };
@@ -527,15 +557,15 @@ function renderShell(d) {
   <div class="cvp">
     <header class="cvp-head">
       <div class="cvp-head-title">
-        <span class="cvp-logo">CV+</span>
+        <div class="cvp-logo"><img src="logo-cvplus.svg" alt="CV+" style="height:38px;display:block"></div>
         <div>
           <h1>Panel Administrador</h1>
           <p>Academia CV+ · ${CVP.view === 'optometras' ? '👁️ Optometristas' : '👓 Asesores'} · ${d.totalUsers} usuarios${currentCanEdit() ? "" : " · Solo lectura"}</p>
         </div>
       </div>
       <div class="cvp-head-actions">
-        <button class="cvp-btn ghost" onclick="cvpExportCSV()">⬇️ Excel</button>
-        <button class="cvp-btn ghost" onclick="window.print()">🖨️ PDF</button>
+        <button class="cvp-btn ghost" onclick="cvpExportXLSX()">⬇️ Excel</button>
+        <button class="cvp-btn ghost" onclick="cvpExportPDF()">🖨️ PDF</button>
         <button class="cvp-btn close" onclick="closeAdminPanel()">✕ Cerrar</button>
       </div>
     </header>
@@ -589,8 +619,10 @@ function renderDashboard(d) {
       ${card("⚠️", "Módulo difícil",
             d.hardestModule ? esc(d.hardestModule.name) : "N/A",
             d.hardestModule ? d.hardestModule.avg + "% promedio" : "Sin datos", "amber")}
-      ${card("👥", "Usuarios", d.totalUsers, "Registrados", "teal")}
-      ${card("📋", "Quizzes", d.totalQuizzes, "Realizados en total", "navy")}
+      ${card("📊", "Participación", `${d.participating}/${d.totalUsers}`,
+            `${d.participationRate}% completaron ≥1 módulo`, "teal")}
+      ${card("✅", "Tasa de aprobación", d.approvalRate + "%",
+            `${d.approvalRate >= 80 ? "✔ Por encima del objetivo" : "⚠ Por debajo del 80%"}`, "navy")}
       ${card("🔥", "Intentos", d.totalAttempts, "Intentos acumulados", "amber")}
       ${card("📅", "Activos (7 días)", d.activeWeek, `${d.inactive} inactivos`, "green")}
     </div>
@@ -609,8 +641,13 @@ function renderDashboard(d) {
         <canvas id="cvpChartDist" height="160"></canvas>
       </div>
       <div class="cvp-card">
-        <h3>Promedio por cargo</h3>
-        <canvas id="cvpChartPos" height="160"></canvas>
+        <h3>Promedio por usuario</h3>
+        <canvas id="cvpChartPos"></canvas>
+      </div>
+      <div class="cvp-card" style="grid-column:1/-1">
+        <h3>📈 Tendencia del promedio — últimas 6 semanas</h3>
+        <p class="cvp-muted" style="margin-bottom:8px">Promedio de notas por semana. Permite ver si el equipo está mejorando con el tiempo.</p>
+        <canvas id="cvpChartTrend" height="100"></canvas>
       </div>
     </div>`;
 }
@@ -1327,12 +1364,64 @@ function drawCharts(d) {
     options: { responsive: true, plugins: { legend: { position: "bottom" } } }
   });
 
+  const usersChart = d.enriched
+    .filter(u => u.avg > 0)
+    .sort((a, b) => b.avg - a.avg);
+  const posEl = document.getElementById("cvpChartPos");
+  if (posEl) posEl.style.height = Math.max(160, usersChart.length * 34) + "px";
   mk("cvpChartPos", {
     type: "bar",
-    data: { labels: d.positionStats.map(p => p.name),
-      datasets: [{ data: d.positionStats.map(p => p.avg),
-        backgroundColor: amber, borderRadius: 8 }] },
-    options: { ...baseOpts(true), indexAxis: "y" }
+    data: {
+      labels: usersChart.map(u => u.name),
+      datasets: [{
+        data: usersChart.map(u => u.avg),
+        backgroundColor: usersChart.map(u =>
+          u.avg >= 80 ? "#28a745" : u.avg >= 60 ? amber : "#dc3545"),
+        borderRadius: 6
+      }]
+    },
+    options: {
+      indexAxis: "y",
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { min: 0, max: 100, grid: { color: "#eef2f7" },
+             ticks: { callback: v => v + "%" } },
+        y: { grid: { display: false } }
+      }
+    }
+  });
+
+  mk("cvpChartTrend", {
+    type: "line",
+    data: {
+      labels: d.weeklyTrend.map(w => w.label),
+      datasets: [{
+        label: "Promedio semanal",
+        data: d.weeklyTrend.map(w => w.avg),
+        borderColor: green,
+        backgroundColor: "rgba(40,167,69,.12)",
+        fill: true, tension: .4, borderWidth: 3,
+        pointBackgroundColor: green, pointRadius: 5,
+        spanGaps: true
+      }, {
+        label: "Objetivo (80%)",
+        data: d.weeklyTrend.map(() => 80),
+        borderColor: "#dc3545",
+        borderWidth: 2, borderDash: [6, 4],
+        pointRadius: 0, fill: false
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: true, position: "bottom" } },
+      scales: {
+        y: { min: 0, max: 100, grid: { color: "#eef2f7" },
+             ticks: { callback: v => v + "%" } },
+        x: { grid: { display: false } }
+      }
+    }
   });
 }
 
@@ -1347,23 +1436,98 @@ function baseOpts(hideLegend) {
 
 
 /* ============================================================================
-   10) EXPORTAR A EXCEL (CSV)
+   10) EXPORTAR A EXCEL (XLSX) y PDF
    ========================================================================== */
-window.cvpExportCSV = function () {
-  const d = computeData();
-  const rows = [["Nombre", "Correo", "Sucursal", "Cargo", "Rol",
-                 "Promedio", "Quizzes", "Intentos", "Completados", "Ultimo login"]];
-  d.enriched.forEach(u => rows.push([
-    u.name, u.email, u.branch, u.position, u.role,
-    u.avg + "%", u.totalQuizzes, u.totalAttempts,
-    u.completed + "/" + TOTAL_MODULES, u.lastLogin || "—"
-  ]));
-  const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(",")).join("\n");
-  const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = "academia-cvplus-usuarios.csv";
-  a.click();
+window.cvpExportXLSX = async function () {
+  if (!window.XLSX) {
+    await new Promise((res, rej) => {
+      const s = document.createElement("script");
+      s.src = "https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js";
+      s.onload = res; s.onerror = rej;
+      document.head.appendChild(s);
+    });
+  }
+  const d = computeData(CVP.range);
+  const viewLabel = CVP.view === "optometras" ? "Optometristas" : "Asesores";
+  const totalMod = CVP.view === "optometras" ? TOTAL_MODULES_OPTO : TOTAL_MODULES;
+
+  const headers = ["Nombre","Correo","Sucursal","Cargo","Rol",
+                   "Promedio (%)","Módulos completados","Total intentos","Último login"];
+  const rows = d.enriched.map(u => [
+    u.name, u.email, u.branch || "", u.position || "", u.role,
+    u.avg,
+    u.completed + "/" + totalMod,
+    u.totalAttempts,
+    u.lastLogin ? new Date(u.lastLogin).toLocaleDateString("es-SV",{timeZone:"America/El_Salvador"}) : "—"
+  ]);
+
+  const ws = window.XLSX.utils.aoa_to_sheet([headers, ...rows]);
+  ws["!cols"] = [{wch:28},{wch:36},{wch:18},{wch:18},{wch:14},{wch:12},{wch:20},{wch:14},{wch:22}];
+
+  const wb = window.XLSX.utils.book_new();
+  window.XLSX.utils.book_append_sheet(wb, ws, viewLabel);
+  window.XLSX.writeFile(wb, `academia-cvplus-${CVP.view}-${new Date().toISOString().slice(0,10)}.xlsx`);
+};
+
+window.cvpExportPDF = function () {
+  const d = computeData(CVP.range);
+  const viewLabel = CVP.view === "optometras" ? "Optometristas" : "Asesores";
+  const totalMod = CVP.view === "optometras" ? TOTAL_MODULES_OPTO : TOTAL_MODULES;
+  const fecha = new Date().toLocaleDateString("es-SV",
+    {year:"numeric",month:"long",day:"numeric",timeZone:"America/El_Salvador"});
+  const avgScore = d.enriched.length > 0
+    ? Math.round(d.enriched.reduce((s,u) => s + u.avg, 0) / d.enriched.length) : 0;
+
+  const filas = d.enriched.map(u => {
+    const color = u.avg >= 80 ? "#16a34a" : u.avg >= 60 ? "#d97706" : "#dc2626";
+    const loginFmt = u.lastLogin
+      ? new Date(u.lastLogin).toLocaleDateString("es-SV",{timeZone:"America/El_Salvador"}) : "—";
+    return `<tr>
+      <td>${u.name}</td><td>${u.branch||"—"}</td><td>${u.position||"—"}</td>
+      <td style="text-align:center;font-weight:700;color:${color}">${u.avg}%</td>
+      <td style="text-align:center">${u.completed}/${totalMod}</td>
+      <td style="text-align:center">${u.totalAttempts}</td>
+      <td>${loginFmt}</td>
+    </tr>`;
+  }).join("");
+
+  const html = `<!DOCTYPE html>
+<html lang="es"><head><meta charset="UTF-8">
+<title>Reporte Academia CV+ · ${viewLabel}</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Arial,sans-serif;padding:28px;color:#1a1a1a;font-size:13px}
+h1{font-size:20px;color:#0B2137;margin-bottom:4px}
+.meta{color:#666;margin-bottom:20px;font-size:12px}
+.stats{display:flex;gap:20px;margin-bottom:20px}
+.stat{background:#f0f7ff;border-radius:8px;padding:12px 20px}
+.stat-val{font-size:22px;font-weight:700;color:#0B2137}
+.stat-lbl{font-size:11px;color:#666;margin-top:2px}
+table{width:100%;border-collapse:collapse;font-size:12px}
+thead tr{background:#0B2137;color:#fff}
+th{padding:8px 10px;text-align:left;font-weight:600}
+td{padding:7px 10px;border-bottom:1px solid #e5e7eb}
+tr:nth-child(even) td{background:#f9fafb}
+@media print{body{padding:0}}
+</style></head><body>
+<h1>Reporte Academia CV+ · ${viewLabel}</h1>
+<p class="meta">Generado el ${fecha} &nbsp;·&nbsp; ${d.totalUsers} usuarios</p>
+<div class="stats">
+  <div class="stat"><div class="stat-val">${d.participationRate}%</div><div class="stat-lbl">Participación</div></div>
+  <div class="stat"><div class="stat-val">${d.approvalRate}%</div><div class="stat-lbl">Aprobación</div></div>
+  <div class="stat"><div class="stat-val">${avgScore}%</div><div class="stat-lbl">Promedio general</div></div>
+</div>
+<table>
+  <thead><tr><th>Nombre</th><th>Sucursal</th><th>Cargo</th><th>Promedio</th><th>Módulos</th><th>Intentos</th><th>Último login</th></tr></thead>
+  <tbody>${filas}</tbody>
+</table>
+</body></html>`;
+
+  const win = window.open("","_blank","width=950,height=720");
+  if (!win) { alert("Permite ventanas emergentes para generar el PDF."); return; }
+  win.document.write(html);
+  win.document.close();
+  setTimeout(() => { win.focus(); win.print(); }, 700);
 };
 
 
@@ -1385,9 +1549,8 @@ function injectStyles() {
 .cvp-head{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;
   background:linear-gradient(135deg,#0B2137,#1f3b57);color:#fff;padding:20px 24px;border-radius:20px}
 .cvp-head-title{display:flex;align-items:center;gap:14px}
-.cvp-logo{background:linear-gradient(135deg,#00B9D6,#14A9C4);font-weight:800;font-size:22px;
-  width:54px;height:54px;display:flex;align-items:center;justify-content:center;border-radius:16px;
-  box-shadow:0 6px 18px rgba(0,185,214,.4)}
+.cvp-logo{background:#fff;padding:8px 14px;border-radius:14px;display:flex;align-items:center;
+  justify-content:center;box-shadow:0 4px 12px rgba(0,0,0,.18)}
 .cvp-head h1{margin:0;font-size:22px;font-weight:800}
 .cvp-head p{margin:2px 0 0;font-size:13px;opacity:.8}
 .cvp-head-actions{display:flex;gap:8px;flex-wrap:wrap}
