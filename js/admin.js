@@ -642,7 +642,7 @@ function renderDashboard(d) {
       </div>
       <div class="cvp-card">
         <h3>Promedio por usuario</h3>
-        <canvas id="cvpChartPos"></canvas>
+        <div id="cvpChartPosWrap" style="position:relative;overflow:hidden"><canvas id="cvpChartPos"></canvas></div>
       </div>
       <div class="cvp-card" style="grid-column:1/-1">
         <h3>📈 Tendencia del promedio — últimas 6 semanas</h3>
@@ -1369,7 +1369,10 @@ function drawCharts(d) {
     .sort((a, b) => b.avg - a.avg);
   const posEl = document.getElementById("cvpChartPos");
   const BAR_H = 28, BAR_GAP = 12;
-  if (posEl) posEl.style.height = (usersChart.length * (BAR_H + BAR_GAP) + 56) + "px";
+  const posWrap = document.getElementById("cvpChartPosWrap");
+  const chartH = usersChart.length * (BAR_H + BAR_GAP) + 56;
+  if (posWrap) { posWrap.style.height = chartH + "px"; }
+  if (posEl) posEl.style.height = chartH + "px";
   mk("cvpChartPos", {
     type: "bar",
     data: {
