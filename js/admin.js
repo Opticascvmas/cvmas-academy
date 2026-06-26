@@ -152,7 +152,8 @@ window.openAdminPanel = async function () {
   if (ENFORCE_ADMIN_ONLY &&
       typeof window.CVP_CURRENT_ROLE !== "undefined" &&
       window.CVP_CURRENT_ROLE !== "admin" &&
-      window.CVP_CURRENT_ROLE !== "viewer") {
+      window.CVP_CURRENT_ROLE !== "viewer" &&
+      window.CVP_CURRENT_ROLE !== "admin_opto") {
     alert("Acceso restringido: solo administradores.");
     return;
   }
@@ -161,6 +162,11 @@ window.openAdminPanel = async function () {
   const container = document.getElementById("admin-users");
   panel.style.display = "block";
   container.innerHTML = `<div class="cvp-loading">Cargando panel CV+…</div>`;
+
+  // Si es admin_opto: fijar vista en optometras desde el inicio
+  if (window.CVP_CURRENT_ROLE === "admin_opto") {
+    CVP.view = "optometras";
+  }
 
   // --- Estilos (se inyectan una sola vez) ---
   injectStyles();
@@ -572,10 +578,11 @@ function renderShell(d) {
 
     <div class="cvp-calbar" id="cvpCalArea"><!-- calendario: lo llena wireUpCalendar() --></div>
 
+    ${window.CVP_CURRENT_ROLE !== 'admin_opto' ? `
     <div class="cvp-role-toggle">
       <button class="cvp-role-btn ${CVP.view === 'asesores' ? 'active' : ''}" onclick="cvpSetView('asesores')">👓 Asesores</button>
       <button class="cvp-role-btn ${CVP.view === 'optometras' ? 'active' : ''}" onclick="cvpSetView('optometras')">👁️ Optometristas</button>
-    </div>
+    </div>` : ''}
 
     <nav class="cvp-tabs">
       <button class="cvp-tab active" data-tab="dashboard">📊 Dashboard</button>
