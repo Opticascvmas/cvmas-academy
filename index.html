@@ -506,6 +506,41 @@ min-height:260px;
       .cv-ojo-cta { flex-direction:column; align-items:stretch; text-align:center; }
       .cv-btn-ojo { width:100%; justify-content:center; }
     }
+    /* ===== Simulador Control Miopía (Módulo Optometristas) ===== */
+    .cv-miopia-cta{
+      margin:28px 0 16px;padding:20px 22px;
+      background:linear-gradient(135deg,rgba(2,171,200,.10),rgba(2,171,200,.04));
+      border:1.5px solid rgba(2,171,200,.35);border-radius:14px;
+      display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;
+    }
+    .cv-miopia-txt strong{display:block;font-size:15px;font-weight:700;color:#e9f2f2;margin-bottom:3px}
+    .cv-miopia-txt span{font-size:13px;color:#88a3a6}
+    .cv-btn-miopia{
+      background:var(--cyan,#02ABC8);color:#091214;border:none;
+      padding:11px 22px;border-radius:10px;font-size:14px;font-weight:700;
+      cursor:pointer;font-family:inherit;white-space:nowrap;transition:.2s;
+    }
+    .cv-btn-miopia:hover{background:#3FD0E8;transform:translateY(-1px)}
+    #modal-miopia{
+      display:none;position:fixed;inset:0;z-index:100000;
+      flex-direction:column;background:#091214;
+    }
+    #modal-miopia.abierto{display:flex}
+    #modal-miopia .cv-modal-bar{
+      display:flex;align-items:center;justify-content:space-between;
+      padding:12px 18px;background:#0d1b1e;color:#e9f2f2;
+      font-size:14px;font-weight:600;flex-shrink:0;
+      border-bottom:1px solid rgba(143,166,168,.16);
+    }
+    #modal-miopia .cv-cerrar{
+      background:var(--gold,#FDC526);color:#091214;border:none;cursor:pointer;
+      padding:9px 16px;border-radius:9px;font-weight:700;font-family:inherit;
+    }
+    #modal-miopia iframe{flex:1;width:100%;border:0}
+    @media(max-width:768px){
+      .cv-miopia-cta{flex-direction:column;align-items:stretch;text-align:center}
+      .cv-btn-miopia{width:100%;justify-content:center}
+    }
     /* ===== Simulador Ametropías (Módulo 3) ===== */
 .cv-ametro-cta{margin:24px 0;padding:20px;border:2px dashed #02ABC8;border-radius:14px;background:#E3F6FA;text-align:center}
 .cv-ametro-cta p{margin:0 0 12px;color:#404042;font-weight:600}
@@ -2154,6 +2189,14 @@ const MODULES_OPTO = [
     <div style="background:#e0f7fa;border-left:4px solid #00B9D6;padding:16px;border-radius:8px;margin-top:24px">
       <strong>💡 Recuerda:</strong> El éxito del control de miopía depende de tres factores por igual: el lente correcto, los hábitos visuales adecuados y el seguimiento clínico constante. Los tres son responsabilidad del equipo de la clínica.
     </div>
+
+    <div class="cv-miopia-cta">
+      <div class="cv-miopia-txt">
+        <strong>🔬 Simulador Clínico — Control de Miopía</strong>
+        <span>Calculadora de riesgo, biometría axial y plan de manejo interactivo</span>
+      </div>
+      <button class="cv-btn-miopia" type="button" onclick="abrirSimuladorMiopia()">Abrir simulador</button>
+    </div>
   `,
   quizBank:[
     {q:"¿Cuál es el principal mecanismo óptico por el que los lentes de adición periférica ralentizan la progresión miópica?",opts:["Reducir la longitud axial del ojo mediante compresión corneal","Generar desenfoque miópico periférico para inhibir el crecimiento axial","Aumentar la profundidad de foco central para mejorar la agudeza visual","Estimular la producción de dopamina retiniana en la zona foveal"],c:1,e:"El mecanismo principal es el desenfoque miópico periférico: el lente genera una señal en la retina periférica que le indica al ojo que no debe seguir creciendo axialmente."},
@@ -2468,7 +2511,7 @@ function isModuleUnlocked(id) {
  // Admin y visores ven TODO desbloqueado, sin aprobar quizzes
   try {
     const u = JSON.parse(localStorage.getItem('cvplus_user') || '{}');
-    if (u.role === 'admin' || u.role === 'viewer') return true;
+    if (u.role === 'admin' || u.role === 'viewer' || u.role === 'admin_opto') return true;
   } catch(e) {}
   const order = getModuleOrder();
   const pos = order.indexOf(id);
@@ -2498,7 +2541,7 @@ localStorage.getItem(
 );
 
 if(
-currentUserData.role !== "admin" && currentUserData.role !== "viewer"
+currentUserData.role !== "admin" && currentUserData.role !== "viewer" && currentUserData.role !== "admin_opto"
 ){
 return;
 }
@@ -2657,7 +2700,7 @@ function showDashboard() {
     const u = JSON.parse(localStorage.getItem('cvplus_user') || '{}');
     const btn = document.getElementById('btn-toggle-academia');
     if (btn) {
-      btn.style.display = (u.role === 'admin') ? 'inline-flex' : 'none';
+      btn.style.display = (u.role === 'admin' || u.role === 'admin_opto') ? 'inline-flex' : 'none';
       btn.textContent = window.CVP_IS_OPTOMETRA ? '👓 Ver academia: Optometristas' : '👓 Ver academia: Asesores';
     }
   } catch(e) {}
@@ -3118,9 +3161,11 @@ const user = window.auth.currentUser;
 // Admin supremo (puede modificar) vs visores (solo ven el panel)
 const SUPER_ADMIN_EMAILS = ["oskarmchdo@gmail.com","alevargas93@hotmail.com","adal.velasquez@index-7.com"];
 const VIEWER_EMAILS = ["erick.ramirez@opticascvmas.com"];
+const ADMIN_OPTO_EMAILS = ["capacitadordeoptometristas@opticacvmas.com"];
 let rolLocal = "participant";
 if (SUPER_ADMIN_EMAILS.includes(user.email)) rolLocal = "admin";
 else if (VIEWER_EMAILS.includes(user.email)) rolLocal = "viewer";
+else if (ADMIN_OPTO_EMAILS.includes(user.email)) rolLocal = "admin_opto";
 localStorage.setItem(
 "cvplus_user",
 JSON.stringify({
@@ -3547,6 +3592,30 @@ Cerrar
     if(e.key==='Escape') cerrarSimuladorAmetropias();
   });
 </script>
+<div id="modal-miopia" role="dialog" aria-modal="true" aria-label="Simulador de control de miopía" aria-hidden="true">
+  <div class="cv-modal-bar">
+    <span>🔬 Control de Miopía · Simulador Clínico</span>
+    <button class="cv-cerrar" type="button" onclick="cerrarSimuladorMiopia()">✕ Cerrar</button>
+  </div>
+  <iframe id="miopia-frame" title="Simulador de control de miopía"></iframe>
+</div>
+<script>
+  window.abrirSimuladorMiopia = function(){
+    var m = document.getElementById('modal-miopia');
+    document.getElementById('miopia-frame').src = 'herramientas/control-miopia.html';
+    m.classList.add('abierto');
+    m.setAttribute('aria-hidden','false');
+  };
+  window.cerrarSimuladorMiopia = function(){
+    var m = document.getElementById('modal-miopia');
+    m.classList.remove('abierto');
+    m.setAttribute('aria-hidden','true');
+    document.getElementById('miopia-frame').src = '';
+  };
+  document.addEventListener('keydown', function(e){
+    var m = document.getElementById('modal-miopia');
+    if(e.key === 'Escape' && m && m.classList.contains('abierto')) window.cerrarSimuladorMiopia();
+  });
 <!-- ═══ Simulador de Lectura de Recetas (Módulo 4) ═══ -->
 <div id="modal-recetas" role="dialog" aria-modal="true" aria-label="Simulador de lectura de recetas" aria-hidden="true">
   <div class="cv-modal-bar">
