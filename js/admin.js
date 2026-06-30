@@ -39,12 +39,13 @@ const MODULE_NAMES = {
   "15": "Lentes de contacto",
   "16": "Luminex",
   "17": "Cierre de ventas",
-  "18": "Aros oftalmicos y ficha de marca"
+  "18": "Aros oftalmicos y ficha de marca",
+  "19": "Flujo de Servicio al Cliente en Odoo"
   // ...agrega o corrige los que necesites
 };
 
 // Total de módulos del curso (para la barra de progreso)
-const TOTAL_MODULES = 18;
+const TOTAL_MODULES = 19;
 
 // Módulos para optometristas
 // ✏️ SOLO EDITA ESTO al agregar un módulo nuevo: agrega una línea con el ID y el nombre.
