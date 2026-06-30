@@ -51,7 +51,7 @@ const TOTAL_MODULES = 18;
 // El total de módulos se calcula automáticamente.
 const MODULE_NAMES_OPTO = {
   "1": "Lentes para el Control de la Miopía",
-  // "2": "Nombre del siguiente módulo",
+  "2": "Flujo de Servicio al Cliente en Odoo",
   // "3": "Nombre del módulo 3",
 };
 const TOTAL_MODULES_OPTO = Object.keys(MODULE_NAMES_OPTO).length;
