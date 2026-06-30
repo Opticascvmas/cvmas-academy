@@ -3775,6 +3775,11 @@ Cerrar
     var m = document.getElementById('modal-miopia');
     if(e.key === 'Escape' && m && m.classList.contains('abierto')) window.cerrarSimuladorMiopia();
   });
+  document.addEventListener('keydown', function(e){
+    var o = document.getElementById('modal-odoo');
+    if(e.key === 'Escape' && o && o.classList.contains('abierto')) window.cerrarSimuladorOdoo();
+  });
+</script>
 <!-- ═══ Simulador de Lectura de Recetas (Módulo 4) ═══ -->
 <div id="modal-recetas" role="dialog" aria-modal="true" aria-label="Simulador de lectura de recetas" aria-hidden="true">
   <div class="cv-modal-bar">
