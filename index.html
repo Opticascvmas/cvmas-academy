@@ -526,6 +526,26 @@ min-height:260px;
       flex-direction:column;background:#091214;
     }
     #modal-miopia.abierto{display:flex}
+    /* ── Modal Odoo ─────────────────────────────────────── */
+    #modal-odoo{
+      display:none;position:fixed;inset:0;z-index:100000;
+      flex-direction:column;background:#091214;
+    }
+    #modal-odoo.abierto{display:flex}
+    .cv-odoo-cta{
+      margin:2rem 0 1rem;display:flex;align-items:center;gap:1rem;
+      background:linear-gradient(135deg,#0d2137 0%,#0a1a2e 100%);
+      border:1px solid #1e4976;border-radius:12px;padding:1.2rem 1.5rem;
+    }
+    .cv-odoo-txt{display:flex;flex-direction:column;flex:1;gap:.25rem;}
+    .cv-odoo-txt strong{color:#e2e8f0;font-size:.95rem;}
+    .cv-odoo-txt span{color:#8fa8c0;font-size:.82rem;}
+    .cv-btn-odoo{
+      background:linear-gradient(135deg,#7c3aed,#5b21b6);color:#fff;
+      border:none;border-radius:8px;padding:.7rem 1.4rem;
+      font-size:.88rem;font-weight:600;cursor:pointer;white-space:nowrap;
+    }
+    .cv-btn-odoo:hover{background:linear-gradient(135deg,#8b5cf6,#6d28d9);}
     #modal-miopia .cv-modal-bar{
       display:flex;align-items:center;justify-content:space-between;
       padding:12px 18px;background:#0d1b1e;color:#e9f2f2;
@@ -2064,6 +2084,65 @@ const MODULES_ASESOR = [
 
 {q:"¿Qué característica NO corresponde al titanio?",opts:["Liviano","Hipoalergénico","Premium","Pesado"],c:3,e:"El titanio no es pesado; destaca por su ligereza."}
   ]
+},
+{
+  id:19, title:"Flujo de Servicio al Cliente en Odoo", icon:"🔄",
+  category:"sistema",
+  quizCount: 20,
+  content:`
+    <h2>Flujo de Servicio al Cliente en Odoo</h2>
+    <p>Este módulo cubre el recorrido completo de atención al paciente dentro del sistema Odoo: desde el primer contacto hasta el envío de la factura a Hacienda. Son <strong>6 etapas secuenciales</strong> que debes dominar para brindar un servicio eficiente y sin errores.</p>
+
+    <h2>Las 6 etapas del flujo</h2>
+    <ol>
+      <li><strong>Creación de contacto</strong> — Identificar al paciente, verificar si ya existe en la base (búsqueda por DUI) y crear su perfil completo.</li>
+      <li><strong>Creación de Rx</strong> — Registro clínico de la receta por parte del optometrista, siguiendo los 12 pasos del examen visual.</li>
+      <li><strong>Creación de oportunidad</strong> — Registrar el interés de compra del paciente. Si se creó desde cero, se genera automáticamente.</li>
+      <li><strong>Creación de actividades</strong> — Programar seguimientos para no perder de vista a ningún paciente, compre o solo cotice.</li>
+      <li><strong>Presupuesto / Pedido</strong> — Armar la propuesta económica, registrar el pago, recoger la firma del paciente y enviar las medidas a Lesa (3 sub-pasos).</li>
+      <li><strong>Facturación</strong> — Validar la entrega, generar la factura y enviarla a Hacienda para el cierre formal.</li>
+    </ol>
+
+    <h2>Puntos clave a recordar</h2>
+    <ul>
+      <li>Siempre busca primero por DUI antes de crear un contacto nuevo para evitar duplicados.</li>
+      <li>Un cliente <strong>CONTADO</strong> paga con métodos tradicionales; un cliente <strong>CRÉDITO</strong> tiene convenio de empresa, Asesuisa, Flexicuotas, CEL o DELSUR.</li>
+      <li>La oportunidad solo tiene 3 etapas válidas: <strong>Nuevo</strong>, <strong>Ganado</strong> y <strong>Perdido</strong>.</li>
+      <li>Los lentes siempre se registran como <strong>2 unidades</strong>; los demás productos como 1 unidad.</li>
+      <li>Antes de facturar debes validar la entrega desde el ícono de camión en el pedido.</li>
+      <li>El paso de medidas y envío a Lesa (5.3) puede realizarse después de despachar al cliente.</li>
+    </ul>
+
+    <div class="cv-odoo-cta">
+      <div class="cv-odoo-txt">
+        <strong>🔄 Ruta de Servicio CV+ · Flujo interactivo completo</strong>
+        <span>Explora las 6 etapas con capturas reales del sistema Odoo</span>
+      </div>
+      <button class="cv-btn-odoo" type="button" onclick="abrirSimuladorOdoo()">Abrir flujo interactivo</button>
+    </div>
+  `,
+  quizBank:[
+    {q:"¿Cuál es el primer paso antes de crear un contacto nuevo en Odoo?",o:["Llenar todos los campos del formulario","Buscar al paciente por su DUI para evitar duplicados","Seleccionar si es Individuo o Compañía","Asignar la etiqueta CONTADO o CRÉDITO"],c:1,e:"Siempre debes verificar si el paciente ya existe en la base de datos buscando por DUI antes de crear un contacto desde cero, para evitar duplicar información."},
+    {q:"¿Qué tipo de contacto se debe usar cuando el paciente solicita Comprobante de Crédito Fiscal?",o:["Individuo","Participante","Compañía","Proveedor"],c:2,e:"Se usa 'Compañía' cuando el paciente solicita Crédito Fiscal, ya que este tipo muestra campos adicionales como Razón Social, NIT, NRC y Giro."},
+    {q:"¿Cuáles son las únicas dos etiquetas de cliente permitidas en Odoo?",o:["Efectivo y Tarjeta","CONTADO y CRÉDITO","Nuevo y Recurrente","Individual y Empresa"],c:1,e:"Solo se permiten dos etiquetas: CONTADO (pago con métodos tradicionales) y CRÉDITO (convenio de empresa, Asesuisa, Flexicuotas, CEL o DELSUR)."},
+    {q:"¿Qué truco rápido existe para ingresar la fecha de nacimiento en Odoo?",o:["Escribir día/mes/año separados por guiones","Seleccionarla desde el calendario del sistema","Escribir los 8 dígitos seguidos y el sistema la detecta automáticamente","Importarla desde el DUI digital"],c:2,e:"Al escribir los 8 dígitos seguidos (por ejemplo 19021997), el sistema detecta y formatea la fecha automáticamente."},
+    {q:"¿Cuántas etapas válidas puede tener una oportunidad en Odoo?",o:["5 etapas: Nuevo, En proceso, Cotizado, Ganado y Perdido","3 etapas: Nuevo, Ganado y Perdido","4 etapas: Nuevo, Seguimiento, Ganado y Perdido","2 etapas: Activo e Inactivo"],c:1,e:"Las oportunidades solo pueden tener 3 etapas: Nuevo (cotizaciones abiertas), Ganado (pedidos de venta) y Perdido (cotizaciones no rescatadas)."},
+    {q:"¿Cuándo se crea la oportunidad automáticamente en Odoo?",o:["Siempre que se registra una venta","Solo cuando el paciente paga de contado","Cuando se crea el expediente del paciente desde cero","Cuando se valida la factura"],c:2,e:"Si acabas de crear el expediente del paciente desde cero, el sistema crea la oportunidad automáticamente. Si el paciente ya existía, debes crearla manualmente."},
+    {q:"¿Cuántas unidades se registran siempre para lentes en el presupuesto?",o:["1 unidad por ojo","2 unidades","3 unidades","Depende del tipo de lente"],c:1,e:"Los lentes siempre se registran como 2 unidades en el pedido. Los demás productos (accesorios, etc.) siempre se registran como 1 unidad."},
+    {q:"¿Qué ícono debes presionar en el pedido para iniciar el proceso de facturación?",o:["El ícono de impresora","El ícono de camión (entrega)","El ícono de dólar (pago)","El ícono de lápiz (editar)"],c:1,e:"Para facturar debes presionar el ícono de entrega representado por un camión dentro del pedido en el módulo de Ventas."},
+    {q:"¿Qué debes verificar al presionar 'Comprobar disponibilidad' antes de validar la entrega?",o:["Que el nombre del cliente sea correcto","Que la fecha de entrega coincida con la prometida","Que las columnas 'demanda' y 'cantidad' tengan los mismos valores","Que el pago esté completamente registrado"],c:2,e:"Debes verificar que las columnas 'demanda' y 'cantidad' tengan los mismos valores antes de presionar VALIDAR."},
+    {q:"¿Cuál es el último paso del flujo de servicio al cliente en Odoo?",o:["Registrar el pago","Validar el pedido","Enviar a Hacienda","Imprimir el presupuesto"],c:2,e:"El último paso es ENVIAR A HACIENDA, que es el cierre formal del proceso. Después se imprime la factura y se entrega una copia al paciente."},
+    {q:"¿Qué información se ingresa en la pestaña 'Otra información' del pedido?",o:["Los datos de contacto del cliente","Las medidas del lente y del aro para enviar a Lesa","El historial de pagos anteriores del cliente","La actividad de seguimiento programada"],c:1,e:"En la pestaña 'Otra información' se registran todas las medidas del lente y del aro, y desde ahí se envía a Lesa para procesar."},
+    {q:"¿Cuándo se puede realizar el paso de medidas y envío a Lesa (paso 5.3)?",o:["Antes de registrar el pago","Solo mientras el cliente está presente","Incluso después de haber despachado al cliente","Uniquamente antes de validar el pedido"],c:2,e:"El paso 5.3 de medidas y envío a Lesa puede realizarse incluso después de haber despachado al cliente, sin retrasar la atención."},
+    {q:"¿Qué hace la función 'Vista previa' en el paso de firma del pedido?",o:["Muestra un resumen interno para el vendedor","Genera la presentación del presupuesto tal como la verá el paciente","Envía automáticamente el presupuesto por correo","Activa el modo de edición avanzada"],c:1,e:"'Vista previa' genera la presentación del presupuesto tal como la verá el paciente, para que pueda revisarlo antes de firmar."},
+    {q:"¿Cuál es el propósito del campo 'Cómo nos conoció' en el perfil del contacto?",o:["Verificar la identidad del paciente","Calcular descuentos automáticos","Informar al departamento de Marketing qué estrategias funcionan mejor","Determinar el tipo de documento fiscal a emitir"],c:2,e:"El campo 'Cómo nos conoció' le da información al departamento de Marketing sobre qué estrategias están funcionando mejor para dar a conocer la marca."},
+    {q:"¿Qué módulo se usa para buscar un pedido antes de facturar?",o:["Contactos","CRM","Compras","Ventas"],c:3,e:"Para facturar debes buscar el pedido en el módulo VENTAS usando la barra de búsqueda para localizarlo por su número."},
+    {q:"¿Quiénes realizan el paso de Creación de Rx en el flujo de servicio?",o:["Los asesores de venta","El administrador del sistema","Los optometristas","El encargado de facturación"],c:2,e:"La Creación de Rx la realizan los optometristas, según lo establecido en los 12 pasos del examen visual."},
+    {q:"¿Qué se debe hacer si al buscar por DUI el paciente no aparece en el sistema?",o:["Crear el contacto inmediatamente sin verificar","Buscar con otros datos primero; si no aparece, crear el contacto desde cero seleccionando NUEVO","Solicitar al administrador que lo agregue","Registrar la venta sin contacto"],c:1,e:"Si el cliente no aparece y ya validaste sus datos varias veces sin éxito, procedes a crearlo seleccionando NUEVO. La verificación previa es clave para evitar duplicados."},
+    {q:"¿Qué campo del presupuesto define los precios según la promoción del mes?",o:["Condiciones de pago","Cuenta analítica","Lista de precios","Tipo de venta"],c:2,e:"La 'Lista de precios' es la tarifa que define los precios, por ejemplo la promo del mes vigente."},
+    {q:"¿Cuáles son los dos tipos de documento fiscal que se pueden seleccionar al editar una factura?",o:["Factura simple y Factura electrónica","Consumidor final y Comprobante de Crédito Fiscal","Factura de exportación y Factura local","Recibo y Nota de crédito"],c:1,e:"Al editar la factura se selecciona el tipo de documento: Consumidor final o Comprobante de Crédito Fiscal, según lo que corresponda al cliente."},
+    {q:"¿Cuál es la función de la IA integrada en Odoo dentro de las oportunidades?",o:["Calcular automáticamente el precio del lente","Sugerir redacciones para las notas internas cuando no se sabe cómo expresarlas","Enviar mensajes automáticos al cliente","Generar facturas sin intervención del usuario"],c:1,e:"La IA incluida en Odoo permite mejorar las notas internas: al seleccionar el texto aparece la opción de IA con sugerencias de redacción para quien siente que no expresa bien sus notas."}
+  ]
 }
 ];
 
@@ -2220,8 +2299,67 @@ const MODULES_OPTO = [
     {q:"¿Cuál de las siguientes afirmaciones sobre el tiempo al aire libre y la miopía es correcta?",opts:["El beneficio se debe exclusivamente al mayor enfoque a distancia en exteriores","La exposición a luz brillante exterior estimula la liberación de dopamina retiniana, inhibiendo el crecimiento axial","El tiempo al aire libre solo es protector si supera 4 horas diarias","El efecto protector del aire libre es independiente de la intensidad lumínica"],c:1,e:"La exposición a luz brillante exterior (no solo el enfoque a distancia) estimula la dopamina retiniana, que inhibe el crecimiento axial. La intensidad lumínica es parte clave del mecanismo."},
     {q:"Al informar a los padres sobre un tratamiento de control de miopía para su hijo, ¿cuál es el mensaje más preciso y ético?",opts:["'Este tratamiento detendrá completamente la progresión de la miopía de su hijo'","'La miopía de su hijo va a revertir con el tratamiento en 6 meses'","'Este tratamiento puede reducir significativamente la velocidad de progresión, aunque no la detiene por completo'","'El tratamiento garantiza que su hijo no necesitará lentes en la adultez'"],c:2,e:"El mensaje correcto y ético es que el tratamiento reduce significativamente la velocidad de progresión pero no la detiene por completo. Prometer curación total o reversión sería incorrecto."}
   ]
-}
-];
+},
+{
+  id:2, title:"Flujo de Servicio al Cliente en Odoo", icon:"🔄",
+  category:"sistema",
+  quizCount: 20,
+  content:`
+    <h2>Flujo de Servicio al Cliente en Odoo</h2>
+    <p>Este módulo cubre el recorrido completo de atención al paciente dentro del sistema Odoo: desde el primer contacto hasta el envío de la factura a Hacienda. Son <strong>6 etapas secuenciales</strong> que debes dominar para brindar un servicio eficiente y sin errores.</p>
+
+    <h2>Las 6 etapas del flujo</h2>
+    <ol>
+      <li><strong>Creación de contacto</strong> — Identificar al paciente, verificar si ya existe en la base (búsqueda por DUI) y crear su perfil completo.</li>
+      <li><strong>Creación de Rx</strong> — Registro clínico de la receta por parte del optometrista, siguiendo los 12 pasos del examen visual.</li>
+      <li><strong>Creación de oportunidad</strong> — Registrar el interés de compra del paciente. Si se creó desde cero, se genera automáticamente.</li>
+      <li><strong>Creación de actividades</strong> — Programar seguimientos para no perder de vista a ningún paciente, compre o solo cotice.</li>
+      <li><strong>Presupuesto / Pedido</strong> — Armar la propuesta económica, registrar el pago, recoger la firma del paciente y enviar las medidas a Lesa (3 sub-pasos).</li>
+      <li><strong>Facturación</strong> — Validar la entrega, generar la factura y enviarla a Hacienda para el cierre formal.</li>
+    </ol>
+
+    <h2>Puntos clave a recordar</h2>
+    <ul>
+      <li>Siempre busca primero por DUI antes de crear un contacto nuevo para evitar duplicados.</li>
+      <li>Un cliente <strong>CONTADO</strong> paga con métodos tradicionales; un cliente <strong>CRÉDITO</strong> tiene convenio de empresa, Asesuisa, Flexicuotas, CEL o DELSUR.</li>
+      <li>La oportunidad solo tiene 3 etapas válidas: <strong>Nuevo</strong>, <strong>Ganado</strong> y <strong>Perdido</strong>.</li>
+      <li>Los lentes siempre se registran como <strong>2 unidades</strong>; los demás productos como 1 unidad.</li>
+      <li>Antes de facturar debes validar la entrega desde el ícono de camión en el pedido.</li>
+      <li>El paso de medidas y envío a Lesa (5.3) puede realizarse después de despachar al cliente.</li>
+    </ul>
+
+    <div class="cv-odoo-cta">
+      <div class="cv-odoo-txt">
+        <strong>🔄 Ruta de Servicio CV+ · Flujo interactivo completo</strong>
+        <span>Explora las 6 etapas con capturas reales del sistema Odoo</span>
+      </div>
+      <button class="cv-btn-odoo" type="button" onclick="abrirSimuladorOdoo()">Abrir flujo interactivo</button>
+    </div>
+  `,
+  quizBank:[
+    {q:"¿Cuál es el primer paso antes de crear un contacto nuevo en Odoo?",o:["Llenar todos los campos del formulario","Buscar al paciente por su DUI para evitar duplicados","Seleccionar si es Individuo o Compañía","Asignar la etiqueta CONTADO o CRÉDITO"],c:1,e:"Siempre debes verificar si el paciente ya existe en la base de datos buscando por DUI antes de crear un contacto desde cero, para evitar duplicar información."},
+    {q:"¿Qué tipo de contacto se debe usar cuando el paciente solicita Comprobante de Crédito Fiscal?",o:["Individuo","Participante","Compañía","Proveedor"],c:2,e:"Se usa 'Compañía' cuando el paciente solicita Crédito Fiscal, ya que este tipo muestra campos adicionales como Razón Social, NIT, NRC y Giro."},
+    {q:"¿Cuáles son las únicas dos etiquetas de cliente permitidas en Odoo?",o:["Efectivo y Tarjeta","CONTADO y CRÉDITO","Nuevo y Recurrente","Individual y Empresa"],c:1,e:"Solo se permiten dos etiquetas: CONTADO (pago con métodos tradicionales) y CRÉDITO (convenio de empresa, Asesuisa, Flexicuotas, CEL o DELSUR)."},
+    {q:"¿Qué truco rápido existe para ingresar la fecha de nacimiento en Odoo?",o:["Escribir día/mes/año separados por guiones","Seleccionarla desde el calendario del sistema","Escribir los 8 dígitos seguidos y el sistema la detecta automáticamente","Importarla desde el DUI digital"],c:2,e:"Al escribir los 8 dígitos seguidos (por ejemplo 19021997), el sistema detecta y formatea la fecha automáticamente."},
+    {q:"¿Cuántas etapas válidas puede tener una oportunidad en Odoo?",o:["5 etapas: Nuevo, En proceso, Cotizado, Ganado y Perdido","3 etapas: Nuevo, Ganado y Perdido","4 etapas: Nuevo, Seguimiento, Ganado y Perdido","2 etapas: Activo e Inactivo"],c:1,e:"Las oportunidades solo pueden tener 3 etapas: Nuevo (cotizaciones abiertas), Ganado (pedidos de venta) y Perdido (cotizaciones no rescatadas)."},
+    {q:"¿Cuándo se crea la oportunidad automáticamente en Odoo?",o:["Siempre que se registra una venta","Solo cuando el paciente paga de contado","Cuando se crea el expediente del paciente desde cero","Cuando se valida la factura"],c:2,e:"Si acabas de crear el expediente del paciente desde cero, el sistema crea la oportunidad automáticamente. Si el paciente ya existía, debes crearla manualmente."},
+    {q:"¿Cuántas unidades se registran siempre para lentes en el presupuesto?",o:["1 unidad por ojo","2 unidades","3 unidades","Depende del tipo de lente"],c:1,e:"Los lentes siempre se registran como 2 unidades en el pedido. Los demás productos (accesorios, etc.) siempre se registran como 1 unidad."},
+    {q:"¿Qué ícono debes presionar en el pedido para iniciar el proceso de facturación?",o:["El ícono de impresora","El ícono de camión (entrega)","El ícono de dólar (pago)","El ícono de lápiz (editar)"],c:1,e:"Para facturar debes presionar el ícono de entrega representado por un camión dentro del pedido en el módulo de Ventas."},
+    {q:"¿Qué debes verificar al presionar 'Comprobar disponibilidad' antes de validar la entrega?",o:["Que el nombre del cliente sea correcto","Que la fecha de entrega coincida con la prometida","Que las columnas 'demanda' y 'cantidad' tengan los mismos valores","Que el pago esté completamente registrado"],c:2,e:"Debes verificar que las columnas 'demanda' y 'cantidad' tengan los mismos valores antes de presionar VALIDAR."},
+    {q:"¿Cuál es el último paso del flujo de servicio al cliente en Odoo?",o:["Registrar el pago","Validar el pedido","Enviar a Hacienda","Imprimir el presupuesto"],c:2,e:"El último paso es ENVIAR A HACIENDA, que es el cierre formal del proceso. Después se imprime la factura y se entrega una copia al paciente."},
+    {q:"¿Qué información se ingresa en la pestaña 'Otra información' del pedido?",o:["Los datos de contacto del cliente","Las medidas del lente y del aro para enviar a Lesa","El historial de pagos anteriores del cliente","La actividad de seguimiento programada"],c:1,e:"En la pestaña 'Otra información' se registran todas las medidas del lente y del aro, y desde ahí se envía a Lesa para procesar."},
+    {q:"¿Cuándo se puede realizar el paso de medidas y envío a Lesa (paso 5.3)?",o:["Antes de registrar el pago","Solo mientras el cliente está presente","Incluso después de haber despachado al cliente","Únicamente antes de validar el pedido"],c:2,e:"El paso 5.3 de medidas y envío a Lesa puede realizarse incluso después de haber despachado al cliente, sin retrasar la atención."},
+    {q:"¿Qué hace la función 'Vista previa' en el paso de firma del pedido?",o:["Muestra un resumen interno para el vendedor","Genera la presentación del presupuesto tal como la verá el paciente","Envía automáticamente el presupuesto por correo","Activa el modo de edición avanzada"],c:1,e:"'Vista previa' genera la presentación del presupuesto tal como la verá el paciente, para que pueda revisarlo antes de firmar."},
+    {q:"¿Cuál es el propósito del campo 'Cómo nos conoció' en el perfil del contacto?",o:["Verificar la identidad del paciente","Calcular descuentos automáticos","Informar al departamento de Marketing qué estrategias funcionan mejor","Determinar el tipo de documento fiscal a emitir"],c:2,e:"El campo 'Cómo nos conoció' le da información al departamento de Marketing sobre qué estrategias están funcionando mejor para dar a conocer la marca."},
+    {q:"¿Qué módulo se usa para buscar un pedido antes de facturar?",o:["Contactos","CRM","Compras","Ventas"],c:3,e:"Para facturar debes buscar el pedido en el módulo VENTAS usando la barra de búsqueda para localizarlo por su número."},
+    {q:"¿Quiénes realizan el paso de Creación de Rx en el flujo de servicio?",o:["Los asesores de venta","El administrador del sistema","Los optometristas","El encargado de facturación"],c:2,e:"La Creación de Rx la realizan los optometristas, según lo establecido en los 12 pasos del examen visual."},
+    {q:"¿Qué se debe hacer si al buscar por DUI el paciente no aparece en el sistema?",o:["Crear el contacto inmediatamente sin verificar","Buscar con otros datos primero; si no aparece, crear el contacto desde cero seleccionando NUEVO","Solicitar al administrador que lo agregue","Registrar la venta sin contacto"],c:1,e:"Si el cliente no aparece y ya validaste sus datos varias veces sin éxito, procedes a crearlo seleccionando NUEVO. La verificación previa es clave para evitar duplicados."},
+    {q:"¿Qué campo del presupuesto define los precios según la promoción del mes?",o:["Condiciones de pago","Cuenta analítica","Lista de precios","Tipo de venta"],c:2,e:"La 'Lista de precios' es la tarifa que define los precios, por ejemplo la promo del mes vigente."},
+    {q:"¿Cuáles son los dos tipos de documento fiscal que se pueden seleccionar al editar una factura?",o:["Factura simple y Factura electrónica","Consumidor final y Comprobante de Crédito Fiscal","Factura de exportación y Factura local","Recibo y Nota de crédito"],c:1,e:"Al editar la factura se selecciona el tipo de documento: Consumidor final o Comprobante de Crédito Fiscal, según lo que corresponda al cliente."},
+    {q:"¿Cuál es la función de la IA integrada en Odoo dentro de las oportunidades?",o:["Calcular automáticamente el precio del lente","Sugerir redacciones para las notas internas cuando no se sabe cómo expresarlas","Enviar mensajes automáticos al cliente","Generar facturas sin intervención del usuario"],c:1,e:"La IA incluida en Odoo permite mejorar las notas internas: al seleccionar el texto aparece la opción de IA con sugerencias de redacción para quien siente que no expresa bien sus notas."}
+  ]
+}];
+
 // MODULES es la lista "activa"; por defecto la de asesores
 let MODULES = MODULES_ASESOR;
 
@@ -3599,6 +3737,13 @@ Cerrar
   </div>
   <iframe id="miopia-frame" title="Simulador de control de miopía"></iframe>
 </div>
+<div id="modal-odoo" role="dialog" aria-modal="true" aria-label="Flujo de Servicio al Cliente en Odoo" aria-hidden="true">
+  <div class="cv-modal-bar">
+    <span>🔄 Flujo de Servicio al Cliente · Odoo</span>
+    <button class="cv-cerrar" type="button" onclick="cerrarSimuladorOdoo()">✕ Cerrar</button>
+  </div>
+  <iframe id="odoo-frame" title="Flujo de Servicio al Cliente en Odoo" style="flex:1;border:none;width:100%;"></iframe>
+</div>
 <script>
   window.abrirSimuladorMiopia = function(){
     var m = document.getElementById('modal-miopia');
@@ -3611,6 +3756,18 @@ Cerrar
     m.classList.remove('abierto');
     m.setAttribute('aria-hidden','true');
     document.getElementById('miopia-frame').src = '';
+  };
+  window.abrirSimuladorOdoo = function(){
+    var m = document.getElementById('modal-odoo');
+    document.getElementById('odoo-frame').src = 'herramientas/flujo-servicio-odoo.html';
+    m.classList.add('abierto');
+    m.setAttribute('aria-hidden','false');
+  };
+  window.cerrarSimuladorOdoo = function(){
+    var m = document.getElementById('modal-odoo');
+    m.classList.remove('abierto');
+    m.setAttribute('aria-hidden','true');
+    document.getElementById('odoo-frame').src = '';
   };
   document.addEventListener('keydown', function(e){
     var m = document.getElementById('modal-miopia');
