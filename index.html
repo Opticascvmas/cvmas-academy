@@ -749,7 +749,7 @@ margin-bottom:15px;
         <div class="dash-welcome">
           <div class="dash-welcome-text">
             <h2>¡Bienvenido a la Academia Ópticas CV+! 👋</h2>
-            <p>Tu plataforma de capacitación en el mundo de la óptica. Estudia los 18 módulos, practica con los quizzes y conviértete en un experto asesor.</p>
+            <p>Tu plataforma de capacitación en el mundo de la óptica. Estudia los módulos, practica con los quizzes y conviértete en un experto asesor.</p>
           </div>
           <div class="dash-welcome-stats">
             <div class="dash-stat">
@@ -2091,7 +2091,7 @@ const MODULES_ASESOR = [
   quizCount: 20,
   content:`
     <h2>Flujo de Servicio al Cliente en Odoo</h2>
-    <p>Este módulo cubre el recorrido completo de atención al paciente dentro del sistema Odoo: desde el primer contacto hasta el envío de la factura a Hacienda. Son <strong>6 etapas secuenciales</strong> que debes dominar para brindar un servicio eficiente y sin errores.</p>
+    <p>Este módulo cubre el recorrido completo de atención al paciente dentro del sistema Odoo: desde el primer contacto hasta la entrega de la factura y producto. Son <strong>6 etapas secuenciales</strong> que debes dominar para brindar un servicio eficiente y sin errores.</p>
 
     <h2>Las 6 etapas del flujo</h2>
     <ol>
@@ -2099,7 +2099,7 @@ const MODULES_ASESOR = [
       <li><strong>Creación de Rx</strong> — Registro clínico de la receta por parte del optometrista, siguiendo los 12 pasos del examen visual.</li>
       <li><strong>Creación de oportunidad</strong> — Registrar el interés de compra del paciente. Si se creó desde cero, se genera automáticamente.</li>
       <li><strong>Creación de actividades</strong> — Programar seguimientos para no perder de vista a ningún paciente, compre o solo cotice.</li>
-      <li><strong>Presupuesto / Pedido</strong> — Armar la propuesta económica, registrar el pago, recoger la firma del paciente y enviar las medidas a Lesa (3 sub-pasos).</li>
+      <li><strong>Presupuesto / Pedido</strong> — Armar la propuesta segun las necesidades del cliente, registrar el pago, recolectar la firma del cliente, ingreso de medidas y envio a Lesa (3 sub-pasos).</li>
       <li><strong>Facturación</strong> — Validar la entrega, generar la factura y enviarla a Hacienda para el cierre formal.</li>
     </ol>
 
@@ -2873,7 +2873,8 @@ function showModule(id) {
 
   const indicator = document.getElementById('studied-indicator');
   if(studied){
-    const score = QUIZ_SCORES[id];
+    const scoreData = QUIZ_SCORES[id];
+    const score = scoreData && typeof scoreData === 'object' ? scoreData.lastScore : scoreData;
     indicator.innerHTML = `<span class="studied-badge">✅ Módulo estudiado${score?` · Quiz: ${score}%`:''}</span>`;
   } else {
     indicator.innerHTML = '';
@@ -3800,6 +3801,4 @@ Cerrar
     if(e.key === 'Escape' && m && m.classList.contains('abierto')) window.cerrarSimuladorRecetas();
   });
 </script>
-<script type="module" src="js/admin.js"></script>
-</body>
-</html>
+<script type="module" src="js/admin.js"></scr
