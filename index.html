@@ -3302,7 +3302,7 @@ const user = window.auth.currentUser;
 // Admin supremo (puede modificar) vs visores (solo ven el panel)
 const SUPER_ADMIN_EMAILS = ["oskarmchdo@gmail.com","alevargas93@hotmail.com","adal.velasquez@index-7.com"];
 const VIEWER_EMAILS = ["erick.ramirez@opticascvmas.com"];
-const ADMIN_OPTO_EMAILS = ["capacitadordeoptometristas@opticacvmas.com"];
+const ADMIN_OPTO_EMAILS = ["capacitadordeoptometristas@opticascvmas.com"];
 let rolLocal = "participant";
 if (SUPER_ADMIN_EMAILS.includes(user.email)) rolLocal = "admin";
 else if (VIEWER_EMAILS.includes(user.email)) rolLocal = "viewer";
