@@ -2590,9 +2590,9 @@ window.hydrateUserData = async function() {
 const CAT_INFO_ASESOR = {
   fundamentos: { label:'Fundamentos de Óptica', dashTitle:'📚 Fundamentos de Óptica', ids:[1,2,3,4,5] },
   fabricacion: { label:'Fabricación y Materiales', dashTitle:'🔬 Fabricación y Materiales', ids:[6,7,8] },
+  sistema: { label:'Sistema', dashTitle:'🔄 Sistema', ids:[19] },
   akkurat: { label:'Portafolio Akkurat', dashTitle:'✨ Portafolio Akkurat', ids:[9,10,11,12,13,14] },
   ventas: { label:'Ventas y Productos', dashTitle:'💼 Ventas y Productos', ids:[15,16,17,18] },
-  sistema: { label:'Sistema', dashTitle:'🔄 Sistema', ids:[19] },
 };
 // Categorías de Optometristas
 const CAT_INFO_OPTO = {
@@ -2707,7 +2707,6 @@ nav.appendChild(adminBtn);
       item.className = `nav-item${isActive?' active':''}${studied?' studied':''}`;
       item.dataset.mid = mid;
       item.innerHTML = `
-        <span class="nav-num">${mid}</span>
         <span class="nav-icon">${mod.icon}</span>
         <span class="nav-title">${mod.title}</span>
         <span class="nav-check">${studied?'✓':''}</span>`;
@@ -2791,14 +2790,12 @@ function renderGrids(searchTerm='') {
       card.className = `module-card${studied?' studied':''}${unlocked?'':' locked'}`;
       if (unlocked) {
         card.innerHTML = `
-          <div class="card-num">Módulo ${mid}</div>
           <span class="card-icon">${mod.icon}</span>
           <div class="card-title">${mod.title}</div>
           <span class="cat-badge cat-${catKey}">${catKey}</span>`;
         card.onclick = () => showModule(mid);
       } else {
         card.innerHTML = `
-          <div class="card-num">Módulo ${mid}</div>
           <span class="card-icon">🔒</span>
           <div class="card-title">${mod.title}</div>
           <div class="card-cat">Aprueba el módulo anterior con ${PASSING_SCORE}%</div>`;
@@ -2857,14 +2854,14 @@ function showModule(id) {
   STATE.currentView = 'module';
 
   document.getElementById('topbar-title').textContent = mod.title;
-  document.getElementById('topbar-breadcrumb').textContent = `Módulo ${id} · ${getCatLabel(mod.category)}`;
+  document.getElementById('topbar-breadcrumb').textContent = getCatLabel(mod.category);
   document.getElementById('topbar-actions').innerHTML = `
     <button class="btn btn-secondary" onclick="showDashboard()">← Inicio</button>
     <button class="btn btn-gold" onclick="startQuiz()">🧠 Quiz</button>`;
 
   document.getElementById('hero-icon').textContent = mod.icon;
   document.getElementById('hero-title').textContent = mod.title;
-  document.getElementById('hero-num').textContent = `📘 Módulo ${id}`;
+  document.getElementById('hero-num').style.display = 'none';
   document.getElementById('hero-cat').textContent = getCatLabel(mod.category);
 
   const studied = !!PROGRESS[id];
@@ -2898,7 +2895,7 @@ function showModule(id) {
 }
 
 function getCatLabel(cat) {
-  const labels = { fundamentos:'Fundamentos', fabricacion:'Fabricación y Materiales', akkurat:'Portafolio Akkurat', ventas:'Ventas y Productos' };
+  const labels = { fundamentos:'Fundamentos', fabricacion:'Fabricación y Materiales', akkurat:'Portafolio Akkurat', ventas:'Ventas y Productos', sistema:'Sistema' };
   return labels[cat] || cat;
 }
 
@@ -2925,7 +2922,7 @@ function startQuiz() {
   document.getElementById('quiz-module-title').textContent = `Quiz: ${mod.title}`;
   document.getElementById('quiz-subtitle').textContent = `${mod.quiz.length} preguntas sobre este módulo`;
   document.getElementById('topbar-title').textContent = `Quiz — ${mod.title}`;
-  document.getElementById('topbar-breadcrumb').textContent = `Módulo ${id}`;
+  document.getElementById('topbar-breadcrumb').textContent = getCatLabel(mod.category);
   document.getElementById('topbar-actions').innerHTML = `
     <button class="btn btn-secondary" onclick="showModule(${id})">← Volver al módulo</button>`;
 
@@ -3116,7 +3113,7 @@ try {
     const nextId = order[pos + 1];
     if (nextId) {
       const nextMod = MODULES.find(m => m.id === nextId);
-      setTimeout(() => alert(`🔓 ¡Desbloqueaste el Módulo ${nextId}: ${nextMod ? nextMod.title : ''}!`), 300);
+      setTimeout(() => alert(`🔓 ¡Desbloqueaste: ${nextMod ? nextMod.title : ''}!`), 300);
     }
   }
 } catch(e) {
@@ -3302,7 +3299,7 @@ const user = window.auth.currentUser;
 // Admin supremo (puede modificar) vs visores (solo ven el panel)
 const SUPER_ADMIN_EMAILS = ["oskarmchdo@gmail.com","alevargas93@hotmail.com","adal.velasquez@index-7.com"];
 const VIEWER_EMAILS = ["erick.ramirez@opticascvmas.com"];
-const ADMIN_OPTO_EMAILS = ["capacitadordeoptometristas@opticascvmas.com"];
+const ADMIN_OPTO_EMAILS = ["capacitadordeoptometristas@opticacvmas.com"];
 let rolLocal = "participant";
 if (SUPER_ADMIN_EMAILS.includes(user.email)) rolLocal = "admin";
 else if (VIEWER_EMAILS.includes(user.email)) rolLocal = "viewer";
