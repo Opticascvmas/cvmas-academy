@@ -2367,41 +2367,80 @@ let MODULES = MODULES_ASESOR;
 // GLOSARIO TÉCNICO
 // ═══════════════════════════════════════════════════════
 const GLOSSARY_DATA = [
-  {term:"Ametropía",def:"Defecto visual que impide que la luz se enfoque correctamente sobre la retina. Incluye: miopía, hipermetropía, astigmatismo y presbicia.",cat:"Anatomía"},
-  {term:"Adición (ADD)",def:"Graduación adicional en la receta para corregir la visión cercana en pacientes con presbicia. Debe ser igual en ambos ojos.",cat:"Receta"},
-  {term:"Antirreflejo",def:"Tratamiento que reduce los reflejos en el lente, aumentando la transmisión de luz. Disponible en verde y azul.",cat:"Tratamiento"},
-  {term:"Astigmatismo",def:"Defecto visual causado por curvatura irregular de la córnea que provoca visión borrosa a todas las distancias. Se corrige con lentes cilíndricos.",cat:"Ametropía"},
   {term:"Aberración cromática",def:"Dificultad de un material para enfocar todos los colores en un mismo punto. Causa halos de colores y cansancio visual. El Número Abbe alto la reduce.",cat:"Óptica"},
+  {term:"Acetato",def:"Material plástico para aros oftálmicos. Puede ser laminado (bloques de color prensados, acabado premium) o inyectado (moldeado, más económico).",cat:"Aros"},
+  {term:"Acomodación",def:"Capacidad del ojo para enfocar de lejos a cerca: el cuerpo ciliar cambia la forma del cristalino. Su pérdida gradual con la edad causa la presbicia.",cat:"Óptica"},
+  {term:"Adición (ADD)",def:"Graduación adicional en la receta para corregir la visión cercana en pacientes con presbicia. Debe ser igual en ambos ojos.",cat:"Receta"},
+  {term:"Akkurat",def:"Marca propia de lentes de proceso de Ópticas CV+; su nombre significa 'preciso'. Toda la línea usa tecnología FREE FORM: progresivos (ONE, BIZ, PRO, BIO), ocupacionales (Office, Tablet), Antifatiga Air y visión sencilla (CTO, SLIM, SPORT).",cat:"Marca"},
+  {term:"Ametropía",def:"Defecto visual que impide que la luz se enfoque correctamente sobre la retina. Incluye: miopía, hipermetropía, astigmatismo y presbicia.",cat:"Anatomía"},
+  {term:"Antifatiga",def:"Lente (Akkurat Air) para personas de 20 a 40 años SIN presbicia con alta demanda visual en pantallas. Reduce el esfuerzo de acomodación con adiciones de +0.37 (fatiga leve) y +0.50 (fatiga moderada).",cat:"Lente"},
+  {term:"Antirreflejo",def:"Tratamiento que reduce los reflejos en el lente, aumentando la transmisión de luz. Disponible en verde y azul.",cat:"Tratamiento"},
+  {term:"Aro oftálmico",def:"Montura que sostiene los lentes. Sus partes: frente, puente, varillas y bisagras. Según la graduación se recomienda: aro completo (graduaciones altas), semi al aire (medias) o al aire (bajas).",cat:"Aros"},
+  {term:"Astigmatismo",def:"Defecto visual causado por curvatura irregular de la córnea que provoca visión borrosa a todas las distancias. Se corrige con lentes cilíndricos.",cat:"Ametropía"},
+  {term:"Atropina 0.01%",def:"Fármaco coadyuvante en el control de miopía. La concentración 0.01% ofrece el mejor balance entre eficacia y ausencia de efectos secundarios. Tiene efecto sinérgico con la ortoqueratología; puede haber rebote al suspenderla.",cat:"Control de Miopía"},
   {term:"Bifocal",def:"Lente con dos zonas de visión (lejos y cerca) identificable por la línea o 'oblea' visible. Para pacientes con presbicia.",cat:"Lente"},
+  {term:"Biometría axial",def:"Medición de la longitud axial del ojo con biómetro óptico. Es el parámetro estándar de oro para monitorear la eficacia del control de miopía; se recomienda medirla cada 6 meses.",cat:"Control de Miopía"},
+  {term:"Cicloplejia",def:"Relajación temporal de la acomodación mediante gotas, necesaria para una refracción exacta en niños. Sin cicloplejia, el resultado puede quedar enmascarado por la acomodación.",cat:"Control de Miopía"},
   {term:"Cilindro (CYL)",def:"Valor en la receta que indica la graduación del astigmatismo. Se maneja siempre con signo negativo (–).",cat:"Receta"},
+  {term:"Colormatic 3",def:"Marca de lentes fotosensibles disponible en Ópticas CV+ (junto a Transitions Gen-S): el lente pasa de claro a oscuro al exponerse a los rayos UV.",cat:"Tratamiento"},
+  {term:"Conjuntiva",def:"Membrana delgada y transparente que recubre la parte blanca del ojo y el interior de los párpados. Lubrica y protege la superficie ocular. Su inflamación es la conjuntivitis.",cat:"Anatomía"},
+  {term:"Control de miopía",def:"Tratamientos que además de corregir la visión frenan la progresión de la miopía en niños (candidato ideal: 6 a 16 años), principalmente mediante desenfoque miópico periférico.",cat:"Control de Miopía"},
   {term:"Córnea",def:"Capa transparente en la parte frontal del ojo. Ayuda a enfocar la luz y protege el ojo de agentes externos.",cat:"Anatomía"},
+  {term:"Coroides",def:"Capa rica en vasos sanguíneos entre la retina y la esclerótica. Alimenta la retina con oxígeno y nutrientes, y absorbe la luz sobrante para que no enturbie la imagen.",cat:"Anatomía"},
   {term:"Corredor",def:"Distancia entre la zona de visión lejana y la zona de visión cercana en un lente progresivo. Puede ser fijo (14,16,18mm) o variable (13-19mm).",cat:"Progresivos"},
   {term:"Cristalino",def:"Lente natural del ojo, transparente y flexible, ubicado detrás del iris. Responsable del enfoque. Su endurecimiento con la edad causa presbicia.",cat:"Anatomía"},
+  {term:"Cuerpo ciliar",def:"Anillo muscular detrás del iris, unido al cristalino por finos hilos (zónulas). Cambia la forma del cristalino para enfocar (acomodación) y produce el humor acuoso.",cat:"Anatomía"},
+  {term:"Desenfoque miópico periférico",def:"Mecanismo de acción de los lentes de control de miopía: generan una señal en la retina periférica que le indica al ojo que no debe seguir creciendo axialmente.",cat:"Control de Miopía"},
   {term:"Dioptría",def:"Unidad de medida de la potencia óptica de un lente o de un defecto visual. Las graduaciones se expresan en pasos de 0.25 dioptrías.",cat:"Medidas"},
   {term:"DMAE",def:"Degeneración Macular Asociada a la Edad. Patología ocular que puede ser causada por exposición prolongada a la luz azul violeta.",cat:"Patología"},
   {term:"Eje (AXIS)",def:"Orientación del astigmatismo en la receta. Siempre debe encontrarse entre 0° y 180°.",cat:"Receta"},
+  {term:"Emétrope",def:"Ojo sin defecto visual: la luz se enfoca exactamente sobre la retina y no necesita corrección.",cat:"Ametropía"},
+  {term:"Esclerótica",def:"Capa blanca, dura y resistente que forma la pared externa del ojo ('lo blanco del ojo'). Da forma al globo ocular y sirve de anclaje a los músculos que lo mueven.",cat:"Anatomía"},
   {term:"Esfera (SPH)",def:"Valor en la receta que muestra la graduación de miopía (–) o hipermetropía (+).",cat:"Receta"},
+  {term:"Filtro para luz azul",def:"Tratamiento (TLX) integrado en la masa del lente que bloquea la luz azul violeta nociva (asociada a DMAE y pantallas) dejando pasar la luz azul turquesa.",cat:"Tratamiento"},
   {term:"Fotosensible",def:"Tratamiento que hace que el lente pase de claro a oscuro al exponerse a los rayos UV. Marcas: Transitions Gen-S y Colormatic 3.",cat:"Tratamiento"},
+  {term:"Fóvea",def:"Depresión central de la mácula, responsable de la visión más nítida: leer, reconocer rostros y distinguir detalles finos.",cat:"Anatomía"},
   {term:"FREE FORM",def:"Tecnología de fabricación avanzada que talla la graduación punto por punto sobre el lente. Usada en todos los productos Akkurat.",cat:"Tecnología"},
+  {term:"Hidrogel",def:"Material tradicional de lentes de contacto, suave y flexible, basado en HEMA.",cat:"Contacto"},
+  {term:"Hidrogel de silicona",def:"Material moderno de lentes de contacto con alta permeabilidad al oxígeno, más saludable para la córnea en uso prolongado.",cat:"Contacto"},
   {term:"Hipermetropía",def:"Defecto visual que dificulta la visión de cerca. El ojo es más pequeño de lo normal. Se corrige con lentes positivos (+) convergentes.",cat:"Ametropía"},
+  {term:"Humor acuoso",def:"Líquido transparente que llena el espacio entre la córnea y el cristalino (cámara anterior). Nutre ambas estructuras y mantiene la presión interna del ojo.",cat:"Anatomía"},
   {term:"Humor vítreo",def:"Gel transparente entre el cristalino y la retina. Mantiene la forma del ojo y sostiene la retina.",cat:"Anatomía"},
   {term:"Índice de refracción",def:"Capacidad del material para desviar la luz. Mayor índice = lente más delgado. Materiales: 1.59, 1.60, 1.67, 1.74.",cat:"Materiales"},
   {term:"Iris",def:"Parte coloreada del ojo. Anillo muscular que regula la cantidad de luz que entra al ojo a través de la pupila.",cat:"Anatomía"},
+  {term:"Lente de proceso",def:"Lente fabricado de manera personalizada (tallado) según la receta del paciente. Se usa cuando la graduación es mayor a 2.00; permite más tratamientos y personalización, con mayor costo.",cat:"Fabricación"},
   {term:"Lente ocupacional",def:"Lente tecnológico con dos campos de visión (cercano e intermedio). Sin líneas visibles. Para présbitas en entornos de oficina o lectura.",cat:"Lente"},
+  {term:"Lente terminado",def:"Lente prefabricado disponible en stock, para graduaciones de hasta 2.00. Más rápido y económico que el lente de proceso.",cat:"Fabricación"},
+  {term:"Longitud axial",def:"Largo del ojo de adelante hacia atrás; en la miopía el ojo es más largo de lo normal. Por encima de 24 mm aumentan significativamente los riesgos de complicaciones graves (desprendimiento de retina, maculopatía miópica).",cat:"Control de Miopía"},
+  {term:"Luminex",def:"Marca de lentes oftálmicos de Ópticas CV+ con material de índice 1.60 y Número Abbe 41. Todos incluyen: AestheticPro (delgados y livianos), VisionGuard (protección UV 100%) y ClearView.",cat:"Marca"},
   {term:"Mácula",def:"Zona central de la retina encargada de la visión de detalles finos y el reconocimiento de rostros.",cat:"Anatomía"},
   {term:"Miopía",def:"Defecto visual que dificulta la visión de lejos. El ojo es más largo de lo normal. Se corrige con lentes negativos (–) divergentes.",cat:"Ametropía"},
+  {term:"MiSight® 1 day",def:"Lente de contacto blando de reemplazo diario (CooperVision) para control de miopía: sus zonas concéntricas alternas crean desenfoque miópico periférico.",cat:"Control de Miopía"},
+  {term:"MiYOSMART®",def:"Lente oftálmico de HOYA para el control de miopía: corrige la visión y genera desenfoque miópico periférico para inhibir el crecimiento axial del ojo.",cat:"Control de Miopía"},
   {term:"Monofocal",def:"Sinónimo de lente de visión sencilla. Tiene una sola graduación en toda su superficie para un único campo visual.",cat:"Lente"},
   {term:"Multifocal",def:"Sinónimo de lente progresivo. Ofrece tres campos de visión (lejos, intermedio, cerca) sin líneas visibles.",cat:"Lente"},
   {term:"Nervio óptico",def:"Estructura que transporta los impulsos nerviosos desde el ojo hasta el cerebro para su interpretación visual.",cat:"Anatomía"},
   {term:"Número Abbe",def:"Valor que mide la calidad óptica y transparencia del material. Mayor a 39 indica buena calidad. Luminex tiene Abbe 41.",cat:"Materiales"},
+  {term:"OD / OI",def:"En la receta oftálmica: OD es el ojo derecho y OI el ojo izquierdo. Cada fila de la receta indica la graduación de un ojo.",cat:"Receta"},
+  {term:"Odoo",def:"Sistema donde se gestiona el flujo de servicio al cliente en CV+, en 6 etapas secuenciales: creación de contacto, creación de Rx, creación de oportunidad, creación de actividades, presupuesto/pedido y facturación.",cat:"Procesos"},
+  {term:"Ortoqueratología (Orto-K)",def:"Lentes de contacto de uso nocturno que moldean temporalmente la córnea: el paciente ve bien de día sin corrección y se frena la progresión de la miopía. Tiene efecto sinérgico con atropina 0.01%.",cat:"Control de Miopía"},
   {term:"Polarizado",def:"Tratamiento que bloquea reflejos molestos del sol. Categoría 3 de oscurecimiento. Protección UV 100%. Se puede hacer con graduación.",cat:"Tratamiento"},
+  {term:"Policarbonato",def:"Material de lente con índice de refracción 1.59. Forma parte, junto con los índices 1.60, 1.67 y 1.74, de los materiales disponibles en Ópticas CV+.",cat:"Materiales"},
+  {term:"Pre-miopía",def:"Niño que aún no es miope pero cuyos valores refractivos y factores de riesgo anticipan que desarrollará miopía. Requiere vigilancia y hábitos visuales preventivos.",cat:"Control de Miopía"},
   {term:"Presbicia",def:"Pérdida de capacidad de enfoque cercano causada por el endurecimiento del cristalino. Aparece a partir de los 40 años. Signo (+).",cat:"Ametropía"},
   {term:"Présbita",def:"Persona que padece presbicia. Es el perfil de paciente que más requiere lentes progresivos, bifocales u ocupacionales.",cat:"Paciente"},
+  {term:"Prisma",def:"Columna de la receta oftálmica reservada para la corrección prismática (desviaciones oculares). En la mayoría de las recetas aparece vacía o en 0.",cat:"Receta"},
   {term:"Progresivo",def:"Lente tecnológico que ofrece 3 campos de visión (lejos, intermedio, cerca) sin líneas visibles. Para uso diario en pacientes con presbicia.",cat:"Lente"},
   {term:"Pupila",def:"Abertura circular en el centro del iris. Controla la entrada de luz al ojo.",cat:"Anatomía"},
   {term:"Refracción",def:"Cambio de dirección y velocidad de la luz al pasar de un medio a otro. Principio óptico en el que se basa la corrección visual.",cat:"Óptica"},
+  {term:"Regla 20-20-20",def:"Hábito visual preventivo: cada 20 minutos de visión cercana, mirar algo a 20 pies (6 metros) durante 20 segundos. Se complementa con la regla del codo (distancia de lectura correcta) y al menos 2 horas diarias al aire libre.",cat:"Control de Miopía"},
   {term:"Retina",def:"Capa sensible a la luz que transforma los estímulos luminosos en impulsos nerviosos enviados al cerebro.",cat:"Anatomía"},
+  {term:"Señales de compra",def:"Indicios de que el prospecto está listo para comprar: preguntas específicas, interés en formas de pago, comentarios positivos y gestos de aprobación. Al detectarlas, se aplica una técnica de cierre.",cat:"Ventas"},
+  {term:"Stellest®",def:"Lente oftálmico de Essilor para el control de miopía: corrige la visión y genera desenfoque miópico periférico para inhibir el crecimiento axial del ojo.",cat:"Control de Miopía"},
+  {term:"Técnicas de cierre",def:"Las 4 técnicas de cierre de ventas en CV+: Cierre Directo, Cierre por Opciones, Cierre por Escasez y Cierre de Prueba.",cat:"Ventas"},
+  {term:"Titanio",def:"Material metálico premium para aros oftálmicos: liviano y resistente. Variantes: Titanio y Beta Titanio; también se usa acero inoxidable.",cat:"Aros"},
   {term:"Tórico",def:"Tipo de lente de contacto diseñado para corregir el astigmatismo.",cat:"Contacto"},
+  {term:"TR90",def:"Material plástico para aros oftálmicos, liviano y flexible.",cat:"Aros"},
   {term:"Transitions Gen-S",def:"Marca premium de lentes fotosensibles con 8 colores disponibles, protección contra luz azul nociva y activación/desactivación más rápida.",cat:"Tratamiento"},
   {term:"VS",def:"Abreviatura de 'Visión Sencilla' (también llamado monofocal). Lente con una sola graduación.",cat:"Lente"},
 ];
@@ -3799,5 +3838,769 @@ Cerrar
   });
 </script>
 <script type="module" src="js/admin.js"></script>
+
+<!-- ═══════════════════════════════════════════════════════
+     🤖 ASISTENTE VIRTUAL — Chatbot de reglas (100% gratis, sin IA externa)
+     No usa ninguna API de pago. Responde comparando palabras clave contra:
+       1) Preguntas frecuentes de uso de la plataforma (CVPBOT_FAQ, escritas a mano)
+       2) El banco de preguntas de quiz que YA existe en cada módulo (variable
+          global MODULES, definida más arriba en este mismo archivo).
+     Como lee MODULES en vivo, responde según el rol (asesor u optómetra) que
+     ya tenga cargado el usuario, y se mantiene actualizado solo: si agregas
+     un módulo o una pregunta de quiz nueva, el asistente la aprende sin que
+     haya que tocar este bloque.
+     No modifica ninguna función existente del archivo.
+     ═══════════════════════════════════════════════════════ -->
+<style>
+  #cvpBot-btn {
+    display: none; /* se muestra solo después de iniciar sesión */
+    position: fixed; bottom: 24px; right: 24px; z-index: 9999;
+    width: 58px; height: 58px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--cyan), var(--cyan-dark));
+    color: var(--white); border: none; cursor: pointer;
+    box-shadow: 0 4px 16px rgba(0,0,0,.25);
+    font-size: 26px; align-items:center; justify-content:center;
+    transition: transform .2s;
+  }
+  #cvpBot-btn:hover { transform: scale(1.08); }
+  #cvpBot-panel {
+    position: fixed; bottom: 94px; right: 24px; z-index: 9999;
+    width: 340px; max-width: 92vw; height: 480px; max-height: 70vh;
+    background: var(--white); border-radius: 16px; overflow: hidden;
+    box-shadow: 0 8px 30px rgba(0,0,0,.3);
+    display: none; flex-direction: column; font-family: 'Poppins', sans-serif;
+  }
+  #cvpBot-panel.abierto { display: flex; }
+  #cvpBot-header {
+    background: var(--dark); color: var(--white); padding: 14px 16px;
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  #cvpBot-header strong { font-size: 14px; }
+  #cvpBot-header span.sub { display:block; font-size: 11px; color: var(--cyan); }
+  #cvpBot-close { background:none; border:none; color:var(--white); font-size:18px; cursor:pointer; }
+  #cvpBot-msgs {
+    flex: 1; overflow-y: auto; padding: 12px; background: var(--gray-bg);
+    display:flex; flex-direction:column; gap:8px;
+  }
+  .cvpBot-msg { max-width: 85%; padding: 9px 12px; border-radius: 12px; font-size: 12.5px; line-height:1.4; }
+  .cvpBot-msg.bot { background: var(--white); color: var(--text); align-self:flex-start; border:1px solid var(--gray-light); }
+  .cvpBot-msg.user { background: var(--cyan); color: var(--white); align-self:flex-end; }
+  .cvpBot-msg .fuente { display:block; margin-top:4px; font-size:10px; color: var(--gray-text); }
+  .cvpBot-chip {
+    background: var(--gray-light); border:1px solid var(--gray-mid); color: var(--text);
+    border-radius: 14px; padding: 5px 10px; font-size: 11px; cursor:pointer; margin: 2px 4px 2px 0; display:inline-block;
+  }
+  .cvpBot-chip:hover { background: var(--cyan-light); border-color: var(--cyan); }
+  #cvpBot-inputRow { display:flex; border-top:1px solid var(--gray-light); padding:8px; gap:6px; }
+  #cvpBot-input {
+    flex:1; border:2px solid var(--gray-light); border-radius:10px; padding:8px 10px;
+    font-family:inherit; font-size:12.5px; outline:none;
+  }
+  #cvpBot-input:focus { border-color: var(--cyan); }
+  #cvpBot-send {
+    background: var(--gold); color: var(--dark); border:none; border-radius:10px;
+    width:38px; cursor:pointer; font-size:16px;
+  }
+  .cvpBot-accion {
+    background: var(--gold); color: var(--dark); border:none; font-weight:600;
+    border-radius: 14px; padding: 6px 12px; font-size: 11.5px; cursor:pointer;
+    margin: 4px 4px 0 0; display:inline-block; font-family:inherit;
+  }
+  .cvpBot-accion:hover { filter: brightness(1.08); }
+  .cvpBot-escribiendo { color: var(--gray-text); font-style: italic; }
+  @media (max-width: 480px) {
+    #cvpBot-panel { right: 4vw; left: 4vw; width: auto; max-width: none; height: 72vh; bottom: 86px; }
+    #cvpBot-btn { bottom: 16px; right: 16px; }
+  }
+</style>
+
+<button id="cvpBot-btn" onclick="cvpBotToggle()" title="Asistente de Academia CV+">💬</button>
+
+<div id="cvpBot-panel">
+  <div id="cvpBot-header">
+    <div>
+      <strong>🤖 Asistente Academia CV+</strong>
+      <span class="sub">Responde con base en tus módulos</span>
+    </div>
+    <button id="cvpBot-close" onclick="cvpBotToggle()">✕</button>
+  </div>
+  <div id="cvpBot-msgs"></div>
+  <div id="cvpBot-inputRow">
+    <input id="cvpBot-input" type="text" placeholder="Escribe tu pregunta…" onkeydown="if(event.key==='Enter') cvpBotSend();">
+    <button id="cvpBot-send" onclick="cvpBotSend()">➤</button>
+  </div>
+</div>
+
+<script>
+// ─── Utilidades de texto ───
+var CVPBOT_STOP = new Set(["el","la","los","las","de","del","en","es","un","una","unos","unas","que","qué","como","cómo","por","para","con","sin","al","a","y","o","se","su","sus","mi","mis","tu","tus","lo","le","les","me","te","nos","este","esta","estos","estas","ese","esa","esos","esas","cual","cuál","cuáles","cuando","cuándo","donde","dónde","porque","será","son","fue","ser","hay","más","muy","tan","ya","si","sí","no","tiene","tienen","hace","cuánto","cuanto","cuántas","cuantas","cuántos","cuantos","cuentame","cuéntame","sobre","dime","significa","explicame","explícame"]);
+
+function cvpBotNormaliza(str){
+  return (str||"")
+    .toLowerCase()
+    .replace(/[áàä]/g,"a").replace(/[éèë]/g,"e").replace(/[íìï]/g,"i")
+    .replace(/[óòö]/g,"o").replace(/[úùü]/g,"u")
+    .replace(/[^a-z0-9ñ\s]/g," ");
+}
+
+function cvpBotTokeniza(str){
+  return cvpBotNormaliza(str)
+    .split(/\s+/)
+    .filter(function(t){ return t.length >= 3 && !CVPBOT_STOP.has(t); })
+    // Quita la "s" final de plurales simples (aros→aro, lentes→lente) para que
+    // singular y plural coincidan. Se aplica igual a contenido y a preguntas.
+    .map(function(t){ return (t.length >= 4 && /[aeiou]s$/.test(t)) ? t.slice(0,-1) : t; });
+}
+
+function cvpBotOverlap(tokensA, tokensB){
+  var setB = new Set(tokensB);
+  var count = 0;
+  tokensA.forEach(function(t){ if (setB.has(t)) count++; });
+  return count;
+}
+
+// ─── Preguntas frecuentes de USO DE LA PLATAFORMA (no del contenido de óptica) ───
+var CVPBOT_FAQ = [
+  { kw:["contraseña","clave","password","olvide","recuperar"],
+    r:"La plataforma todavía no tiene un botón de \"olvidé mi contraseña\". Escríbele directamente a tu administrador para que te la restablezca." },
+  { kw:["iniciar","sesion","entrar","login","acceso","credenciales","usuario"],
+    r:"Inicia sesión con el correo y la contraseña que te asignó tu administrador. Si es tu primer ingreso y aún no tienes credenciales, contáctalo." },
+  { kw:["progreso","avance","modulos completados","cuantos modulos"],
+    r:"Tu progreso general aparece arriba del menú de módulos, en la barra lateral izquierda: muestra cuántos módulos has completado del total." },
+  { kw:["bloqueado","bloqueada","candado","desbloquear","abrir modulo"],
+    r:"Los módulos se desbloquean en orden. Para abrir el siguiente, primero debes aprobar el quiz del módulo anterior con al menos 80%." },
+  { kw:["nota minima","puntaje minimo","aprobar","porcentaje minimo"],
+    r:"La nota mínima para aprobar cualquier quiz es 80%." },
+  { kw:["repetir","reintentar","volver a intentar","reprobe","fallar"],
+    r:"Sí, puedes repetir el quiz de un módulo las veces que necesites hasta aprobarlo." },
+  { kw:["cuantas preguntas","numero de preguntas","cantidad de preguntas"],
+    r:"Cada módulo tiene un banco de preguntas más grande, y el sistema elige algunas al azar en cada intento — por eso el orden y la selección cambian cada vez que haces el quiz." },
+  { kw:["historial","intentos anteriores","notas anteriores","mis intentos"],
+    r:"Puedes ver tu última nota en cada módulo. El historial completo de todos tus intentos lo consulta tu administrador desde el panel de control." },
+  { kw:["cerrar sesion","salir","logout","desconectar"],
+    r:"Usa el botón \"🚪 Cerrar sesión\" que está en la parte inferior del menú lateral." },
+  { kw:["buscar","donde encuentro","donde esta el tema","barra de busqueda"],
+    r:"Usa la barra de búsqueda en la parte superior del menú lateral (🔍) para encontrar un tema en todos los módulos." },
+  { kw:["asesor","optometra","optómetra","diferencia de rol","tipo de cuenta"],
+    r:"El contenido que ves (de asesor o de optómetra) depende del rol que te asignó tu administrador; tú no puedes cambiarlo." }
+];
+
+var CVPBOT_SALUDOS = ["hola","buenas","buenos dias","buenas tardes","buenas noches","hey","ola"];
+var CVPBOT_GRACIAS = ["gracias","thank","thanks"];
+var CVPBOT_AYUDA = ["ayuda","que puedes hacer","que sabes hacer","opciones","menu"];
+
+// ─── Índice del CONTENIDO real, leído en vivo desde MODULES ───
+function cvpBotModulosActivos(){
+  try {
+    return (typeof MODULES !== "undefined" && Array.isArray(MODULES)) ? MODULES : [];
+  } catch(e) { return []; }
+}
+function cvpBotBancoDe(mod){ return mod.quizBank || mod.quiz || []; }
+// Lee el glosario técnico EN VIVO desde la variable global GLOSSARY_DATA
+// (la misma que alimenta la sección "📖 Glosario"). Si agregas o corriges un
+// término ahí, el bot lo aprende automáticamente, sin tocar este bloque.
+function cvpBotGlosario(){
+  try {
+    return (typeof GLOSSARY_DATA !== "undefined" && Array.isArray(GLOSSARY_DATA)) ? GLOSSARY_DATA : [];
+  } catch(e) { return []; }
+}
+// TODO lo relacionado a una palabra en el glosario: devuelve las entradas cuyo
+// TÉRMINO o cuya DEFINICIÓN contienen alguna palabra de la consulta. Las que
+// coinciden por término van primero (son más relevantes que una mención de paso).
+function cvpBotGlosarioRelacionados(tokens, excluir){
+  var res = [];
+  cvpBotGlosario().forEach(function(g){
+    if (excluir && g.term === excluir.term) return;
+    var enTerm = cvpBotTokeniza(g.term).some(function(t){ return tokens.indexOf(t) !== -1; });
+    // Se compara contra PALABRAS completas de la definición (no subcadenas),
+    // para que "aro" no coincida dentro de "claro", por ejemplo.
+    var defTokens = new Set(cvpBotTokeniza(g.def));
+    var enDef = 0;
+    tokens.forEach(function(t){ if (defTokens.has(t)) enDef++; });
+    // Coincidir por término vale más que por definición; entre definiciones,
+    // gana la que menciona más palabras de la consulta.
+    if (enTerm || enDef) res.push({ g:g, peso: (enTerm ? 100 : 0) + enDef });
+  });
+  res.sort(function(a,b){ return b.peso - a.peso; });
+  return res.map(function(r){ return r.g; });
+}
+function cvpBotTemasDe(mod){
+  var temas = (mod.content || "").match(/<h2>([^<]+)<\/h2>/g) || [];
+  return temas.map(function(h){ return h.replace(/<\/?h2>/g,""); });
+}
+
+// Se construye en 3 pasadas (todos los títulos, luego todos los temas, luego
+// todas las preguntas de quiz) en vez de módulo por módulo. Así, si un título
+// empata en puntaje con una pregunta de quiz de OTRO módulo (p. ej. "Lentes
+// Oftálmicos" menciona de paso "visión sencilla" igual que el módulo dedicado
+// "Lente de Visión Sencilla"), el título específico se evalúa primero y gana
+// el empate — la coincidencia de título es la señal más confiable de tema.
+function cvpBotCorpus(){
+  var mods = cvpBotModulosActivos();
+  var glosario = [], titulos = [], temas = [], quizzes = [];
+  // El glosario va PRIMERO: si la pregunta es exactamente un término técnico
+  // ("¿qué es astigmatismo?"), la definición oficial del glosario gana el
+  // empate sobre títulos y preguntas de quiz — es la fuente más precisa.
+  cvpBotGlosario().forEach(function(g){
+    glosario.push({ tipo:"glosario", g:g, tokens: cvpBotTokeniza(g.term) });
+  });
+  mods.forEach(function(mod){
+    titulos.push({ tipo:"titulo", mod:mod, tokens: cvpBotTokeniza(mod.title) });
+    cvpBotTemasDe(mod).forEach(function(tema){
+      temas.push({ tipo:"tema", mod:mod, tokens: cvpBotTokeniza(tema) });
+    });
+    cvpBotBancoDe(mod).forEach(function(item){
+      quizzes.push({ tipo:"quiz", mod:mod, item:item, tokens: cvpBotTokeniza(item.q) });
+    });
+  });
+  return glosario.concat(titulos, temas, quizzes);
+}
+
+// Pesos tipo TF-IDF: una palabra que aparece en pocos lugares del contenido
+// (ej. "sencilla", "astigmatismo") pesa mucho más que una que aparece en
+// decenas de preguntas (ej. "visión", "lente"). Esto permite ser flexible con
+// la forma de preguntar SIN repetir el bug original: "visión sencilla" ya no
+// se confunde con una pregunta de astigmatismo solo por compartir "visión".
+function cvpBotPesos(docs){
+  var df = {};
+  docs.forEach(function(d){
+    var vistos = {};
+    d.tokens.forEach(function(t){
+      if (!vistos[t]) { df[t] = (df[t]||0) + 1; vistos[t] = true; }
+    });
+  });
+  var N = docs.length || 1;
+  var idf = {};
+  Object.keys(df).forEach(function(t){
+    idf[t] = Math.log((N + 1) / (df[t] + 1)) + 1;
+  });
+  return idf;
+}
+
+function cvpBotPuntaje(tokensQuery, tokensDoc, idf){
+  var setDoc = new Set(tokensDoc);
+  var score = 0;
+  tokensQuery.forEach(function(t){ if (setDoc.has(t)) score += (idf[t]||1); });
+  return score;
+}
+
+// Dentro de un módulo YA identificado, busca la pregunta de quiz más parecida
+// (compara contra la pregunta Y su explicación, porque a veces la palabra que
+// usó el usuario aparece en la respuesta explicada, no en el enunciado).
+function cvpBotMejorPreguntaEnModulo(mod, tokens, idf){
+  var bank = cvpBotBancoDe(mod);
+  var mejor = null, mejorScore = 0;
+  bank.forEach(function(item){
+    var itemTokens = cvpBotTokeniza(item.q + " " + (item.e || ""));
+    var score = cvpBotPuntaje(tokens, itemTokens, idf);
+    if (score > mejorScore) { mejorScore = score; mejor = item; }
+  });
+  return mejor;
+}
+
+// Temas relacionados del mismo módulo, para invitar a seguir explorando con
+// un clic (botones/"chips") después de cada respuesta de contenido.
+function cvpBotChipsDe(mod){
+  return cvpBotTemasDe(mod).slice(0,4);
+}
+
+// ─── Búsqueda amplia en TODO el contenido de los módulos ───
+// Se usa cuando la palabra/frase no está en el glosario ni coincide fuerte con
+// títulos, temas o quiz: rastrea el TEXTO COMPLETO de cada módulo (los párrafos
+// bajo cada <h2>) y las explicaciones de quiz, y devuelve fragmentos relacionados.
+
+function cvpBotLimpiaHtml(html){
+  return (html || "")
+    .replace(/<style[\s\S]*?<\/style>/gi, " ")
+    .replace(/<script[\s\S]*?<\/script>/gi, " ")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&[a-z#0-9]+;/gi, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+// Divide el contenido de un módulo en secciones: cada <h2> con su texto.
+function cvpBotSeccionesDe(mod){
+  var partes = (mod.content || "").split(/<h2>/i);
+  var secs = [];
+  partes.forEach(function(p, i){
+    if (i === 0) {
+      var t0 = cvpBotLimpiaHtml(p);
+      if (t0.length > 40) secs.push({ tema:"", texto:t0 });
+      return;
+    }
+    var fin = p.indexOf("</h2>");
+    var tema = fin >= 0 ? cvpBotLimpiaHtml(p.slice(0, fin)) : "";
+    var texto = cvpBotLimpiaHtml(fin >= 0 ? p.slice(fin + 5) : p);
+    if (texto.length > 20 || tema) secs.push({ tema:tema, texto:texto });
+  });
+  return secs;
+}
+
+// Extrae la oración del texto que más palabras de la consulta contiene.
+function cvpBotFragmento(texto, tokens){
+  var frases = texto.split(/[.!?]\s+/);
+  var mejor = "", mejorN = 0;
+  frases.forEach(function(f){
+    var fT = cvpBotTokeniza(f);
+    var n = 0;
+    tokens.forEach(function(t){ if (fT.indexOf(t) !== -1) n++; });
+    if (n > mejorN) { mejorN = n; mejor = f; }
+  });
+  if (!mejor) mejor = frases[0] || texto;
+  mejor = mejor.trim();
+  if (mejor.length > 220) mejor = mejor.slice(0, 217) + "...";
+  return mejor + (/[.!?…]$/.test(mejor) ? "" : ".");
+}
+
+// Busca en secciones de contenido + explicaciones de quiz. Devuelve resultados
+// ordenados por puntaje ponderado, máximo 2 por módulo, hasta 4 en total.
+function cvpBotBuscarAmplio(tokens, idf){
+  var resultados = [];
+  cvpBotModulosActivos().forEach(function(mod){
+    cvpBotSeccionesDe(mod).forEach(function(sec){
+      var secTokens = cvpBotTokeniza(sec.tema + " " + sec.texto);
+      var score = cvpBotPuntaje(tokens, secTokens, idf);
+      if (score > 0) resultados.push({
+        score: score, mod: mod,
+        term: mod.title + (sec.tema ? " · " + sec.tema : ""),
+        def: cvpBotFragmento(sec.texto, tokens)
+      });
+    });
+    cvpBotBancoDe(mod).forEach(function(item){
+      if (!item.e) return;
+      var itTokens = cvpBotTokeniza(item.q + " " + item.e);
+      var score = cvpBotPuntaje(tokens, itTokens, idf) * 0.9; // la sección gana empates
+      if (score > 0) resultados.push({ score:score, mod:mod, term:mod.title, def:item.e });
+    });
+  });
+  resultados.sort(function(a,b){ return b.score - a.score; });
+  var porMod = {}, top = [];
+  resultados.forEach(function(r){
+    var k = r.mod.title;
+    porMod[k] = porMod[k] || 0;
+    if (porMod[k] < 2 && top.length < 4) { top.push(r); porMod[k]++; }
+  });
+  return top;
+}
+
+// ─── Progreso personal: lee las MISMAS variables/funciones que el dashboard ───
+function cvpBotProgresoDatos(){
+  try {
+    if (typeof getModuleOrder !== "function" || typeof getLastScore !== "function") return null;
+    var order = getModuleOrder();
+    var aprobados = [];
+    var siguiente = null;
+    order.forEach(function(id){
+      if (getLastScore(id) >= PASSING_SCORE) aprobados.push(id);
+      else if (siguiente === null) siguiente = id;
+    });
+    return { total: order.length, aprobados: aprobados, siguiente: siguiente };
+  } catch(e) { return null; }
+}
+function cvpBotModuloPorId(id){
+  var mods = cvpBotModulosActivos();
+  for (var i = 0; i < mods.length; i++) if (mods[i].id === id) return mods[i];
+  return null;
+}
+
+// ─── Modo repaso: preguntas de práctica del banco real. NO toca QUIZ_SCORES
+//     ni PROGRESS, así que nunca afecta las notas del usuario. ───
+var CVPBOT_REPASO = { activo:false, mod:null, item:null };
+
+function cvpBotRepasoNueva(tokens){
+  var mods = cvpBotModulosActivos().filter(function(m){ return cvpBotBancoDe(m).length; });
+  if (!mods.length) return { texto:"Aún no hay preguntas disponibles para repasar." };
+  var mod = null;
+  // Si mencionó un módulo ("repaso de progresivos"), lo usamos
+  if (tokens && tokens.length) {
+    var mejorSc = 0;
+    mods.forEach(function(m){
+      var sc = cvpBotOverlap(tokens, cvpBotTokeniza(m.title));
+      if (sc > mejorSc) { mejorSc = sc; mod = m; }
+    });
+  }
+  // Si no, seguimos en el mismo módulo del repaso anterior, o uno al azar
+  if (!mod) mod = CVPBOT_REPASO.mod || mods[Math.floor(Math.random() * mods.length)];
+  var bank = cvpBotBancoDe(mod);
+  var item = bank[Math.floor(Math.random() * bank.length)];
+  CVPBOT_REPASO = { activo:true, mod:mod, item:item };
+  return {
+    texto: "📝 " + item.q,
+    fuente: "Modo repaso · " + mod.title + " (no afecta tus notas)",
+    chips: (item.opts || []).slice()
+  };
+}
+
+// Procesa el mensaje cuando el repaso está activo. Devuelve null si el mensaje
+// no es parte del repaso (y el flujo normal lo atiende).
+function cvpBotRepasoProcesar(mensaje){
+  var norm = cvpBotNormaliza(mensaje).trim();
+  var item = CVPBOT_REPASO.item;
+  // 1) PRIMERO ver si es una de las opciones de la pregunta pendiente
+  //    (antes que los comandos, porque una opción podría contener "nueva", etc.)
+  if (item && item.opts) {
+    var idx = -1;
+    item.opts.forEach(function(o, i){ if (cvpBotNormaliza(o).trim() === norm) idx = i; });
+    if (idx === -1 && norm.length <= 2) {
+      var l = "abcd".indexOf(norm);
+      if (l !== -1) idx = l;
+      else if (/^[1-4]$/.test(norm)) idx = parseInt(norm, 10) - 1;
+    }
+    if (idx >= 0 && idx < item.opts.length) {
+      var correcto = (idx === item.c);
+      CVPBOT_REPASO.item = null;
+      var t = correcto
+        ? "✅ ¡Correcto!"
+        : "❌ No exactamente. La respuesta correcta es: \"" + item.opts[item.c] + "\".";
+      if (item.e) t += "\n\n💡 " + item.e;
+      return { texto: t, fuente: "Modo repaso · " + CVPBOT_REPASO.mod.title, chips: ["🔁 Otra pregunta", "🚪 Salir del repaso"] };
+    }
+  }
+  // 2) Comandos del repaso
+  if (/salir|terminar|cancelar|basta|dejalo|ya no/.test(norm)) {
+    CVPBOT_REPASO = { activo:false, mod:null, item:null };
+    return { texto: "¡Buen repaso! 👏 Salimos del modo repaso. ¿En qué más te ayudo?" };
+  }
+  if (/otra|siguiente|nueva|continuar|una mas|dame/.test(norm)) {
+    var filtro = ["otra","siguiente","nueva","pregunta","continuar","dame","quiero"];
+    return cvpBotRepasoNueva(cvpBotTokeniza(mensaje).filter(function(t){ return filtro.indexOf(t) === -1; }));
+  }
+  // 3) No es parte del repaso → que lo atienda el flujo normal
+  return null;
+}
+
+// ─── Motor principal: decide qué responder ───
+function cvpBotResponder(mensaje){
+  var norm = cvpBotNormaliza(mensaje).trim();
+  var tokens = cvpBotTokeniza(mensaje);
+
+  // 0) Modo repaso activo: las respuestas a la pregunta van primero que todo
+  //    (una opción del quiz podría contener palabras que parecen saludo/comando)
+  if (CVPBOT_REPASO.activo) {
+    var rep = cvpBotRepasoProcesar(mensaje);
+    if (rep) return rep;
+  }
+
+  if (CVPBOT_SALUDOS.some(function(s){ return norm.indexOf(s) !== -1; })) {
+    return { texto:"¡Hola! 👋 Puedo ayudarte con dudas de tus módulos, decirte cómo vas en tu progreso, darte un repaso de práctica o resolver dudas de la plataforma. ¿Qué necesitas?", chips:["📊 ¿Cómo voy?","📝 Dame un repaso","📖 ¿Qué es la miopía?"] };
+  }
+  if (CVPBOT_GRACIAS.some(function(s){ return norm.indexOf(s) !== -1; })) {
+    return { texto:"¡Con gusto! ¿Tienes otra pregunta?" };
+  }
+  if (CVPBOT_AYUDA.some(function(s){ return norm.indexOf(s) !== -1; })) {
+    return { texto:"Puedo hacer varias cosas:\n\n📖 Definiciones del Glosario Técnico (\"¿qué es astigmatismo?\")\n🔍 Buscar en todo el contenido de tus módulos\n📊 Decirte cómo vas (\"¿cómo voy?\", \"¿qué módulo sigue?\", \"mis notas\")\n📝 Darte preguntas de repaso que no afectan tus notas (\"dame un repaso\")\n🛟 Resolver dudas de la plataforma (contraseña, módulos bloqueados, nota mínima)" };
+  }
+
+  // 0.5) Iniciar modo repaso ("dame un repaso", "hazme una pregunta", "quiero practicar")
+  if (/repas|hazme una pregunta|ponme a prueba|practicar|pregunta de practica|modo practica/.test(norm)) {
+    var filtroInicio = ["repaso","hazme","pregunta","practica","practicar","prueba","quiero","ponme","dame","modo","examen"];
+    return cvpBotRepasoNueva(tokens.filter(function(t){ return filtroInicio.indexOf(t) === -1; }));
+  }
+
+  // 0.6) Progreso personal — con los datos REALES del usuario
+  var esProgreso  = /como voy|mi progreso|mi avance|cuanto me falta|que me falta|cuantos modulos me falta/.test(norm);
+  var esSiguiente = /que sigue|cual sigue|siguiente modulo|que modulo sigue|que modulo me toca|que me toca|proximo modulo|siguiente leccion/.test(norm);
+  var esNotas     = /mi nota|mis notas|ultima nota|mi calificacion|mis calificaciones|mi puntaje|mis puntajes|como me fue/.test(norm);
+  if (esProgreso || esSiguiente || esNotas) {
+    var d = cvpBotProgresoDatos();
+    if (d) {
+      var sigMod = d.siguiente !== null ? cvpBotModuloPorId(d.siguiente) : null;
+      if (esNotas) {
+        var cards = [];
+        cvpBotModulosActivos().forEach(function(m){
+          try {
+            var sc = getLastScore(m.id);
+            if (sc > 0) cards.push({ term: m.title, def: "Última nota: " + sc + "%" + (sc >= PASSING_SCORE ? " ✅ Aprobado" : " — aún no alcanza el mínimo (" + PASSING_SCORE + "%)") });
+          } catch(e){}
+        });
+        if (!cards.length) return { texto:"Aún no has realizado ningún quiz. ¡Anímate con el primero!", acciones: sigMod ? [{label:"📚 Ir a mi primer módulo", modId: sigMod.id}] : null };
+        return { texto:"Estas son tus últimas notas por módulo:", fuente:"📈 Tu progreso personal", relacionados: cards.slice(0,10), relTitulo:"📝 Tus notas:" };
+      }
+      var pct = d.total ? Math.round(d.aprobados.length * 100 / d.total) : 0;
+      var txt;
+      if (!sigMod) {
+        txt = "🎉 ¡Felicidades! Has aprobado TODOS los módulos (" + d.total + "/" + d.total + ").";
+      } else if (esSiguiente) {
+        txt = "Tu siguiente módulo es: \"" + sigMod.title + "\". ¡Tú puedes! 💪";
+      } else {
+        txt = "📊 Llevas " + d.aprobados.length + " de " + d.total + " módulos aprobados (" + pct + "%)." +
+              "\n\nTu siguiente módulo es: \"" + sigMod.title + "\".";
+      }
+      return {
+        texto: txt,
+        fuente: "📈 Tu progreso personal",
+        acciones: sigMod ? [{ label:"📚 Ir al módulo", modId: sigMod.id }] : null
+      };
+    }
+  }
+
+  // 1) Preguntas frecuentes de la plataforma
+  var mejorFaq = null, mejorFaqScore = 0;
+  CVPBOT_FAQ.forEach(function(entry){
+    var kwTokens = entry.kw.reduce(function(a,k){ return a.concat(cvpBotTokeniza(k)); }, []);
+    var score = cvpBotOverlap(tokens, kwTokens);
+    if (score > mejorFaqScore) { mejorFaqScore = score; mejorFaq = entry; }
+  });
+  if (mejorFaq && mejorFaqScore >= 1) {
+    return { texto: mejorFaq.r };
+  }
+
+  if (!tokens.length) {
+    var modsVacio = cvpBotModulosActivos();
+    return { texto:"No entendí bien tu mensaje 🤔. ¿Sobre qué tema quieres saber?", chips: modsVacio.slice(0,6).map(function(m){ return m.title; }) };
+  }
+
+  // 2) Búsqueda ponderada en título + temas + preguntas de quiz a la vez.
+  var corpus = cvpBotCorpus();
+  var idf = cvpBotPesos(corpus);
+  var vistos = {};
+  var maxPosible = 0;
+  tokens.forEach(function(t){ if (!vistos[t]) { maxPosible += (idf[t]||1); vistos[t] = true; } });
+
+  var mejor = null, mejorScore = 0;
+  corpus.forEach(function(d){
+    var score = cvpBotPuntaje(tokens, d.tokens, idf);
+    if (score > mejorScore) { mejorScore = score; mejor = d; }
+  });
+  var ratio = maxPosible > 0 ? (mejorScore / maxPosible) : 0;
+
+  if (mejor && ratio >= 0.5) {
+    // Coincidió con un término del glosario: respondemos con la definición
+    // oficial (la más precisa) y sugerimos términos de la misma categoría.
+    if (mejor.tipo === "glosario") {
+      // Además de la definición principal, mostramos TODO lo relacionado a la
+      // palabra dentro del glosario (máx. 6 entradas, término primero).
+      var relacionados = cvpBotGlosarioRelacionados(tokens, mejor.g).slice(0,6);
+      var mostrados = relacionados.map(function(x){ return x.term; });
+      var rel = cvpBotGlosario()
+        .filter(function(x){ return x.cat === mejor.g.cat && x.term !== mejor.g.term && mostrados.indexOf(x.term) === -1; })
+        .slice(0,4)
+        .map(function(x){ return x.term; });
+      return {
+        texto: mejor.g.def,
+        fuente: "📖 Glosario: " + mejor.g.term,
+        relacionados: relacionados,
+        relTitulo: "🔎 Relacionado en el glosario:",
+        chips: rel,
+        acciones: [{ label:"📖 Abrir el glosario completo", glosario:true }]
+      };
+    }
+    // Coincidió directo con una pregunta de quiz: respuesta corta y directa.
+    if (mejor.tipo === "quiz") {
+      return {
+        texto: mejor.item.e || (mejor.item.opts && mejor.item.opts[mejor.item.c]) || "",
+        fuente: "📚 " + mejor.mod.title,
+        chips: cvpBotChipsDe(mejor.mod),
+        acciones: [{ label:"📚 Ir al módulo", modId: mejor.mod.id }]
+      };
+    }
+    // Coincidió con el título o un tema del módulo: buscamos DENTRO de ese
+    // módulo la pregunta más parecida para dar una respuesta concreta.
+    var preg = cvpBotMejorPreguntaEnModulo(mejor.mod, tokens, idf);
+    if (preg) {
+      return {
+        texto: preg.e || (preg.opts && preg.opts[preg.c]) || "",
+        fuente: "📚 " + mejor.mod.title,
+        chips: cvpBotChipsDe(mejor.mod),
+        acciones: [{ label:"📚 Ir al módulo", modId: mejor.mod.id }]
+      };
+    }
+    var temas = cvpBotTemasDe(mejor.mod);
+    return {
+      texto: "El módulo \"" + mejor.mod.title + "\" trata sobre esto. Elige un tema para más detalle:",
+      fuente: "📚 " + mejor.mod.title,
+      chips: temas.slice(0,4),
+      acciones: [{ label:"📚 Ir al módulo", modId: mejor.mod.id }]
+    };
+  }
+
+  // 3) No está en el glosario ni coincide fuerte con títulos/temas/quiz →
+  //    búsqueda amplia en TODO el contenido de los módulos, y se muestran
+  //    los fragmentos relacionados con la palabra o frase escrita.
+  var amplios = cvpBotBuscarAmplio(tokens, idf);
+  // Se exige una relevancia mínima (25% del valor ponderado de la consulta)
+  // para no mostrar resultados que solo comparten una palabra sin peso.
+  amplios = amplios.filter(function(r){ return maxPosible > 0 && (r.score / maxPosible) >= 0.25; });
+  if (amplios.length) {
+    return {
+      texto: "Esto es lo que encontré relacionado en el contenido de la academia:",
+      fuente: "🔍 Búsqueda en todos los módulos",
+      relacionados: amplios.map(function(r){ return { term: r.term, def: r.def }; }),
+      relTitulo: "🔍 Encontrado en el contenido:",
+      chips: cvpBotChipsDe(amplios[0].mod),
+      acciones: [{ label:"📚 Ir al módulo", modId: amplios[0].mod.id }]
+    };
+  }
+
+  // 4) Nada, ni siquiera en la búsqueda amplia → contacto directo con el creador
+  var mods = cvpBotModulosActivos();
+  return {
+    texto: "No tengo una respuesta para eso 🙁. Pero puedes comunicarte con el creador de esta academia y él con gusto te ayudará:\n\n📞 +503 7786-8880\n\nO intenta con otras palabras, o elige un tema:",
+    chips: mods.slice(0,6).map(function(m){ return m.title; }),
+    acciones: [{ label:"💬 Escribirle por WhatsApp", url:"https://wa.me/50377868880" }]
+  };
+}
+
+// ─── Interfaz del chat ───
+
+// Historial de la conversación en sessionStorage: se conserva al cerrar y
+// reabrir el chat, e incluso al recargar la página (se borra al cerrar pestaña).
+var CVPBOT_HIST = [];
+try { CVPBOT_HIST = JSON.parse(sessionStorage.getItem("cvpbot_hist") || "[]"); } catch(e) { CVPBOT_HIST = []; }
+var CVPBOT_REPLAY = false;
+function cvpBotGuardarHist(m){
+  if (CVPBOT_REPLAY) return;
+  CVPBOT_HIST.push(m);
+  if (CVPBOT_HIST.length > 40) CVPBOT_HIST = CVPBOT_HIST.slice(-40);
+  try { sessionStorage.setItem("cvpbot_hist", JSON.stringify(CVPBOT_HIST)); } catch(e) {}
+}
+
+function cvpBotToggle(){
+  var panel = document.getElementById("cvpBot-panel");
+  panel.classList.toggle("abierto");
+  if (panel.classList.contains("abierto") && !panel.dataset.iniciado) {
+    panel.dataset.iniciado = "1";
+    if (CVPBOT_HIST.length) {
+      // Restaurar la conversación previa de esta sesión
+      CVPBOT_REPLAY = true;
+      var hist = CVPBOT_HIST.slice();
+      hist.forEach(function(m){ cvpBotAgregarMsg(m.texto, m.tipo, m.fuente, m.chips, m.relacionados, m.acciones, m.relTitulo); });
+      CVPBOT_REPLAY = false;
+    } else {
+      cvpBotAgregarMsg("¡Hola! Soy el asistente de Academia CV+ 🤖. Pregúntame algo de tus módulos, pídeme un repaso o consulta tu progreso.", "bot", null, ["📊 ¿Cómo voy?","📝 Dame un repaso"]);
+    }
+  }
+}
+
+// Cierra el panel del chat (al navegar hacia un módulo o el glosario)
+function cvpBotCerrarPanel(){
+  var p = document.getElementById("cvpBot-panel");
+  if (p) p.classList.remove("abierto");
+}
+
+// Ejecuta un botón de acción. Son datos (no funciones) para poder guardarlos
+// en el historial: {modId} abre módulo, {glosario} abre glosario, {url} abre enlace.
+function cvpBotEjecutarAccion(a){
+  try {
+    if (a.url) { window.open(a.url, "_blank"); return; }
+    if (a.glosario && typeof showGlossary === "function") { cvpBotCerrarPanel(); showGlossary(); return; }
+    if (a.modId !== undefined && a.modId !== null && typeof showModule === "function") { cvpBotCerrarPanel(); showModule(a.modId); return; }
+  } catch(e) {}
+}
+
+function cvpBotAgregarMsg(texto, tipo, fuente, chips, relacionados, acciones, relTitulo){
+  cvpBotGuardarHist({ texto:texto, tipo:tipo, fuente:fuente, chips:chips, relacionados:relacionados, acciones:acciones, relTitulo:relTitulo });
+  var cont = document.getElementById("cvpBot-msgs");
+  var div = document.createElement("div");
+  div.className = "cvpBot-msg " + tipo;
+  div.textContent = texto;
+  if (fuente) {
+    var f = document.createElement("span");
+    f.className = "fuente";
+    f.textContent = fuente;
+    div.appendChild(f);
+  }
+  // Tarjetas de resultados (glosario, búsqueda amplia o notas del usuario)
+  if (relacionados && relacionados.length) {
+    var relWrap = document.createElement("div");
+    relWrap.style.cssText = "margin-top:8px;display:flex;flex-direction:column;gap:6px";
+    var titulo = document.createElement("div");
+    titulo.textContent = relTitulo || "🔎 Relacionado en el glosario:";
+    titulo.style.cssText = "font-size:11px;font-weight:700;opacity:.75";
+    relWrap.appendChild(titulo);
+    relacionados.forEach(function(r){
+      var card = document.createElement("div");
+      card.style.cssText = "font-size:12px;line-height:1.45;background:rgba(0,0,0,.06);border-radius:8px;padding:7px 9px";
+      var b = document.createElement("b");
+      b.textContent = r.term + ": ";
+      card.appendChild(b);
+      card.appendChild(document.createTextNode(r.def));
+      relWrap.appendChild(card);
+    });
+    div.appendChild(relWrap);
+  }
+  cont.appendChild(div);
+  // Botones de acción (ir al módulo, abrir glosario, WhatsApp)
+  if (acciones && acciones.length) {
+    var accWrap = document.createElement("div");
+    acciones.forEach(function(a){
+      var btn = document.createElement("button");
+      btn.className = "cvpBot-accion";
+      btn.textContent = a.label;
+      btn.onclick = function(){ cvpBotEjecutarAccion(a); };
+      accWrap.appendChild(btn);
+    });
+    cont.appendChild(accWrap);
+  }
+  if (chips && chips.length) {
+    var chipWrap = document.createElement("div");
+    chips.forEach(function(c){
+      var chip = document.createElement("span");
+      chip.className = "cvpBot-chip";
+      chip.textContent = c;
+      chip.onclick = function(){
+        // En modo repaso los botones se envían tal cual (son opciones/comandos);
+        // fuera del repaso se convierten en una consulta natural.
+        cvpBotEnviarTexto(CVPBOT_REPASO && CVPBOT_REPASO.activo ? c : "Cuéntame sobre " + c);
+      };
+      chipWrap.appendChild(chip);
+    });
+    cont.appendChild(chipWrap);
+  }
+  cont.scrollTop = cont.scrollHeight;
+}
+
+function cvpBotEnviarTexto(texto){
+  if (!texto || !texto.trim()) return;
+  cvpBotAgregarMsg(texto, "user");
+  var resp = cvpBotResponder(texto);
+  // Indicador de "escribiendo…" mientras llega la respuesta
+  var cont = document.getElementById("cvpBot-msgs");
+  var esc = document.createElement("div");
+  esc.className = "cvpBot-msg bot cvpBot-escribiendo";
+  esc.textContent = "Escribiendo…";
+  cont.appendChild(esc);
+  cont.scrollTop = cont.scrollHeight;
+  setTimeout(function(){
+    esc.remove();
+    cvpBotAgregarMsg(resp.texto, "bot", resp.fuente, resp.chips, resp.relacionados, resp.acciones, resp.relTitulo);
+  }, 450);
+}
+
+function cvpBotSend(){
+  var input = document.getElementById("cvpBot-input");
+  var texto = input.value;
+  input.value = "";
+  cvpBotEnviarTexto(texto);
+}
+
+// ─── Visibilidad del botón: solo después de login, y NUNCA sobre el panel admin ───
+// No toca ninguna función existente: solo observa dos cosas cada 800ms:
+//  1) si #login-screen ya no existe (login.remove() al autenticar) → puede mostrarse.
+//  2) si #admin-panel está abierto (style.display === 'block', pantalla completa,
+//     mismo z-index que este botón) → se oculta para no quedar flotando encima
+//     de los controles del panel de administrador.
+(function cvpBotVisibilidad(){
+  var yaInicioSesion = false;
+  setInterval(function(){
+    var btn = document.getElementById('cvpBot-btn');
+    if (!btn) return;
+
+    if (!document.getElementById('login-screen')) yaInicioSesion = true;
+    if (!yaInicioSesion) { btn.style.display = 'none'; return; }
+
+    var adminPanel = document.getElementById('admin-panel');
+    var panelAdminAbierto = adminPanel && adminPanel.style.display === 'block';
+
+    btn.style.display = panelAdminAbierto ? 'none' : 'flex';
+
+    if (panelAdminAbierto) {
+      var chatPanel = document.getElementById('cvpBot-panel');
+      if (chatPanel) chatPanel.classList.remove('abierto');
+    }
+  }, 800);
+})();
+</script>
 </body>
 </html>
