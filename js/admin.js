@@ -40,12 +40,17 @@ const MODULE_NAMES = {
   "16": "Luminex",
   "17": "Cierre de ventas",
   "18": "Aros oftalmicos y ficha de marca",
-  "19": "Flujo de Servicio al Cliente en Odoo"
+  "19": "Flujo de Servicio al Cliente en Odoo",
+  "20": "Ingles Nivel 1 - Survival English",
+  "21": "Ingles Nivel 2 - Presente y rutina",
+  "22": "Ingles Nivel 3 - Pasado y futuro",
+  "23": "Ingles Nivel 4 - Conversacion real"
   // ...agrega o corrige los que necesites
 };
 
 // Total de módulos del curso (para la barra de progreso)
-const TOTAL_MODULES = 19;
+// Se calcula automáticamente: al agregar una línea arriba, el total se ajusta solo.
+const TOTAL_MODULES = Object.keys(MODULE_NAMES).length;
 
 // Módulos para optometristas
 // ✏️ SOLO EDITA ESTO al agregar un módulo nuevo: agrega una línea con el ID y el nombre.
@@ -53,7 +58,10 @@ const TOTAL_MODULES = 19;
 const MODULE_NAMES_OPTO = {
   "1": "Lentes para el Control de la Miopía",
   "2": "Flujo de Servicio al Cliente en Odoo",
-  // "3": "Nombre del módulo 3",
+  "3": "Ingles Nivel 1 - Survival English",
+  "4": "Ingles Nivel 2 - Presente y rutina",
+  "5": "Ingles Nivel 3 - Pasado y futuro",
+  "6": "Ingles Nivel 4 - Conversacion real",
 };
 const TOTAL_MODULES_OPTO = Object.keys(MODULE_NAMES_OPTO).length;
 
