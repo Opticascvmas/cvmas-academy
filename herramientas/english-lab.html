@@ -1,0 +1,1367 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>English Lab · Academia CV+</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --cyan:#00B9D6; --cyan-dark:#0099B5; --cyan-light:#E0F7FA;
+  --dark:#0D2137; --dark2:#1A3350; --gold:#F5B800;
+  --white:#fff; --bg:#F0F4F8; --gray-light:#E8EDF2; --gray-mid:#B0BEC5;
+  --gray-text:#546E7A; --text:#1A2A3A; --ok:#00C853; --bad:#F44336; --warn:#FF9800;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Poppins',sans-serif;background:var(--bg);color:var(--text);
+  -webkit-font-smoothing:antialiased;padding-bottom:40px}
+.wrap{max-width:1080px;margin:0 auto;padding:18px 16px 60px}
+
+/* ── Encabezado ── */
+.eltop{background:linear-gradient(135deg,var(--dark) 0%,var(--dark2) 100%);
+  border-radius:16px;padding:20px 24px;color:#fff;position:relative;overflow:hidden}
+.eltop:after{content:'';position:absolute;right:-40px;top:-40px;width:180px;height:180px;
+  border-radius:50%;background:rgba(0,185,214,.16)}
+.eltop h1{font-size:1.35rem;font-weight:700;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.eltop p{color:#9db4c9;font-size:.86rem;margin-top:6px;max-width:640px;line-height:1.5}
+.elbadge{background:var(--gold);color:var(--dark);font-size:.7rem;font-weight:700;
+  padding:3px 10px;border-radius:20px;letter-spacing:.4px}
+
+/* ── Niveles ── */
+.niveles{display:flex;gap:8px;margin:16px 0 6px;flex-wrap:wrap}
+.niv{flex:1;min-width:150px;background:#fff;border:2px solid var(--gray-light);border-radius:12px;
+  padding:11px 14px;cursor:pointer;transition:.16s;text-align:left}
+.niv:hover{border-color:var(--cyan);transform:translateY(-2px)}
+.niv.on{border-color:var(--cyan);background:var(--cyan-light);box-shadow:0 4px 14px rgba(0,185,214,.18)}
+.niv b{display:block;font-size:.82rem;color:var(--dark)}
+.niv span{font-size:.7rem;color:var(--gray-text)}
+
+/* ── Modos ── */
+.modos{display:flex;gap:6px;margin:14px 0 18px;flex-wrap:wrap;
+  background:#fff;padding:7px;border-radius:12px;border:1px solid var(--gray-light)}
+.modo{border:none;background:transparent;font-family:inherit;font-size:.79rem;font-weight:600;
+  color:var(--gray-text);padding:9px 13px;border-radius:9px;cursor:pointer;transition:.15s}
+.modo:hover{background:var(--gray-light);color:var(--dark)}
+.modo.on{background:var(--cyan);color:#fff;box-shadow:0 3px 10px rgba(0,185,214,.3)}
+
+/* ── Tarjetas ── */
+.card{background:#fff;border-radius:14px;padding:20px;border:1px solid var(--gray-light);
+  box-shadow:0 2px 10px rgba(13,33,55,.05);margin-bottom:16px}
+.card h2{font-size:1.02rem;color:var(--dark);margin-bottom:4px;display:flex;align-items:center;gap:8px}
+.card .sub{font-size:.79rem;color:var(--gray-text);margin-bottom:16px;line-height:1.5}
+.hint{background:#FFF9E6;border-left:4px solid var(--gold);border-radius:0 8px 8px 0;
+  padding:11px 14px;font-size:.8rem;color:#6b5200;line-height:1.55;margin:12px 0}
+.hint b{color:#4a3800}
+
+/* ── Frase grande ── */
+.frase{text-align:center;padding:22px 14px 8px}
+.frase .en{font-size:1.6rem;font-weight:700;color:var(--dark);line-height:1.3}
+.frase .fon{font-size:.92rem;color:var(--cyan-dark);font-weight:600;margin-top:9px;letter-spacing:.3px}
+.frase .es{font-size:.86rem;color:var(--gray-text);margin-top:7px;font-style:italic}
+.controles{display:flex;gap:9px;justify-content:center;flex-wrap:wrap;margin-top:18px}
+.btn{border:none;font-family:inherit;font-size:.82rem;font-weight:600;padding:11px 18px;
+  border-radius:10px;cursor:pointer;transition:.15s;display:inline-flex;align-items:center;gap:7px}
+.btn:active{transform:scale(.97)}
+.btn-c{background:var(--cyan);color:#fff}.btn-c:hover{background:var(--cyan-dark)}
+.btn-g{background:var(--gold);color:var(--dark)}.btn-g:hover{background:#e0a800}
+.btn-o{background:#fff;color:var(--dark);border:2px solid var(--gray-light)}
+.btn-o:hover{border-color:var(--cyan);color:var(--cyan-dark)}
+.btn-d{background:var(--dark);color:#fff}.btn-d:hover{background:var(--dark2)}
+.btn.rec{background:var(--bad);color:#fff;animation:lat 1s infinite}
+@keyframes lat{50%{opacity:.55}}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+
+/* ── Resultado de pronunciación ── */
+.resul{margin-top:18px;border-radius:12px;padding:15px 17px;display:none;text-align:left}
+.resul.ok{background:#E8F8EE;border:1px solid #A5E0BC}
+.resul.med{background:#FFF6E5;border:1px solid #F5D48A}
+.resul.no{background:#FDECEA;border:1px solid #F5B7B1}
+.resul .pct{font-size:1.6rem;font-weight:800;line-height:1}
+.resul.ok .pct{color:#0a7d3c}.resul.med .pct{color:#946200}.resul.no .pct{color:#a02c1f}
+.resul .oiste{font-size:.8rem;color:var(--gray-text);margin-top:7px}
+.resul .oiste i{color:var(--text);font-style:normal;font-weight:600}
+.pal{display:inline-block;padding:2px 7px;margin:3px 3px 0 0;border-radius:6px;
+  font-size:.78rem;font-weight:600}
+.pal.b{background:#C8ECD5;color:#0a6b34}.pal.m{background:#F8D7DA;color:#8a231a}
+
+/* ── Barra de progreso / racha ── */
+.stats{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+.stat{flex:1;min-width:110px;background:#fff;border:1px solid var(--gray-light);
+  border-radius:12px;padding:12px 14px;text-align:center}
+.stat b{display:block;font-size:1.35rem;color:var(--cyan-dark);font-weight:800}
+.stat span{font-size:.68rem;color:var(--gray-text);text-transform:uppercase;letter-spacing:.5px}
+.barra{height:8px;background:var(--gray-light);border-radius:20px;overflow:hidden;margin-top:12px}
+.barra i{display:block;height:100%;background:linear-gradient(90deg,var(--cyan),var(--gold));
+  border-radius:20px;transition:width .4s}
+.paso{font-size:.72rem;color:var(--gray-mid);text-align:center;margin-top:8px;letter-spacing:.4px}
+
+/* ── Sonidos ── */
+.sgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
+.son{background:#fff;border:2px solid var(--gray-light);border-radius:12px;padding:15px;
+  cursor:pointer;transition:.16s}
+.son:hover{border-color:var(--cyan);transform:translateY(-2px);box-shadow:0 5px 16px rgba(0,185,214,.15)}
+.son .sim{font-size:1.5rem;font-weight:800;color:var(--cyan-dark)}
+.son .nom{font-size:.78rem;font-weight:700;color:var(--dark);margin-top:2px}
+.son .ej{font-size:.72rem;color:var(--gray-text);margin-top:5px}
+.boca{background:var(--dark);color:#dbe7f1;border-radius:12px;padding:15px 17px;
+  font-size:.83rem;line-height:1.6;margin:12px 0}
+.boca b{color:var(--gold)}
+.pares{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.par{flex:1;min-width:130px;background:var(--cyan-light);border:2px solid #B2E7F0;
+  border-radius:10px;padding:12px;text-align:center;cursor:pointer;transition:.15s}
+.par:hover{border-color:var(--cyan)}
+.par b{display:block;font-size:1rem;color:var(--dark)}
+.par span{font-size:.7rem;color:var(--gray-text)}
+.chips{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}
+.chip{background:#fff;border:1.5px solid var(--gray-light);border-radius:20px;
+  padding:6px 13px;font-size:.78rem;font-weight:600;color:var(--dark);cursor:pointer;transition:.15s}
+.chip:hover{border-color:var(--cyan);background:var(--cyan-light)}
+
+/* ── Conjugador ── */
+.selv{display:flex;gap:9px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+select,input[type=text]{font-family:inherit;font-size:.85rem;padding:10px 13px;
+  border:2px solid var(--gray-light);border-radius:10px;background:#fff;color:var(--text);outline:none}
+select:focus,input[type=text]:focus{border-color:var(--cyan)}
+.tabla{width:100%;border-collapse:collapse;margin-top:10px;font-size:.83rem}
+.tabla th{background:var(--dark);color:#fff;text-align:left;padding:9px 12px;font-size:.75rem;
+  font-weight:600;text-transform:uppercase;letter-spacing:.4px}
+.tabla th:first-child{border-radius:8px 0 0 0}.tabla th:last-child{border-radius:0 8px 0 0}
+.tabla td{padding:9px 12px;border-bottom:1px solid var(--gray-light)}
+.tabla tr:hover td{background:#F7FBFC}
+.tabla .eng{font-weight:600;color:var(--dark)}
+.tabla .esp{color:var(--gray-text);font-size:.79rem}
+.tabla .spk{cursor:pointer;color:var(--cyan-dark);font-size:1rem;user-select:none}
+.ttitulo{font-size:.8rem;font-weight:700;color:var(--cyan-dark);
+  text-transform:uppercase;letter-spacing:.6px;margin:20px 0 4px}
+.regla{background:var(--cyan-light);border-radius:10px;padding:12px 15px;font-size:.81rem;
+  line-height:1.6;color:#0a4652;margin:10px 0}
+.regla b{color:#063a45}
+
+/* ── Diálogos ── */
+.dlg{background:#F7FAFC;border-radius:12px;padding:6px;margin-top:12px}
+.lin{display:flex;gap:11px;padding:11px 13px;border-radius:10px;margin-bottom:5px;align-items:flex-start}
+.lin.cli{background:#fff;border:1px solid var(--gray-light)}
+.lin.yo{background:var(--cyan-light);border:1px solid #B2E7F0}
+.lin .qui{font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;
+  min-width:62px;padding-top:3px}
+.lin.cli .qui{color:var(--gray-text)}.lin.yo .qui{color:var(--cyan-dark)}
+.lin .txt{flex:1}
+.lin .txt .en{font-size:.88rem;font-weight:600;color:var(--dark)}
+.lin .txt .es{font-size:.75rem;color:var(--gray-text);font-style:italic;margin-top:2px}
+.lin .txt .fon{font-size:.72rem;color:var(--cyan-dark);font-weight:600;margin-top:2px}
+.lin .acc{display:flex;gap:5px;flex-shrink:0}
+.mini{border:none;background:#fff;border:1.5px solid var(--gray-light);border-radius:8px;
+  width:32px;height:32px;cursor:pointer;font-size:.85rem;transition:.15s}
+.mini:hover{border-color:var(--cyan);background:var(--cyan-light)}
+.mini.rec{background:var(--bad);border-color:var(--bad);color:#fff;animation:lat 1s infinite}
+
+/* ── Flashcards ── */
+.fc{perspective:1200px;margin:14px auto;max-width:430px}
+.fcin{position:relative;width:100%;height:210px;transition:transform .55s;transform-style:preserve-3d;cursor:pointer}
+.fc.flip .fcin{transform:rotateY(180deg)}
+.fcara{position:absolute;inset:0;backface-visibility:hidden;border-radius:16px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;text-align:center}
+.fcfr{background:linear-gradient(135deg,var(--dark),var(--dark2));color:#fff}
+.fcfr .w{font-size:1.7rem;font-weight:700}
+.fcfr .f{font-size:.85rem;color:var(--gold);margin-top:8px;font-weight:600}
+.fcfr .t{font-size:.68rem;color:#7f97ad;margin-top:16px;letter-spacing:.5px}
+.fcde{background:linear-gradient(135deg,var(--cyan),var(--cyan-dark));color:#fff;transform:rotateY(180deg)}
+.fcde .w{font-size:1.4rem;font-weight:700}
+.fcde .u{font-size:.8rem;margin-top:12px;opacity:.92;line-height:1.5;font-style:italic}
+
+/* ── Dictado / quiz de escucha ── */
+.dictado{text-align:center;padding:10px 0}
+.dictado input{width:100%;max-width:460px;text-align:center;font-size:1rem;font-weight:600;margin-top:14px}
+.vok{color:var(--ok);font-weight:700}.vno{color:var(--bad);font-weight:700}
+
+/* ── Avisos ── */
+.aviso{background:#FDECEA;border:1px solid #F5B7B1;color:#8a231a;border-radius:10px;
+  padding:12px 15px;font-size:.79rem;line-height:1.55;margin-bottom:14px;display:none}
+.aviso.show{display:block}
+.velo{display:flex;align-items:center;gap:9px;font-size:.76rem;color:var(--gray-text);
+  justify-content:center;margin-top:14px;flex-wrap:wrap}
+.velo input[type=range]{width:130px;accent-color:var(--cyan)}
+.hide{display:none!important}
+@media(max-width:600px){
+  .frase .en{font-size:1.25rem}
+  .eltop h1{font-size:1.1rem}
+  .lin{flex-wrap:wrap}
+  .lin .qui{min-width:auto}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="eltop">
+    <h1>🇺🇸 English Lab <span class="elbadge">ACADEMIA CV+</span></h1>
+    <p>Aprende inglés como si hubieras nacido allá: primero el <b>oído</b>, después la boca, y al final la
+       gramática. Escucha la voz nativa, repite en voz alta y el laboratorio te califica la pronunciación.</p>
+  </div>
+
+  <div class="aviso" id="aviso"></div>
+
+  <div class="niveles" id="niveles"></div>
+
+  <div class="modos" id="modos"></div>
+
+  <div id="panel"></div>
+
+</div>
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   ENGLISH LAB · Academia CV+
+   Contenido por niveles. Para agregar material solo edita este
+   objeto DATA: la interfaz se dibuja sola.
+   ═══════════════════════════════════════════════════════════════ */
+const DATA = {
+
+/* ────────────────────────── NIVEL 1 ────────────────────────── */
+1:{
+ nombre:"Nivel 1 · Survival English",
+ corto:"Sonidos y primeras frases",
+ sonidos:[
+  {sim:"TH", nom:"th sonora y sorda /θ/ /ð/",
+   ej:"think · thanks · the",
+   boca:"Este sonido <b>no existe en español</b> y es la marca #1 de un acento extranjero. Saca la punta de la lengua entre los dientes y sopla. En <b>think</b> y <b>thanks</b> solo sale aire (sorda). En <b>the</b>, <b>this</b>, <b>that</b> la garganta vibra (sonora). Nunca lo cambies por T ni por S: si dices <i>sink</i> en vez de <i>think</i>, dijiste 'lavamanos'.",
+   palabras:["think","thanks","three","this","that","the","mother","birthday"],
+   pares:[{a:"think",b:"sink",na:"pensar",nb:"lavamanos"},{a:"three",b:"tree",na:"tres",nb:"árbol"}]},
+
+  {sim:"H", nom:"h aspirada /h/",
+   ej:"hello · help · how",
+   boca:"En español la H es muda; en inglés <b>siempre suena</b>, como un suspiro suave desde el pecho. Pon la mano frente a la boca: debes sentir el aire tibio. Ojo con el error contrario: <b>hour</b>, <b>honest</b> y <b>honor</b> son las excepciones donde sí es muda.",
+   palabras:["hello","help","how","have","here","happy","hi"],
+   pares:[{a:"heat",b:"eat",na:"calor",nb:"comer"},{a:"hi",b:"eye",na:"hola",nb:"ojo"}]},
+
+  {sim:"V/B", nom:"v labiodental /v/",
+   ej:"very · vision · have",
+   boca:"En español B y V suenan igual. En inglés son distintas y confundirlas cambia palabras. Para la <b>V</b> muerde suavemente el labio inferior con los dientes de arriba y haz vibrar: <b>vvvv</b>. Para la <b>B</b> los dos labios se juntan y explotan. Practica: <i>very</i> (muy) vs <i>berry</i> (fruta).",
+   palabras:["very","vision","have","glasses have","five","seven","invoice"],
+   pares:[{a:"very",b:"berry",na:"muy",nb:"baya"},{a:"vest",b:"best",na:"chaleco",nb:"lo mejor"}]},
+
+  {sim:"R", nom:"r americana /ɹ/",
+   ej:"red · ready · here",
+   boca:"La R en inglés <b>no vibra</b> como en español (nada de 'rr'). La lengua se enrolla hacia atrás <b>sin tocar</b> el paladar, y los labios se redondean un poco, como si fueras a decir 'u'. Truco: piensa en el gruñido de un perro suave, no en el motor de una moto.",
+   palabras:["red","ready","right","frame","here","repair","doctor"],
+   pares:[{a:"right",b:"light",na:"correcto",nb:"luz"},{a:"free",b:"flee",na:"gratis",nb:"huir"}]},
+
+  {sim:"ə", nom:"schwa · la vocal perezosa",
+   ej:"about · problem · doctor",
+   boca:"Es el sonido <b>más común del inglés</b> y el secreto del ritmo nativo. En las sílabas sin acento, la vocal se relaja hasta convertirse en un 'e' apagada: <b>about</b> = /ə-BÁUT/, <b>problem</b> = /PRÁ-blem/, <b>doctor</b> = /DÁK-ter/. El error típico del hispanohablante es pronunciar todas las vocales claras y fuertes; en inglés solo <b>una</b> sílaba brilla y el resto se apaga.",
+   palabras:["about","problem","doctor","customer","again","support","banana"],
+   pares:[{a:"customer",b:"cus-to-mer",na:"KAS-te-mer (nativo)",nb:"kus-to-mer (marcado)"}]},
+
+  {sim:"S-", nom:"s líquida al inicio",
+   ej:"school · Spanish · store",
+   boca:"En español no arrancamos palabras con S + consonante, así que agregamos una 'e': <i>escuela</i>, <i>español</i>. En inglés <b>nunca</b> pongas esa 'e'. Es <b>school</b>, no 'eschool'; <b>store</b>, no 'estore'. Empieza directamente con el silbido de la serpiente.",
+   palabras:["school","Spanish","store","start","stop","special","street"],
+   pares:[{a:"store",b:"e-store",na:"correcto",nb:"acento marcado"}]},
+
+  {sim:"iː/ɪ", nom:"vocal larga vs corta",
+   ej:"see · sit",
+   boca:"El español tiene 5 vocales; el inglés tiene más de 12. La <b>i larga</b> (see, eat, feel) se estira con la sonrisa amplia. La <b>i corta</b> (sit, fit, this) es breve y relajada, casi entre 'i' y 'e'. Es la diferencia entre <i>sheet</i> y otra palabra que no querrás decirle a un cliente.",
+   palabras:["see","sit","eat","it","feel","fill","cheap","chip"],
+   pares:[{a:"see",b:"sit",na:"ver",nb:"sentarse"},{a:"feel",b:"fill",na:"sentir",nb:"llenar"}]}
+ ],
+ frases:[
+  {en:"Good morning! Welcome to CV Plus.",es:"¡Buenos días! Bienvenido a CV Plus.",fon:"gud MOR-ning · UÉL-com tu si-vi PLAS"},
+  {en:"Good afternoon! How can I help you?",es:"¡Buenas tardes! ¿Cómo puedo ayudarle?",fon:"gud af-ter-NUN · jáu can ai JELP iu"},
+  {en:"My name is Oscar. Nice to meet you.",es:"Mi nombre es Oscar. Gusto en conocerle.",fon:"mai néim is OS-car · náis tu MIT iu"},
+  {en:"How are you today?",es:"¿Cómo está hoy?",fon:"jáu ar iu tu-DÉI"},
+  {en:"I'm sorry, could you repeat that, please?",es:"Disculpe, ¿podría repetir eso, por favor?",fon:"áim SÓ-ri · cud iu ri-PIT dat plis"},
+  {en:"Just a moment, please.",es:"Un momento, por favor.",fon:"yast a MÓU-ment plis"},
+  {en:"Thank you very much!",es:"¡Muchas gracias!",fon:"zénk iu VÉ-ri match"},
+  {en:"You're welcome.",es:"De nada.",fon:"iur UÉL-com"},
+  {en:"Please, have a seat.",es:"Por favor, tome asiento.",fon:"plis · jav a SIT"},
+  {en:"Do you speak Spanish?",es:"¿Habla español?",fon:"du iu SPIK SPÁ-nish"},
+  {en:"I speak a little English.",es:"Hablo un poco de inglés.",fon:"ai spik a LÍ-tel ÍN-glish"},
+  {en:"One moment, I'll call my supervisor.",es:"Un momento, llamaré a mi supervisor.",fon:"uán MÓU-ment · ail col mai SU-per-vái-ser"},
+  {en:"Here you go.",es:"Aquí tiene.",fon:"jir iu GÓU"},
+  {en:"Have a nice day!",es:"¡Que tenga un buen día!",fon:"jav a náis DÉI"},
+  {en:"See you soon. Goodbye!",es:"Nos vemos pronto. ¡Adiós!",fon:"si iu SUN · gud-BÁI"}
+ ],
+ verbos:[
+  {inf:"to be",es:"ser / estar",nota:"El verbo más usado del inglés. Los nativos casi siempre lo dicen contraído (I'm, you're, it's). Aprende la contracción primero: eso es lo que de verdad se escucha en la calle.",
+   tiempos:{
+    "Afirmativo":[["I am (I'm)","yo soy / estoy"],["You are (you're)","tú eres / estás"],["He is (he's)","él es / está"],["She is (she's)","ella es / está"],["It is (it's)","eso es / está"],["We are (we're)","nosotros somos / estamos"],["They are (they're)","ellos son / están"]],
+    "Negativo":[["I am not (I'm not)","yo no soy / no estoy"],["You are not (you aren't)","tú no eres / no estás"],["He is not (he isn't)","él no es / no está"],["We are not (we aren't)","nosotros no somos / no estamos"],["They are not (they aren't)","ellos no son / no están"]],
+    "Pregunta":[["Am I...?","¿soy / estoy...?"],["Are you...?","¿eres / estás...?"],["Is he...?","¿es / está él...?"],["Is it...?","¿es / está eso...?"],["Are we...?","¿somos / estamos...?"],["Are they...?","¿son / están ellos...?"]]
+   }},
+  {inf:"to have",es:"tener",nota:"Se usa para lo que el cliente o la tienda posee. Solo cambia en la tercera persona: he/she/it → has.",
+   tiempos:{
+    "Afirmativo":[["I have","yo tengo"],["You have","tú tienes"],["He has","él tiene"],["She has","ella tiene"],["It has","eso tiene"],["We have","nosotros tenemos"],["They have","ellos tienen"]],
+    "Negativo":[["I don't have","yo no tengo"],["He doesn't have","él no tiene"],["We don't have","nosotros no tenemos"]],
+    "Pregunta":[["Do you have...?","¿tienes...?"],["Does he have...?","¿tiene él...?"],["Do you have your prescription?","¿tiene su receta?"]]
+   }},
+  {inf:"can",es:"poder",nota:"Es un modal: nunca lleva 's' y el verbo que le sigue va en infinitivo sin 'to'. La forma cortés para atender es 'How can I help you?'.",
+   tiempos:{
+    "Afirmativo":[["I can help","yo puedo ayudar"],["You can see","tú puedes ver"],["He can wait","él puede esperar"],["We can order it","podemos pedirlo"]],
+    "Negativo":[["I can't (cannot) help","no puedo ayudar"],["He can't see","él no puede ver"]],
+    "Pregunta":[["Can I help you?","¿puedo ayudarle?"],["Can you read this line?","¿puede leer esta línea?"],["How can I help you?","¿cómo puedo ayudarle?"]]
+   }}
+ ],
+ dialogos:[
+  {titulo:"Recibir a un cliente extranjero",
+   lineas:[
+    {q:"cli",en:"Hi, good morning!",es:"¡Hola, buenos días!",fon:"jai · gud MOR-ning"},
+    {q:"yo",en:"Good morning! Welcome to CV Plus. How can I help you?",es:"¡Buenos días! Bienvenido a CV Plus. ¿Cómo puedo ayudarle?",fon:"gud MOR-ning · UÉL-com tu si-vi PLAS · jáu can ai JELP iu"},
+    {q:"cli",en:"I need new glasses.",es:"Necesito lentes nuevos.",fon:"ai nid nu GLÁ-ses"},
+    {q:"yo",en:"Of course. Do you have your prescription?",es:"Por supuesto. ¿Tiene su receta?",fon:"of CORS · du iu jav ior pres-CRÍP-shon"},
+    {q:"cli",en:"No, I don't. Can I get an exam here?",es:"No, no tengo. ¿Puedo hacerme un examen aquí?",fon:"nou ai dóunt · can ai get an eg-SÁM jir"},
+    {q:"yo",en:"Yes, we can. Please, have a seat. One moment.",es:"Sí, podemos. Por favor, tome asiento. Un momento.",fon:"ies ui can · plis jav a SIT · uán MÓU-ment"}
+   ]},
+  {titulo:"No entendí: pedir que repitan",
+   lineas:[
+    {q:"cli",en:"Do you carry progressive lenses with blue light filter?",es:"¿Manejan lentes progresivos con filtro de luz azul?",fon:"du iu QUÉ-ri pro-GRÉ-siv LEN-ses uid blu láit FÍL-ter"},
+    {q:"yo",en:"I'm sorry, could you repeat that a little slower, please?",es:"Disculpe, ¿podría repetir eso un poco más despacio, por favor?",fon:"áim SÓ-ri · cud iu ri-PIT dat a LÍ-tel SLÓU-er plis"},
+    {q:"cli",en:"Sure. Progressive lenses. With a blue light filter.",es:"Claro. Lentes progresivos. Con filtro de luz azul.",fon:"shur · pro-GRÉ-siv LEN-ses · uid a blu láit FÍL-ter"},
+    {q:"yo",en:"Yes! We have them. Let me show you.",es:"¡Sí! Los tenemos. Permítame mostrarle.",fon:"ies · ui jav dem · let mi SHÓU iu"}
+   ]}
+ ],
+ cards:[
+  {en:"glasses",es:"lentes / anteojos",fon:"GLÁ-ses",uso:"Do you like these glasses?"},
+  {en:"frames",es:"aros / armazón",fon:"fréims",uso:"These frames are titanium."},
+  {en:"lenses",es:"lentes (los cristales)",fon:"LEN-ses",uso:"Your lenses are ready."},
+  {en:"eye",es:"ojo",fon:"ai",uso:"Cover your left eye, please."},
+  {en:"prescription",es:"receta",fon:"pres-CRÍP-shon",uso:"May I see your prescription?"},
+  {en:"appointment",es:"cita",fon:"a-PÓINT-ment",uso:"Do you have an appointment?"},
+  {en:"price",es:"precio",fon:"práis",uso:"The price includes the lenses."},
+  {en:"today",es:"hoy",fon:"tu-DÉI",uso:"Can you come back today?"},
+  {en:"tomorrow",es:"mañana",fon:"tu-MÓ-rou",uso:"They will be ready tomorrow."},
+  {en:"thank you",es:"gracias",fon:"ZÉNK iu",uso:"Thank you for waiting."},
+  {en:"please",es:"por favor",fon:"plis",uso:"Sit here, please."},
+  {en:"sorry",es:"disculpe / lo siento",fon:"SÓ-ri",uso:"Sorry for the delay."},
+  {en:"one, two, three",es:"uno, dos, tres",fon:"uán · tu · zri",uso:"One or two — which is clearer?"},
+  {en:"black",es:"negro",fon:"blak",uso:"We have it in black."},
+  {en:"here / there",es:"aquí / allá",fon:"jir · der",uso:"Your glasses are here."}
+ ]
+},
+
+/* ────────────────────────── NIVEL 2 ────────────────────────── */
+2:{
+ nombre:"Nivel 2 · Presente y rutina",
+ corto:"Presente simple, continuo y la tienda",
+ sonidos:[
+  {sim:"-s", nom:"la s de la 3ª persona",
+   ej:"works · needs · washes",
+   boca:"Cuando agregas <b>-s</b> al verbo (he works), el sonido cambia según lo que va antes y los nativos lo hacen sin pensar:<br>• Después de sonido sordo (p, t, k, f) suena <b>/s/</b>: <i>works, wants, helps</i>.<br>• Después de sonido sonoro o vocal suena <b>/z/</b>: <i>needs, sees, wears</i> (suena 'nidz').<br>• Después de s, sh, ch, x, ge suena <b>/ɪz/</b>: <i>washes, watches, uses</i> (una sílaba extra).",
+   palabras:["works","helps","wants","needs","sees","wears","washes","watches","uses"],
+   pares:[{a:"needs",b:"nits",na:"nidz (correcto)",nb:"nits (marcado)"},{a:"watches",b:"watch",na:"UÁ-chis",nb:"uach"}]},
+  {sim:"´", nom:"acento de palabra (word stress)",
+   ej:"PROgress · proGRESS",
+   boca:"En inglés cada palabra tiene <b>una sílaba fuerte</b> y las demás se apagan. Si le pones el acento en el lugar equivocado, un nativo puede no entenderte aunque los sonidos sean correctos. Ejemplos de la tienda: <b>CUS</b>-tomer, pre-<b>SCRIP</b>-tion, ap-<b>POINT</b>-ment, <b>GLA</b>-sses, pro-<b>GRE</b>-ssive, war-<b>RAN</b>-ty.",
+   palabras:["customer","prescription","appointment","progressive","warranty","insurance","available"],
+   pares:[{a:"aPPOINTment",b:"appointMENT",na:"correcto",nb:"incorrecto"}]},
+  {sim:"↝", nom:"linking · palabras pegadas",
+   ej:"How_are_you → jaueriu",
+   boca:"Los nativos <b>no separan</b> las palabras: las pegan en una cadena. Cuando una palabra termina en consonante y la siguiente empieza con vocal, se enlazan: <i>How are you</i> suena 'jaua-riu'; <i>What is it</i> suena 'uá-ti-sit'; <i>Can I help you</i> suena 'ca-nai-JEL-piu'. Practica diciendo la frase completa <b>de un solo tirón</b>, no palabra por palabra.",
+   palabras:["How are you","What is it","Can I help you","Take a look","Pick it up"],
+   pares:[{a:"Can I help you",b:"Can. I. help. you.",na:"pegado (nativo)",nb:"separado (marcado)"}]}
+ ],
+ frases:[
+  {en:"We open at nine and close at six.",es:"Abrimos a las nueve y cerramos a las seis.",fon:"ui ÓU-pen at náin and clóus at SIKS"},
+  {en:"I work at the front desk.",es:"Trabajo en recepción.",fon:"ai uerk at de front DESK"},
+  {en:"The doctor is with a patient right now.",es:"El doctor está con un paciente en este momento.",fon:"de DÁK-ter is uid a PÉI-shent ráit NÁU"},
+  {en:"Do you wear glasses every day?",es:"¿Usa lentes todos los días?",fon:"du iu uér GLÁ-ses É-vri déi"},
+  {en:"How often do you use the computer?",es:"¿Con qué frecuencia usa la computadora?",fon:"jáu Ó-fen du iu ius de com-PIÚ-ter"},
+  {en:"These frames are on sale this week.",es:"Estos aros están en promoción esta semana.",fon:"dis fréims ar on SÉIL dis UIK"},
+  {en:"There is a mirror right behind you.",es:"Hay un espejo justo detrás de usted.",fon:"der is a MÍ-ror ráit bi-JÁIND iu"},
+  {en:"There are three colors available.",es:"Hay tres colores disponibles.",fon:"der ar zri CÓ-lors a-VÉI-la-bel"},
+  {en:"I'm checking the price for you.",es:"Estoy revisando el precio para usted.",fon:"áim CHÉ-king de práis for iu"},
+  {en:"She is helping another customer.",es:"Ella está atendiendo a otro cliente.",fon:"shi is JÉL-ping a-NÁ-der CAS-te-mer"},
+  {en:"Can I take your measurements?",es:"¿Puedo tomarle las medidas?",fon:"can ai téik ior MÉ-sher-ments"},
+  {en:"This one looks great on you.",es:"Este le queda muy bien.",fon:"dis uán luks GRÉIT on iu"},
+  {en:"The price includes the frame and the lenses.",es:"El precio incluye el aro y los lentes.",fon:"de práis in-CLÚDS de fréim and de LEN-ses"},
+  {en:"We don't have that model in stock.",es:"No tenemos ese modelo en existencia.",fon:"ui dóunt jav dat MÁ-del in STOK"},
+  {en:"Does your insurance cover the exam?",es:"¿Su seguro cubre el examen?",fon:"das ior in-SHÚ-rans CÁ-ver di eg-SÁM"}
+ ],
+ verbos:[
+  {inf:"Presente simple",es:"acciones habituales y hechos",nota:"Se usa para rutinas, horarios y verdades permanentes: 'we open at nine', 'she wears contacts'. La única trampa es la <b>-s</b> de he/she/it, y que en negativo y pregunta esa -s se va al auxiliar: he doesn't work (no 'doesn't works').",
+   tiempos:{
+    "Afirmativo":[["I work","yo trabajo"],["You work","tú trabajas"],["He works","él trabaja"],["She works","ella trabaja"],["It works","funciona"],["We work","nosotros trabajamos"],["They work","ellos trabajan"]],
+    "Negativo":[["I do not (don't) work","yo no trabajo"],["He does not (doesn't) work","él no trabaja"],["We don't work","nosotros no trabajamos"],["They don't work on Sunday","ellos no trabajan el domingo"]],
+    "Pregunta":[["Do I work...?","¿trabajo...?"],["Do you work here?","¿trabajas aquí?"],["Does he work here?","¿trabaja él aquí?"],["Does she wear glasses?","¿ella usa lentes?"],["Do they open at nine?","¿abren a las nueve?"]]
+   }},
+  {inf:"Presente continuo",es:"lo que pasa ahora mismo",nota:"Se forma con <b>am / is / are + verbo-ing</b>. Es lo que usas para narrar el momento: 'I'm checking', 'the doctor is coming'. Regla de ortografía: si el verbo termina en 'e' muda la pierde (make → making) y si termina en consonante-vocal-consonante la duplica (get → getting).",
+   tiempos:{
+    "Afirmativo":[["I am working (I'm working)","estoy trabajando"],["You are waiting","estás esperando"],["He is coming","él viene / está viniendo"],["She is helping a customer","ella está atendiendo a un cliente"],["We are closing","estamos cerrando"],["They are looking at frames","están viendo aros"]],
+    "Negativo":[["I'm not working today","hoy no estoy trabajando"],["He isn't waiting","él no está esperando"],["They aren't coming","ellos no vienen"]],
+    "Pregunta":[["Am I speaking too fast?","¿estoy hablando muy rápido?"],["Are you looking for sunglasses?","¿busca lentes de sol?"],["Is he waiting for the doctor?","¿está esperando al doctor?"]]
+   }},
+  {inf:"there is / there are",es:"hay",nota:"'There is' para uno (singular), 'there are' para varios (plural). Es el equivalente del 'hay' del español, que no cambia — en inglés sí cambia y es un error muy común decir 'there is three colors'.",
+   tiempos:{
+    "Afirmativo":[["There is a mirror here","hay un espejo aquí"],["There is one left","queda uno"],["There are three colors","hay tres colores"],["There are two people waiting","hay dos personas esperando"]],
+    "Negativo":[["There isn't any stock","no hay existencia"],["There aren't other options","no hay otras opciones"]],
+    "Pregunta":[["Is there a restroom?","¿hay un baño?"],["Are there other colors?","¿hay otros colores?"]]
+   }},
+  {inf:"like / need / want",es:"gustar / necesitar / querer",nota:"Los tres verbos que más vas a escuchar de un cliente. Ojo con <b>like</b>: en inglés el sujeto es la persona (I like these frames), al contrario del español ('me gustan'). Después de <b>need</b> y <b>want</b> el segundo verbo lleva 'to': I need to check.",
+   tiempos:{
+    "Afirmativo":[["I like these frames","me gustan estos aros"],["He likes the black one","a él le gusta el negro"],["I need to check the price","necesito revisar el precio"],["She wants to try them on","ella quiere probárselos"]],
+    "Negativo":[["I don't like the color","no me gusta el color"],["He doesn't need an exam","él no necesita examen"]],
+    "Pregunta":[["Do you like this style?","¿le gusta este estilo?"],["What do you need?","¿qué necesita?"],["Would you like to try it on?","¿le gustaría probárselo?"]]
+   }}
+ ],
+ dialogos:[
+  {titulo:"Ayudar a elegir aros",
+   lineas:[
+    {q:"cli",en:"I'm looking for something light. Do you have titanium frames?",es:"Busco algo liviano. ¿Tienen aros de titanio?",fon:"áim LÚ-king for SÁM-zing láit · du iu jav tai-TÉI-ni-om fréims"},
+    {q:"yo",en:"Yes, we do. These are titanium — they are very light and flexible.",es:"Sí. Estos son de titanio: son muy livianos y flexibles.",fon:"ies ui du · dis ar tai-TÉI-ni-om · dei ar VÉ-ri láit and FLÉK-si-bel"},
+    {q:"cli",en:"How much are they?",es:"¿Cuánto cuestan?",fon:"jáu match ar déi"},
+    {q:"yo",en:"They are on sale this week. The price includes the lenses.",es:"Están en promoción esta semana. El precio incluye los lentes.",fon:"dei ar on SÉIL dis uik · de práis in-CLÚDS de LEN-ses"},
+    {q:"cli",en:"Can I try them on?",es:"¿Puedo probármelos?",fon:"can ai trái dem ON"},
+    {q:"yo",en:"Of course! There is a mirror right behind you.",es:"¡Por supuesto! Hay un espejo justo detrás de usted.",fon:"of CORS · der is a MÍ-ror ráit bi-JÁIND iu"},
+    {q:"yo",en:"That one looks great on you. It matches your face shape.",es:"Ese le queda muy bien. Combina con la forma de su rostro.",fon:"dat uán luks GRÉIT on iu · it MÁ-ches ior féis SHÉIP"}
+   ]},
+  {titulo:"Agendar el examen visual",
+   lineas:[
+    {q:"cli",en:"Do I need an appointment for an eye exam?",es:"¿Necesito cita para un examen visual?",fon:"du ai nid an a-PÓINT-ment for an ái eg-SÁM"},
+    {q:"yo",en:"Not always, but today the doctor is with a patient right now.",es:"No siempre, pero hoy el doctor está con un paciente en este momento.",fon:"not ÓL-ueis · bat tu-DÉI de DÁK-ter is uid a PÉI-shent ráit NÁU"},
+    {q:"cli",en:"How long is the wait?",es:"¿Cuánto es la espera?",fon:"jáu long is de UÉIT"},
+    {q:"yo",en:"About twenty minutes. Would you like to wait or come back later?",es:"Unos veinte minutos. ¿Prefiere esperar o volver más tarde?",fon:"a-BÁUT TUÉN-ti MÍ-nits · ud iu láik tu uéit or com bak LÉI-ter"},
+    {q:"cli",en:"I'll wait, thanks.",es:"Espero, gracias.",fon:"ail UÉIT zenks"},
+    {q:"yo",en:"Perfect. Please have a seat. I'm checking you in right now.",es:"Perfecto. Por favor tome asiento. Lo estoy registrando ahora mismo.",fon:"PÉR-fect · plis jav a SIT · áim CHÉ-king iu in ráit NÁU"}
+   ]}
+ ],
+ cards:[
+  {en:"titanium",es:"titanio",fon:"tai-TÉI-ni-om",uso:"These frames are titanium."},
+  {en:"lightweight",es:"liviano",fon:"LÁIT-uéit",uso:"It's very lightweight."},
+  {en:"progressive lenses",es:"lentes progresivos",fon:"pro-GRÉ-siv LEN-ses",uso:"Do you wear progressive lenses?"},
+  {en:"single vision",es:"visión sencilla",fon:"SÍN-guel VÍ-shon",uso:"Single vision or progressive?"},
+  {en:"blue light filter",es:"filtro de luz azul",fon:"blu láit FÍL-ter",uso:"I recommend a blue light filter."},
+  {en:"anti-reflective coating",es:"tratamiento antirreflejo",fon:"an-ti-ri-FLÉK-tiv CÓU-ting",uso:"It has an anti-reflective coating."},
+  {en:"contact lenses",es:"lentes de contacto",fon:"CON-takt LEN-ses",uso:"Do you use contact lenses?"},
+  {en:"sunglasses",es:"lentes de sol",fon:"SAN-gla-ses",uso:"Are you looking for sunglasses?"},
+  {en:"on sale",es:"en promoción",fon:"on SÉIL",uso:"These are on sale."},
+  {en:"in stock",es:"en existencia",fon:"in STOK",uso:"It's not in stock right now."},
+  {en:"insurance",es:"seguro",fon:"in-SHÚ-rans",uso:"Does your insurance cover it?"},
+  {en:"to try on",es:"probarse",fon:"tu trái ON",uso:"Would you like to try them on?"},
+  {en:"mirror",es:"espejo",fon:"MÍ-ror",uso:"The mirror is behind you."},
+  {en:"available",es:"disponible",fon:"a-VÉI-la-bel",uso:"It's available in three colors."},
+  {en:"measurements",es:"medidas",fon:"MÉ-sher-ments",uso:"Let me take your measurements."}
+ ]
+},
+
+/* ────────────────────────── NIVEL 3 ────────────────────────── */
+3:{
+ nombre:"Nivel 3 · Pasado y futuro",
+ corto:"Contar lo que pasó y prometer lo que viene",
+ sonidos:[
+  {sim:"-ed", nom:"las 3 pronunciaciones de -ed",
+   ej:"worked · called · wanted",
+   boca:"Este es el detalle que <b>delata al 100%</b> a quien aprendió inglés en libro. El '-ed' del pasado tiene tres sonidos y ninguno es 'ed' salvo en el tercer caso:<br>• Sonido sordo antes (k, p, f, s, sh, ch) → <b>/t/</b>: <i>worked</i> = 'uerkt', <i>helped</i> = 'jelpt'.<br>• Sonido sonoro o vocal antes → <b>/d/</b>: <i>called</i> = 'cold', <i>tried</i> = 'traid'.<br>• Solo si termina en <b>t</b> o <b>d</b> → <b>/ɪd/</b> y suma una sílaba: <i>wanted</i> = 'UÁN-tid', <i>needed</i> = 'NÍ-did'.",
+   palabras:["worked","helped","looked","called","tried","ordered","wanted","needed","waited"],
+   pares:[{a:"worked",b:"work-ed",na:"uerkt (correcto)",nb:"UÉR-ked (marcado)"},{a:"wanted",b:"wantd",na:"UÁN-tid",nb:"uantd"}]},
+  {sim:"↓", nom:"vocales que cambian en el pasado",
+   ej:"see→saw · come→came",
+   boca:"Los verbos irregulares no cambian solo la escritura: cambian el <b>sonido de la vocal</b>, y ahí está el reto del oído. Escucha el salto: <i>see /si/ → saw /so/</i>, <i>come /kam/ → came /kéim/</i>, <i>find /fáind/ → found /fáund/</i>, <i>buy /bái/ → bought /bot/</i>. Aprende el par completo como si fuera una sola palabra doble.",
+   palabras:["see - saw","come - came","find - found","buy - bought","take - took","tell - told","give - gave"],
+   pares:[{a:"came",b:"come",na:"kéim (pasado)",nb:"kam (presente)"}]},
+  {sim:"'ll", nom:"la contracción del futuro",
+   ej:"I'll · we'll · they'll",
+   boca:"Nadie dice 'I will call you' en la vida real; se dice <b>I'll</b> y suena casi como 'ail', una sola sílaba. Igual: <i>we'll</i> = 'uil', <i>he'll</i> = 'jil', <i>they'll</i> = 'déil'. Si pronuncias el 'will' completo suenas formal o robótico. Y para 'going to' los nativos dicen <b>gonna</b>: 'I'm gonna check' = áim GÁ-na chek.",
+   palabras:["I'll call you","we'll have it ready","they'll be here","I'm gonna check","it's gonna be ready"],
+   pares:[{a:"I'll call you",b:"I will call you",na:"natural",nb:"muy formal"}]}
+ ],
+ frases:[
+  {en:"When did you get your last eye exam?",es:"¿Cuándo fue su último examen visual?",fon:"uén did iu get ior last ái eg-SÁM"},
+  {en:"I called you yesterday about your order.",es:"Le llamé ayer por su pedido.",fon:"ai cold iu IÉS-ter-dei a-BÁUT ior ÓR-der"},
+  {en:"We ordered your lenses on Monday.",es:"Pedimos sus lentes el lunes.",fon:"ui ÓR-derd ior LEN-ses on MÁN-dei"},
+  {en:"The lab sent them this morning.",es:"El laboratorio los envió esta mañana.",fon:"de lab sent dem dis MOR-ning"},
+  {en:"I'm sorry, they didn't arrive yet.",es:"Disculpe, todavía no llegaron.",fon:"áim SÓ-ri · dei DÍ-dent a-RÁIV iet"},
+  {en:"Your glasses will be ready on Friday.",es:"Sus lentes estarán listos el viernes.",fon:"ior GLÁ-ses uil bi RÉ-di on FRÁI-dei"},
+  {en:"I'll call you as soon as they arrive.",es:"Le llamaré en cuanto lleguen.",fon:"ail col iu as sun as dei a-RÁIV"},
+  {en:"We're going to check with the lab.",es:"Vamos a verificar con el laboratorio.",fon:"uir GÓU-ing tu chek uid de LAB"},
+  {en:"How long have you had these glasses?",es:"¿Cuánto tiempo ha tenido estos lentes?",fon:"jáu long jav iu jad dis GLÁ-ses"},
+  {en:"Have you ever worn progressive lenses?",es:"¿Ha usado lentes progresivos antes?",fon:"jav iu É-ver uorn pro-GRÉ-siv LEN-ses"},
+  {en:"It took a little longer than expected.",es:"Tomó un poco más de lo esperado.",fon:"it tuk a LÍ-tel LON-guer dan ex-PÉK-ted"},
+  {en:"I already sent your measurements to the lab.",es:"Ya envié sus medidas al laboratorio.",fon:"ai ol-RÉ-di sent ior MÉ-sher-ments tu de LAB"},
+  {en:"Did you bring your old glasses?",es:"¿Trajo sus lentes viejos?",fon:"did iu bring ior óuld GLÁ-ses"},
+  {en:"We won't charge you for the adjustment.",es:"No le cobraremos por el ajuste.",fon:"ui uóunt charch iu for di a-YÁST-ment"},
+  {en:"They should be here by tomorrow afternoon.",es:"Deberían llegar mañana por la tarde.",fon:"déi shud bi jir bai tu-MÓ-rou af-ter-NUN"}
+ ],
+ verbos:[
+  {inf:"Pasado simple · regulares",es:"lo que ya pasó",nota:"Se agrega <b>-ed</b> y listo: es igual para todas las personas (no hay 'he workeds'). En negativo y pregunta se usa <b>did</b> y el verbo vuelve al infinitivo: 'I didn't call' (no 'didn't called').",
+   tiempos:{
+    "Afirmativo":[["I called","yo llamé"],["You worked","tú trabajaste"],["He ordered","él pidió"],["She helped","ella ayudó"],["We waited","nosotros esperamos"],["They arrived","ellos llegaron"]],
+    "Negativo":[["I didn't call","yo no llamé"],["He didn't arrive","él no llegó"],["They didn't order it","ellos no lo pidieron"]],
+    "Pregunta":[["Did I call you?","¿le llamé?"],["Did you order it?","¿lo pidió?"],["When did you get your exam?","¿cuándo se hizo el examen?"]]
+   }},
+  {inf:"Pasado simple · irregulares",es:"los 15 que más se usan",nota:"No siguen regla: hay que memorizarlos como pareja presente-pasado. Estos son los que de verdad vas a necesitar atendiendo en la óptica.",
+   tiempos:{
+    "Los imprescindibles":[["be → was / were","ser, estar → fue / era"],["have → had","tener → tuve"],["do → did","hacer → hice"],["go → went","ir → fui"],["get → got","obtener → obtuve"],["say → said","decir → dije"],["tell → told","contar → conté"],["see → saw","ver → vi"],["come → came","venir → vine"],["take → took","tomar → tomé"],["give → gave","dar → di"],["make → made","hacer → hice"],["find → found","encontrar → encontré"],["buy → bought","comprar → compré"],["bring → brought","traer → traje"],["send → sent","enviar → envié"],["pay → paid","pagar → pagué"],["wear → wore","usar (ropa) → usé"],["break → broke","romper → rompí"],["lose → lost","perder → perdí"]]
+   }},
+  {inf:"was / were",es:"pasado de to be",nota:"Es el único verbo del inglés que cambia de forma en el pasado según la persona: <b>was</b> para I / he / she / it, y <b>were</b> para you / we / they.",
+   tiempos:{
+    "Afirmativo":[["I was here","yo estaba aquí"],["You were right","tenías razón"],["He was with a patient","él estaba con un paciente"],["It was ready","estaba listo"],["We were closed","estábamos cerrados"],["They were on sale","estaban en promoción"]],
+    "Negativo":[["I wasn't here","yo no estaba aquí"],["They weren't ready","no estaban listos"]],
+    "Pregunta":[["Was it expensive?","¿era caro?"],["Were you here yesterday?","¿estuvo aquí ayer?"]]
+   }},
+  {inf:"will / going to",es:"futuro",nota:"<b>will</b> ('ll) para decisiones del momento y promesas: 'I'll call you'. <b>going to</b> (gonna) para planes ya decididos: 'we're going to order it today'. Los dos se traducen igual al español, pero el nativo los siente distinto.",
+   tiempos:{
+    "will · promesa del momento":[["I'll call you","le llamaré"],["We'll have it ready on Friday","lo tendremos listo el viernes"],["It won't take long","no tomará mucho"],["Will you come back tomorrow?","¿regresará mañana?"]],
+    "going to · plan decidido":[["I'm going to check with the lab","voy a verificar con el laboratorio"],["We're going to order it today","lo vamos a pedir hoy"],["He isn't going to charge you","él no le va a cobrar"],["Are you going to pay by card?","¿va a pagar con tarjeta?"]]
+   }},
+  {inf:"Presente perfecto",es:"have / has + participio",nota:"Es el puente entre pasado y presente: algo que pasó pero <b>todavía importa ahora</b>. Se usa con <i>ever, never, already, yet, just, since, for</i>. 'Have you ever worn progressives?' pregunta por toda tu vida hasta hoy.",
+   tiempos:{
+    "Afirmativo":[["I have (I've) sent it","ya lo envié / lo he enviado"],["He has (he's) arrived","él ha llegado"],["We've already ordered it","ya lo pedimos"],["They've had them for two years","los han tenido por dos años"]],
+    "Negativo":[["I haven't received it yet","aún no lo he recibido"],["She hasn't called","ella no ha llamado"]],
+    "Pregunta":[["Have you ever worn contacts?","¿ha usado lentes de contacto alguna vez?"],["How long have you had them?","¿cuánto tiempo los ha tenido?"],["Has the lab sent them?","¿el laboratorio ya los envió?"]]
+   }}
+ ],
+ dialogos:[
+  {titulo:"Un pedido que se retrasó",
+   lineas:[
+    {q:"cli",en:"Hi. I came last week for my glasses. Are they ready?",es:"Hola. Vine la semana pasada por mis lentes. ¿Están listos?",fon:"jai · ai kéim last uik for mai GLÁ-ses · ar déi RÉ-di"},
+    {q:"yo",en:"Let me check. May I have your name, please?",es:"Permítame revisar. ¿Su nombre, por favor?",fon:"let mi CHEK · méi ai jav ior NÉIM plis"},
+    {q:"cli",en:"Sure. Robert Miller.",es:"Claro. Robert Miller.",fon:"shur · RÁ-bert MÍ-ler"},
+    {q:"yo",en:"Thank you. We ordered your lenses on Monday and the lab sent them this morning.",es:"Gracias. Pedimos sus lentes el lunes y el laboratorio los envió esta mañana.",fon:"zénk iu · ui ÓR-derd ior LEN-ses on MÁN-dei and de lab sent dem dis MOR-ning"},
+    {q:"cli",en:"So they're not here yet?",es:"¿Entonces todavía no llegan?",fon:"sóu dér not jir IET"},
+    {q:"yo",en:"Not yet. I'm sorry — it took a little longer than expected.",es:"Todavía no. Disculpe, tomó un poco más de lo esperado.",fon:"not IET · áim SÓ-ri · it tuk a LÍ-tel LON-guer dan ex-PÉK-ted"},
+    {q:"yo",en:"They should be here by tomorrow afternoon. I'll call you as soon as they arrive.",es:"Deberían llegar mañana por la tarde. Le llamaré en cuanto lleguen.",fon:"déi shud bi jir bai tu-MÓ-rou af-ter-NUN · ail col iu as sun as dei a-RÁIV"},
+    {q:"cli",en:"Okay, thank you.",es:"Está bien, gracias.",fon:"ou-QUÉI zénk iu"},
+    {q:"yo",en:"Thank you for your patience. And we won't charge you for the shipping.",es:"Gracias por su paciencia. Y no le cobraremos el envío.",fon:"zénk iu for ior PÉI-shens · and ui uóunt charch iu for de SHÍ-ping"}
+   ]},
+  {titulo:"Historia visual del paciente",
+   lineas:[
+    {q:"yo",en:"When did you get your last eye exam?",es:"¿Cuándo fue su último examen visual?",fon:"uén did iu get ior last ái eg-SÁM"},
+    {q:"cli",en:"About two years ago, back home.",es:"Hace unos dos años, en mi país.",fon:"a-BÁUT tu íers a-GÓU · bak jóum"},
+    {q:"yo",en:"Have you ever worn progressive lenses?",es:"¿Ha usado lentes progresivos antes?",fon:"jav iu É-ver uorn pro-GRÉ-siv LEN-ses"},
+    {q:"cli",en:"No, I've never tried them. I bought reading glasses instead.",es:"No, nunca los he probado. Compré lentes de lectura en su lugar.",fon:"nou · aiv NÉ-ver tráid dem · ai bot RÍ-ding GLÁ-ses ins-TÉD"},
+    {q:"yo",en:"Did you have any trouble with your vision at night?",es:"¿Tuvo alguna dificultad con su visión de noche?",fon:"did iu jav É-ni TRÁ-bel uid ior VÍ-shon at NÁIT"},
+    {q:"cli",en:"Yes, and my eyes got tired at the computer.",es:"Sí, y mis ojos se cansaban en la computadora.",fon:"ies · and mai áis got TÁIRD at de com-PIÚ-ter"},
+    {q:"yo",en:"I understand. The doctor will check that today.",es:"Entiendo. El doctor va a revisar eso hoy.",fon:"ai an-der-STÁND · de DÁK-ter uil chek dat tu-DÉI"}
+   ]}
+ ],
+ cards:[
+  {en:"yesterday",es:"ayer",fon:"IÉS-ter-dei",uso:"I called you yesterday."},
+  {en:"last week",es:"la semana pasada",fon:"last UIK",uso:"You came last week."},
+  {en:"ago",es:"hace (tiempo)",fon:"a-GÓU",uso:"Two years ago."},
+  {en:"already",es:"ya",fon:"ol-RÉ-di",uso:"I already sent it."},
+  {en:"yet",es:"todavía (en negativo/pregunta)",fon:"iet",uso:"They haven't arrived yet."},
+  {en:"order",es:"pedido / pedir",fon:"ÓR-der",uso:"Your order is in the lab."},
+  {en:"lab",es:"laboratorio",fon:"lab",uso:"The lab sent them today."},
+  {en:"to arrive",es:"llegar",fon:"tu a-RÁIV",uso:"They will arrive tomorrow."},
+  {en:"ready",es:"listo",fon:"RÉ-di",uso:"Your glasses are ready."},
+  {en:"delay",es:"retraso",fon:"di-LÉI",uso:"Sorry for the delay."},
+  {en:"warranty",es:"garantía",fon:"UÁ-ran-ti",uso:"It has a one-year warranty."},
+  {en:"adjustment",es:"ajuste",fon:"a-YÁST-ment",uso:"The adjustment is free."},
+  {en:"to charge",es:"cobrar",fon:"tu CHARCH",uso:"We won't charge you."},
+  {en:"receipt",es:"recibo / factura",fon:"ri-SÍT",uso:"Do you have your receipt?"},
+  {en:"to break / broke",es:"romper / rompió",fon:"bréik · bróuk",uso:"My frame broke."}
+ ]
+},
+
+/* ────────────────────────── NIVEL 4 ────────────────────────── */
+4:{
+ nombre:"Nivel 4 · Conversación real",
+ corto:"Habla como nativo: reducciones y cortesía",
+ sonidos:[
+  {sim:"gonna", nom:"reducciones del habla real",
+   ej:"gonna · wanna · gotta",
+   boca:"Los nativos comprimen las palabras funcionales y esto es lo que hace que sientas que 'hablan rapidísimo'. No hablan rápido: <b>hablan pegado</b>.<br>• going to → <b>gonna</b> ('áim GÁ-na chek')<br>• want to → <b>wanna</b> ('du iu UÁ-na trái')<br>• got to → <b>gotta</b> ('ai GÁ-ta gou')<br>• let me → <b>lemme</b> · give me → <b>gimme</b><br>• what do you → <b>whaddaya</b> ('UÁ-da-ia zink')<br>Entrenar el oído con estas formas es lo que te permite entender a un cliente real, no a un audio de libro.",
+   palabras:["I'm gonna check","Do you wanna try it","I gotta ask my manager","Lemme see","Whaddaya think"],
+   pares:[{a:"I'm gonna check",b:"I am going to check",na:"habla real",nb:"libro de texto"}]},
+  {sim:"d/t", nom:"la t que suena a d (t-flapping)",
+   ej:"water · better · later",
+   boca:"En inglés americano, la <b>t entre dos vocales</b> se relaja y suena como una <b>d</b> suave: <i>water</i> = 'UÁ-der', <i>better</i> = 'BÉ-der', <i>later</i> = 'LÉI-der', <i>little</i> = 'LÍ-del'. Y cuando la t va después de n muchas veces <b>desaparece</b>: <i>twenty</i> = 'TUÉ-ni', <i>center</i> = 'SÉ-ner'. Si pronuncias la t marcada suenas británico o extranjero.",
+   palabras:["water","better","later","little","twenty","center","matter","photo"],
+   pares:[{a:"better",b:"bet-ter",na:"BÉ-der (americano)",nb:"bét-ter (marcado)"}]},
+  {sim:"↗↘", nom:"entonación y cortesía",
+   ej:"tono de pregunta",
+   boca:"En inglés el <b>tono</b> comunica más que las palabras. Sube al final para preguntas de sí/no y para sonar amable (<i>Can I help you? ↗</i>). Baja al final para afirmaciones y para sonar seguro (<i>Your glasses are ready ↘</i>). Una frase correcta dicha con tono plano suena molesta o desinteresada — para un cliente estadounidense, el tono cálido <b>es</b> el servicio.",
+   palabras:["Can I help you?","Is everything okay?","Your glasses are ready.","I'd be happy to help."],
+   pares:[{a:"Sure!",b:"Sure.",na:"cálido, con gusto",nb:"seco, molesto"}]}
+ ],
+ frases:[
+  {en:"I'd be happy to help you with that.",es:"Con mucho gusto le ayudo con eso.",fon:"aid bi JÁ-pi tu jelp iu uid DAT"},
+  {en:"Would you like me to check other options?",es:"¿Le gustaría que revise otras opciones?",fon:"ud iu láik mi tu chek Á-der ÁP-shons"},
+  {en:"Could you give me a moment to check that?",es:"¿Podría darme un momento para verificar eso?",fon:"cud iu giv mi a MÓU-ment tu chek DAT"},
+  {en:"I completely understand your frustration.",es:"Entiendo completamente su frustración.",fon:"ai com-PLÍT-li an-der-STÁND ior fras-TRÉI-shon"},
+  {en:"Let me see what I can do for you.",es:"Déjeme ver qué puedo hacer por usted.",fon:"lémi si uat ai can du for iu"},
+  {en:"I'm gonna talk to my supervisor about this.",es:"Voy a hablar con mi supervisor sobre esto.",fon:"áim GÁ-na tok tu mai SU-per-vái-ser a-BÁUT dis"},
+  {en:"If you bring the receipt, we can replace it.",es:"Si trae el recibo, podemos reemplazarlo.",fon:"if iu bring de ri-SÍT · ui can ri-PLÉIS it"},
+  {en:"You should come back in about a week.",es:"Debería regresar en aproximadamente una semana.",fon:"iu shud com bak in a-BÁUT a UIK"},
+  {en:"That might take a couple of days.",es:"Eso podría tomar un par de días.",fon:"dat máit téik a CÁ-pel of DÉIS"},
+  {en:"Actually, I'd recommend the thinner lens.",es:"De hecho, le recomendaría el lente más delgado.",fon:"ÁK-chu-li · aid re-co-MÉND de ZÍ-ner LENS"},
+  {en:"Thanks for being so patient with us.",es:"Gracias por ser tan paciente con nosotros.",fon:"zenks for BÍ-ing sóu PÉI-shent uid as"},
+  {en:"Is there anything else I can do for you?",es:"¿Hay algo más que pueda hacer por usted?",fon:"is der É-ni-zing els ai can du for iu"},
+  {en:"No worries at all, it happens.",es:"No hay problema, pasa.",fon:"nou UÓ-ris at OL · it JÁ-pens"},
+  {en:"I'll make sure it gets done today.",es:"Me aseguraré de que se haga hoy.",fon:"ail méik shur it gets dan tu-DÉI"},
+  {en:"Feel free to call us if anything comes up.",es:"No dude en llamarnos si surge algo.",fon:"fil fri tu col as if É-ni-zing coms AP"}
+ ],
+ verbos:[
+  {inf:"would · cortesía",es:"la clave del servicio en EUA",nota:"En inglés, la diferencia entre sonar amable y sonar mandón está en <b>would / could</b>. 'Do you want...?' suena directo; '<b>Would</b> you like...?' suena profesional. Casi nunca digas 'I want' con un cliente: di '<b>I'd like</b>'.",
+   tiempos:{
+    "Cortesía profesional":[["Would you like to try it on?","¿le gustaría probárselo?"],["Would you prefer the lighter frame?","¿preferiría el aro más liviano?"],["I'd (I would) recommend this one","le recomendaría este"],["I'd be happy to help","con gusto le ayudo"],["Could you spell your last name?","¿podría deletrear su apellido?"],["Could you give me a moment?","¿podría darme un momento?"]],
+    "Compara":[["Do you want this? → directo","¿quieres esto?"],["Would you like this? → profesional","¿le gustaría esto?"],["Give me your receipt → brusco","dame tu recibo"],["Could I see your receipt? → correcto","¿podría ver su recibo?"]]
+   }},
+  {inf:"should / might / must",es:"consejo, posibilidad, obligación",nota:"Los tres son modales: van sin 'to' y sin 's'. <b>should</b> = consejo ('you should wear them all day'), <b>might</b> = posibilidad ('it might take two days'), <b>must / have to</b> = obligación ('you have to sign here').",
+   tiempos:{
+    "should · consejo":[["You should wear them all day","debería usarlos todo el día"],["You shouldn't clean them with your shirt","no debería limpiarlos con su camisa"],["Should I call you or text you?","¿le llamo o le escribo?"]],
+    "might / may · posibilidad":[["It might take two days","podría tomar dos días"],["You may feel dizzy at first","puede sentirse mareado al inicio"],["That might not be covered","eso podría no estar cubierto"]],
+    "must / have to · obligación":[["You have to sign here","tiene que firmar aquí"],["I have to check with the lab","tengo que verificar con el laboratorio"],["You must not use hot water","no debe usar agua caliente"]]
+   }},
+  {inf:"Condicional tipo 1",es:"if + presente, will + verbo",nota:"Es la estructura para negociar y explicar políticas: <b>if</b> + presente simple, y en la otra mitad <b>will / can</b>. Nunca pongas 'will' después de 'if': se dice 'if you bring' (no 'if you will bring').",
+   tiempos:{
+    "Estructura":[["If you bring the receipt, we can replace it","si trae el recibo, podemos reemplazarlo"],["If it breaks, the warranty covers it","si se rompe, la garantía lo cubre"],["If you pay today, I'll apply the discount","si paga hoy, le aplico el descuento"],["We'll call you if there's a delay","le llamaremos si hay un retraso"]],
+    "Error típico":[["If you will bring the receipt ✗","incorrecto"],["If you bring the receipt ✓","correcto"]]
+   }},
+  {inf:"Phrasal verbs de tienda",es:"los que suenan nativos",nota:"Un phrasal verb es verbo + partícula, y cambia totalmente el significado. Los nativos los prefieren sobre la palabra 'formal': dicen 'pick up' en vez de 'collect'. Estos son los que más vas a usar en el mostrador.",
+   tiempos:{
+    "Los esenciales":[["to try on","probarse (ropa, lentes)"],["to pick up","recoger (el pedido)"],["to fill out","llenar (un formulario)"],["to look for","buscar"],["to look after","cuidar"],["to come back","regresar"],["to hold on","esperar (en el teléfono)"],["to check out","pagar / revisar"],["to run out of","quedarse sin"],["to take care of","encargarse de"],["to figure out","descifrar / resolver"],["to come up","surgir"]],
+    "En contexto":[["You can pick them up on Friday","puede recogerlos el viernes"],["Please fill out this form","por favor llene este formulario"],["Hold on one second, please","espere un segundo, por favor"],["We ran out of that color","nos quedamos sin ese color"],["I'll take care of it","yo me encargo"]]
+   }}
+ ],
+ dialogos:[
+  {titulo:"Manejar una queja (el escenario difícil)",
+   lineas:[
+    {q:"cli",en:"This is the second time I come and my glasses still aren't right.",es:"Es la segunda vez que vengo y mis lentes siguen mal.",fon:"dis is de SÉ-cond táim ai com and mai GLÁ-ses stil árent RÁIT"},
+    {q:"yo",en:"I'm really sorry about that. I completely understand your frustration.",es:"Lo siento mucho. Entiendo completamente su frustración.",fon:"áim RÍ-li SÓ-ri a-BÁUT dat · ai com-PLÍT-li an-der-STÁND ior fras-TRÉI-shon"},
+    {q:"yo",en:"Could you tell me exactly what's bothering you when you wear them?",es:"¿Podría decirme exactamente qué le molesta cuando los usa?",fon:"cud iu tel mi eg-ZÁKT-li uats BÁ-der-ing iu uén iu uér dem"},
+    {q:"cli",en:"Everything looks blurry when I read.",es:"Todo se ve borroso cuando leo.",fon:"É-vri-zing luks BLÁ-ri uén ai RID"},
+    {q:"yo",en:"Okay, thank you. Let me see what I can do for you.",es:"Bien, gracias. Déjeme ver qué puedo hacer por usted.",fon:"ou-QUÉI zénk iu · lémi si uat ai can du for iu"},
+    {q:"yo",en:"I'm gonna have the doctor check the prescription again — at no cost.",es:"Voy a pedirle al doctor que revise la receta de nuevo, sin costo.",fon:"áim GÁ-na jav de DÁK-ter chek de pres-CRÍP-shon a-GUÉN · at nou COST"},
+    {q:"cli",en:"How long will that take?",es:"¿Cuánto tomará eso?",fon:"jáu long uil dat TÉIK"},
+    {q:"yo",en:"If we remake the lenses today, they might be ready by Thursday.",es:"Si rehacemos los lentes hoy, podrían estar listos para el jueves.",fon:"if ui ri-MÉIK de LEN-ses tu-DÉI · déi máit bi RÉ-di bai ZÉRS-dei"},
+    {q:"yo",en:"And I'll call you myself to make sure it gets done. Thanks for being so patient.",es:"Y yo mismo le llamaré para asegurarme de que se haga. Gracias por ser tan paciente.",fon:"and ail col iu mai-SÉLF tu méik shur it gets dan · zenks for BÍ-ing sóu PÉI-shent"}
+   ]},
+  {titulo:"Llamada telefónica",
+   lineas:[
+    {q:"yo",en:"CV Plus, this is Oscar speaking. How may I help you?",es:"CV Plus, le habla Oscar. ¿Cómo puedo ayudarle?",fon:"si-vi PLAS · dis is OS-car SPÍ-king · jáu méi ai jelp iu"},
+    {q:"cli",en:"Hi, I'm calling to check on my order.",es:"Hola, llamo para consultar por mi pedido.",fon:"jai · áim CÓ-ling tu chek on mai ÓR-der"},
+    {q:"yo",en:"Sure. Could you spell your last name for me, please?",es:"Claro. ¿Podría deletrearme su apellido, por favor?",fon:"shur · cud iu spel ior last néim for mi plis"},
+    {q:"cli",en:"M-I-L-L-E-R. Miller.",es:"M-I-L-L-E-R. Miller.",fon:"em ai el el i ar · MÍ-ler"},
+    {q:"yo",en:"Thank you. Hold on one second while I pull it up.",es:"Gracias. Espere un segundo mientras lo busco en el sistema.",fon:"zénk iu · jóuld on uán SÉ-cond uáil ai pul it AP"},
+    {q:"yo",en:"Good news — your glasses are ready. You can pick them up anytime today.",es:"Buenas noticias: sus lentes están listos. Puede recogerlos hoy a cualquier hora.",fon:"gud nius · ior GLÁ-ses ar RÉ-di · iu can pik dem ap É-ni-táim tu-DÉI"},
+    {q:"cli",en:"Great, thank you so much.",es:"Excelente, muchas gracias.",fon:"gréit · zénk iu sóu match"},
+    {q:"yo",en:"My pleasure. Is there anything else I can do for you?",es:"Con gusto. ¿Hay algo más que pueda hacer por usted?",fon:"mai PLÉ-sher · is der É-ni-zing els ai can du for iu"}
+   ]},
+  {titulo:"Explicar precio y garantía",
+   lineas:[
+    {q:"cli",en:"Honestly, that seems a little expensive.",es:"Honestamente, eso parece un poco caro.",fon:"ÁN-est-li · dat sims a LÍ-tel eks-PÉN-siv"},
+    {q:"yo",en:"I hear you. Let me explain what's included in that price.",es:"Le entiendo. Permítame explicarle qué incluye ese precio.",fon:"ai JÍR iu · let mi eks-PLÉIN uats in-CLÚ-ded in dat práis"},
+    {q:"yo",en:"It covers the frame, the lenses, the anti-reflective coating and a one-year warranty.",es:"Cubre el aro, los lentes, el antirreflejo y un año de garantía.",fon:"it CÁ-vers de fréim · de LEN-ses · di an-ti-ri-FLÉK-tiv CÓU-ting and a uán-íer UÁ-ran-ti"},
+    {q:"cli",en:"What does the warranty cover exactly?",es:"¿Qué cubre exactamente la garantía?",fon:"uat das de UÁ-ran-ti CÁ-ver eg-ZÁKT-li"},
+    {q:"yo",en:"If the coating peels or the frame breaks under normal use, we'll replace it.",es:"Si el tratamiento se desprende o el aro se rompe con uso normal, lo reemplazamos.",fon:"if de CÓU-ting pils or de fréim bréiks Án-der NOR-mal ius · uil ri-PLÉIS it"},
+    {q:"yo",en:"Adjustments and cleanings are always free, as often as you want.",es:"Los ajustes y limpiezas son siempre gratis, cuantas veces quiera.",fon:"a-YÁST-ments and CLÍ-nings ar ÓL-ueis FRI · as Ó-fen as iu uánt"},
+    {q:"cli",en:"Okay, that makes sense. Let's do it.",es:"Bien, eso tiene sentido. Hagámoslo.",fon:"ou-QUÉI · dat méiks SENS · lets DÚ it"}
+   ]}
+ ],
+ cards:[
+  {en:"I'd be happy to...",es:"con mucho gusto...",fon:"aid bi JÁ-pi tu",uso:"I'd be happy to check that."},
+  {en:"Let me see...",es:"déjeme ver...",fon:"lémi SI",uso:"Let me see what I can do."},
+  {en:"Hold on",es:"espere (teléfono)",fon:"jóuld ON",uso:"Hold on one second."},
+  {en:"to pick up",es:"recoger",fon:"tu pik AP",uso:"You can pick them up Friday."},
+  {en:"to fill out",es:"llenar (formulario)",fon:"tu fil ÁUT",uso:"Please fill out this form."},
+  {en:"to run out of",es:"quedarse sin",fon:"tu ran ÁUT of",uso:"We ran out of that color."},
+  {en:"No worries",es:"no hay problema",fon:"nou UÓ-ris",uso:"No worries at all."},
+  {en:"My pleasure",es:"con gusto",fon:"mai PLÉ-sher",uso:"My pleasure!"},
+  {en:"Actually...",es:"de hecho...",fon:"ÁK-chu-li",uso:"Actually, I'd recommend this."},
+  {en:"I hear you",es:"le entiendo",fon:"ai JÍR iu",uso:"I hear you — let me help."},
+  {en:"That makes sense",es:"eso tiene sentido",fon:"dat méiks SENS",uso:"Okay, that makes sense."},
+  {en:"under normal use",es:"con uso normal",fon:"Án-der NOR-mal ius",uso:"Covered under normal use."},
+  {en:"at no cost",es:"sin costo",fon:"at nou COST",uso:"We'll redo it at no cost."},
+  {en:"anytime",es:"a cualquier hora",fon:"É-ni-táim",uso:"Come by anytime today."},
+  {en:"Is there anything else?",es:"¿algo más?",fon:"is der É-ni-zing ELS",uso:"Is there anything else I can do?"}
+ ]
+}
+
+};
+</script>
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   MOTOR DEL LABORATORIO
+   ═══════════════════════════════════════════════════════════════ */
+var ST = {
+  nivel: 1,
+  modo: "sonidos",
+  velocidad: 0.85,
+  iFrase: 0, iSon: 0, iDlg: 0, iCard: 0, iDict: 0, iVerbo: 0,
+  flip: false,
+  grabando: false
+};
+
+/* ── Progreso local ── */
+var PROG = (function(){
+  try { return JSON.parse(localStorage.getItem("cvp_english_lab") || "{}"); }
+  catch(e){ return {}; }
+})();
+function guardarProg(){
+  try { localStorage.setItem("cvp_english_lab", JSON.stringify(PROG)); } catch(e){}
+}
+function nivProg(n){
+  if(!PROG["n"+n]) PROG["n"+n] = { intentos:0, suma:0, mejor:0, racha:0, hechas:{} };
+  return PROG["n"+n];
+}
+function registrar(pct, clave){
+  var p = nivProg(ST.nivel);
+  p.intentos++; p.suma += pct;
+  if(pct > p.mejor) p.mejor = pct;
+  if(pct >= 75){ p.racha++; } else { p.racha = 0; }
+  if(clave) p.hechas[clave] = Math.max(p.hechas[clave]||0, pct);
+  guardarProg();
+}
+
+/* ═══════════ VOZ NATIVA (text to speech) ═══════════ */
+var VOZ = null;
+function elegirVoz(){
+  if(!window.speechSynthesis) return;
+  var vs = speechSynthesis.getVoices() || [];
+  var pref = ["Google US English","Samantha","Microsoft Aria","Microsoft Jenny","Microsoft Zira",
+              "Alex","Ava","Allison","en-US"];
+  for(var i=0;i<pref.length;i++){
+    for(var j=0;j<vs.length;j++){
+      if((vs[j].name||"").indexOf(pref[i])>-1 && (vs[j].lang||"").indexOf("en")===0){ VOZ = vs[j]; return; }
+    }
+  }
+  for(var k=0;k<vs.length;k++){ if((vs[k].lang||"").indexOf("en")===0){ VOZ = vs[k]; return; } }
+}
+if(window.speechSynthesis){
+  elegirVoz();
+  speechSynthesis.onvoiceschanged = elegirVoz;
+}
+function decir(txt, rate){
+  if(!window.speechSynthesis){ return; }
+  try{
+    speechSynthesis.cancel();
+    var u = new SpeechSynthesisUtterance(txt);
+    u.lang = "en-US";
+    u.rate = rate || ST.velocidad;
+    u.pitch = 1;
+    if(VOZ) u.voice = VOZ;
+    speechSynthesis.speak(u);
+  }catch(e){}
+}
+
+/* ═══════════ RECONOCIMIENTO DE VOZ (micrófono) ═══════════ */
+var REC_OK = !!(window.SpeechRecognition || window.webkitSpeechRecognition);
+var rec = null;
+function escuchar(onListo, onError){
+  if(!REC_OK){ if(onError) onError("no-soporte"); return; }
+  try{
+    var R = window.SpeechRecognition || window.webkitSpeechRecognition;
+    rec = new R();
+    rec.lang = "en-US";
+    rec.interimResults = false;
+    rec.maxAlternatives = 3;
+    rec.continuous = false;
+    var listo = false;
+    rec.onresult = function(ev){
+      listo = true;
+      var alts = [];
+      for(var i=0;i<ev.results[0].length;i++) alts.push(ev.results[0][i].transcript);
+      onListo(alts);
+    };
+    rec.onerror = function(ev){ if(onError) onError(ev.error||"error"); };
+    rec.onend = function(){ if(!listo && onError) onError("silencio"); };
+    rec.start();
+  }catch(e){ if(onError) onError("error"); }
+}
+function pararEscucha(){ try{ if(rec) rec.stop(); }catch(e){} }
+
+/* ═══════════ CALIFICACIÓN DE PRONUNCIACIÓN ═══════════ */
+function normal(s){
+  return (s||"").toLowerCase()
+    .replace(/['’´]/g,"")                       /* I'm → im  (sin partir la palabra) */
+    .replace(/[.,!?;:"“”()\-—]/g," ")
+    .replace(/\s+/g," ").trim();
+}
+/* Equivalencias: formas contraídas y reducciones que el reconocedor puede
+   escribir de dos maneras. Se aplican igual a lo esperado y a lo escuchado,
+   así que nunca penalizan al alumno. */
+var EQUIV = {
+  "gonna":"going to","wanna":"want to","gotta":"got to","lemme":"let me","gimme":"give me",
+  "whaddaya":"what do you","cause":"because","ok":"okay","yeah":"yes","yep":"yes","nope":"no",
+  "im":"i am","ive":"i have","ill":"i will","id":"i would","youre":"you are","youve":"you have",
+  "hes":"he is","shes":"she is","its":"it is","were":"we are","weve":"we have","well":"we will",
+  "theyre":"they are","theyve":"they have","theres":"there is","thats":"that is","whats":"what is",
+  "lets":"let us","dont":"do not","doesnt":"does not","didnt":"did not","isnt":"is not",
+  "arent":"are not","wasnt":"was not","werent":"were not","cant":"can not","cannot":"can not",
+  "wont":"will not","wouldnt":"would not","couldnt":"could not","shouldnt":"should not",
+  "havent":"have not","hasnt":"has not","aint":"is not"
+};
+function expandir(s){
+  var w = normal(s).split(" "), out=[];
+  for(var i=0;i<w.length;i++){ out.push(EQUIV[w[i]] ? EQUIV[w[i]] : w[i]); }
+  return out.join(" ").split(" ").filter(function(x){return x.length>0;});
+}
+function lev(a,b){
+  var m=a.length,n=b.length,d=[],i,j;
+  for(i=0;i<=m;i++){ d[i]=[i]; }
+  for(j=0;j<=n;j++){ d[0][j]=j; }
+  for(i=1;i<=m;i++) for(j=1;j<=n;j++)
+    d[i][j] = Math.min(d[i-1][j]+1, d[i][j-1]+1, d[i-1][j-1] + (a[i-1]===b[j-1]?0:1));
+  return d[m][n];
+}
+/* Estricto a propósito en palabras cortas: si aceptáramos "tree" como "three"
+   el laboratorio dejaría pasar justo el error que estamos enseñando a corregir.
+   La tolerancia solo aplica a palabras largas (plurales, terminaciones). */
+function parecidas(a,b){
+  if(a===b) return true;
+  var L = Math.max(a.length,b.length);
+  if(L < 6) return false;
+  var d = lev(a,b);
+  return L >= 9 ? d <= 2 : d <= 1;
+}
+/* alinea palabra por palabra y devuelve % + marcas */
+function calificar(esperado, dicho){
+  var A = expandir(esperado), B = expandir(dicho);
+  var m=A.length, n=B.length, i, j;
+  var T=[]; for(i=0;i<=m;i++){ T[i]=[]; for(j=0;j<=n;j++) T[i][j]=0; }
+  for(i=1;i<=m;i++) for(j=1;j<=n;j++)
+    T[i][j] = parecidas(A[i-1],B[j-1]) ? T[i-1][j-1]+1 : Math.max(T[i-1][j], T[i][j-1]);
+  /* reconstruir qué palabras se lograron */
+  var ok = {}; i=m; j=n;
+  while(i>0 && j>0){
+    if(parecidas(A[i-1],B[j-1]) && T[i][j]===T[i-1][j-1]+1){ ok[i-1]=true; i--; j--; }
+    else if(T[i-1][j] >= T[i][j-1]) i--; else j--;
+  }
+  var aciertos = T[m][n];
+  var pct = m ? Math.round(aciertos*100/m) : 0;
+  /* penaliza si dijo muchísimo de más */
+  if(n > m*1.8) pct = Math.max(0, pct-10);
+  var marcas=[]; for(i=0;i<A.length;i++) marcas.push({w:A[i], ok:!!ok[i]});
+  return { pct:pct, marcas:marcas, dicho:B.join(" ") };
+}
+function claseRes(p){ return p>=85 ? "ok" : (p>=60 ? "med" : "no"); }
+function tituloRes(p){
+  if(p>=95) return "🏆 Perfecto — sonaste nativo";
+  if(p>=85) return "✅ ¡Muy bien! Te entenderían sin problema";
+  if(p>=70) return "👍 Casi. Repite marcando las palabras en rojo";
+  if(p>=50) return "🔁 Vas por buen camino, escucha otra vez y repite";
+  return "🎧 Escucha de nuevo y repite más despacio";
+}
+function pintaResultado(cajaId, esperado, alts, tip){
+  var mejor = null;
+  for(var i=0;i<alts.length;i++){
+    var r = calificar(esperado, alts[i]);
+    if(!mejor || r.pct > mejor.pct) mejor = r;
+  }
+  var box = document.getElementById(cajaId);
+  if(!box) return null;
+  box.className = "resul " + claseRes(mejor.pct);
+  var pal = "";
+  for(var k=0;k<mejor.marcas.length;k++){
+    pal += '<span class="pal '+(mejor.marcas[k].ok?"b":"m")+'">'+mejor.marcas[k].w+'</span>';
+  }
+  box.innerHTML =
+    '<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">'+
+      '<span class="pct">'+mejor.pct+'%</span>'+
+      '<span style="font-size:.86rem;font-weight:600">'+tituloRes(mejor.pct)+'</span>'+
+    '</div>'+
+    '<div style="margin-top:10px">'+pal+'</div>'+
+    '<div class="oiste">El micrófono escuchó: <i>'+(mejor.dicho||"(nada)")+'</i></div>'+
+    (tip ? '<div class="oiste" style="margin-top:6px">💡 '+tip+'</div>' : "");
+  box.style.display = "block";
+  return mejor;
+}
+function pintaError(cajaId, err){
+  var box = document.getElementById(cajaId); if(!box) return;
+  box.className = "resul no";
+  var msg = "No pude escucharte. ";
+  if(err==="not-allowed" || err==="service-not-allowed")
+    msg = "El navegador bloqueó el micrófono. Toca el candado 🔒 en la barra de direcciones y permite el micrófono.";
+  else if(err==="silencio" || err==="no-speech")
+    msg = "No escuché nada. Habla más cerca del micrófono y con voz clara.";
+  else if(err==="no-soporte")
+    msg = "Este navegador no evalúa pronunciación. Usa Google Chrome en la computadora.";
+  else msg += "Intenta otra vez.";
+  box.innerHTML = '<div style="font-size:.84rem;font-weight:600">🎤 '+msg+'</div>';
+  box.style.display = "block";
+}
+
+/* ═══════════ UTILIDADES DE UI ═══════════ */
+function esc(s){ return (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+function q(id){ return document.getElementById(id); }
+function nivelActual(){ return DATA[ST.nivel]; }
+
+var MODOS = [
+  {k:"sonidos",   n:"🔊 Sonidos nativos"},
+  {k:"frases",    n:"🗣️ Repetir frases"},
+  {k:"conjugador",n:"🔁 Conjugador"},
+  {k:"dialogos",  n:"💬 Diálogos"},
+  {k:"cards",     n:"🃏 Flashcards"},
+  {k:"dictado",   n:"🎧 Dictado"}
+];
+
+function pintaNiveles(){
+  var h = "";
+  for(var n=1;n<=4;n++){
+    var d = DATA[n], p = nivProg(n);
+    var prom = p.intentos ? Math.round(p.suma/p.intentos) : 0;
+    h += '<div class="niv'+(ST.nivel===n?" on":"")+'" onclick="irNivel('+n+')">'+
+           '<b>Nivel '+n+' · '+esc(d.corto)+'</b>'+
+           '<span>'+(p.intentos ? p.intentos+" prácticas · "+prom+"% promedio" : "sin practicar aún")+'</span>'+
+         '</div>';
+  }
+  q("niveles").innerHTML = h;
+}
+function pintaModos(){
+  var h = "";
+  for(var i=0;i<MODOS.length;i++){
+    h += '<button class="modo'+(ST.modo===MODOS[i].k?" on":"")+'" onclick="irModo(\''+MODOS[i].k+'\')">'+MODOS[i].n+'</button>';
+  }
+  q("modos").innerHTML = h;
+}
+function irNivel(n){
+  ST.nivel = n;
+  ST.iFrase=0; ST.iSon=0; ST.iDlg=0; ST.iCard=0; ST.iDict=0; ST.iVerbo=0;
+  pintaNiveles(); pintar();
+}
+function irModo(k){ ST.modo = k; pintaModos(); pintar(); }
+function setVel(v){ ST.velocidad = parseFloat(v); var e=q("velTxt"); if(e) e.textContent = ST.velocidad.toFixed(2)+"x"; }
+
+function barraStats(){
+  var p = nivProg(ST.nivel);
+  var prom = p.intentos ? Math.round(p.suma/p.intentos) : 0;
+  return '<div class="stats">'+
+    '<div class="stat"><b>'+p.intentos+'</b><span>Prácticas</span></div>'+
+    '<div class="stat"><b>'+prom+'%</b><span>Promedio</span></div>'+
+    '<div class="stat"><b>'+p.mejor+'%</b><span>Mejor</span></div>'+
+    '<div class="stat"><b>🔥 '+p.racha+'</b><span>Racha</span></div>'+
+  '</div>';
+}
+function controlVel(){
+  return '<div class="velo">🐢 Velocidad de la voz '+
+    '<input type="range" min="0.5" max="1.1" step="0.05" value="'+ST.velocidad+'" oninput="setVel(this.value)"> '+
+    '<span id="velTxt">'+ST.velocidad.toFixed(2)+'x</span> 🐇</div>';
+}
+
+/* ═══════════ MODO 1 · SONIDOS ═══════════ */
+function vistaSonidos(){
+  var d = nivelActual(), s = d.sonidos[ST.iSon];
+  var grid = "";
+  for(var i=0;i<d.sonidos.length;i++){
+    var o = d.sonidos[i];
+    grid += '<div class="son" style="'+(i===ST.iSon?"border-color:var(--cyan);background:var(--cyan-light)":"")+
+            '" onclick="ST.iSon='+i+';pintar()">'+
+            '<div class="sim">'+esc(o.sim)+'</div><div class="nom">'+esc(o.nom)+'</div>'+
+            '<div class="ej">'+esc(o.ej)+'</div></div>';
+  }
+  var pals = "";
+  for(var j=0;j<s.palabras.length;j++){
+    pals += '<span class="chip" onclick="decir(\''+s.palabras[j].replace(/'/g,"\\'")+'\')">🔊 '+esc(s.palabras[j])+'</span>';
+  }
+  var pares = "";
+  for(var k=0;k<(s.pares||[]).length;k++){
+    var pr = s.pares[k];
+    pares += '<div class="par" onclick="decir(\''+pr.a.replace(/'/g,"\\'")+'\')"><b>'+esc(pr.a)+'</b><span>'+esc(pr.na)+'</span></div>'+
+             '<div class="par" style="background:#FFF6E5;border-color:#F5D48A" onclick="decir(\''+pr.b.replace(/'/g,"\\'")+'\')"><b>'+esc(pr.b)+'</b><span>'+esc(pr.nb)+'</span></div>';
+  }
+  return barraStats()+
+  '<div class="card">'+
+    '<h2>🔊 Laboratorio de sonidos</h2>'+
+    '<div class="sub">Estos son los sonidos que <b>no existen en español</b> y que más delatan el acento. '+
+      'Toca uno, lee cómo se coloca la boca, escucha y repite. Aquí se construye el oído nativo.</div>'+
+    '<div class="sgrid">'+grid+'</div>'+
+  '</div>'+
+  '<div class="card">'+
+    '<h2>'+esc(s.sim)+' · '+esc(s.nom)+'</h2>'+
+    '<div class="boca">'+s.boca+'</div>'+
+    '<div class="ttitulo">Escucha palabra por palabra</div>'+
+    '<div class="chips">'+pals+'</div>'+
+    (pares ? '<div class="ttitulo">Pares mínimos · nota la diferencia</div><div class="pares">'+pares+'</div>' : "")+
+    '<div class="hint"><b>Cómo practicar:</b> escucha la palabra 3 veces sin hablar. A la cuarta, dila al mismo tiempo que la voz '+
+      '(esto se llama <i>shadowing</i>). Cuando ya te salga natural, grábate abajo y compara.</div>'+
+    '<div class="controles">'+
+      '<button class="btn btn-c" onclick="decir(\''+esc(s.palabras.join(", ")).replace(/'/g,"\\'")+'\')">▶ Escuchar toda la serie</button>'+
+      (REC_OK ? '<button class="btn btn-g" id="btnMic" onclick="micSonido()">🎤 Grabarme diciendo la serie</button>' : "")+
+    '</div>'+
+    controlVel()+
+    '<div class="resul" id="res"></div>'+
+  '</div>';
+}
+function micSonido(){
+  var s = nivelActual().sonidos[ST.iSon];
+  var objetivo = s.palabras.join(" ");
+  var b = q("btnMic"); if(b){ b.className="btn rec"; b.textContent="🔴 Escuchando... di las palabras"; }
+  escuchar(function(alts){
+    if(b){ b.className="btn btn-g"; b.textContent="🎤 Grabarme diciendo la serie"; }
+    var r = pintaResultado("res", objetivo, alts, "Las palabras en rojo son las que el oído nativo no reconoció. Vuelve a escucharlas arriba una por una.");
+    if(r) registrar(r.pct, "son"+ST.iSon);
+    pintaNiveles();
+  }, function(err){
+    if(b){ b.className="btn btn-g"; b.textContent="🎤 Grabarme diciendo la serie"; }
+    pintaError("res", err);
+  });
+}
+
+/* ═══════════ MODO 2 · FRASES (shadowing) ═══════════ */
+function vistaFrases(){
+  var d = nivelActual(), f = d.frases[ST.iFrase];
+  var pct = Math.round((ST.iFrase+1)*100/d.frases.length);
+  return barraStats()+
+  '<div class="card">'+
+    '<h2>🗣️ Repetir frases · método shadowing</h2>'+
+    '<div class="sub">Así aprende un niño en Estados Unidos: <b>escucha primero, entiende después</b>. '+
+      'Escucha la frase completa, repítela pegada como una sola palabra larga, y deja que el micrófono te califique.</div>'+
+    '<div class="frase">'+
+      '<div class="en">'+esc(f.en)+'</div>'+
+      '<div class="fon">'+esc(f.fon)+'</div>'+
+      '<div class="es">'+esc(f.es)+'</div>'+
+    '</div>'+
+    '<div class="controles">'+
+      '<button class="btn btn-c" onclick="decir(\''+f.en.replace(/'/g,"\\'")+'\')">▶ Escuchar</button>'+
+      '<button class="btn btn-o" onclick="decir(\''+f.en.replace(/'/g,"\\'")+'\',0.55)">🐢 Muy despacio</button>'+
+      (REC_OK ? '<button class="btn btn-g" id="btnMic" onclick="micFrase()">🎤 Mi turno</button>' : "")+
+    '</div>'+
+    '<div class="resul" id="res"></div>'+
+    controlVel()+
+    '<div class="barra"><i style="width:'+pct+'%"></i></div>'+
+    '<div class="paso">FRASE '+(ST.iFrase+1)+' DE '+d.frases.length+'</div>'+
+    '<div class="controles" style="margin-top:14px">'+
+      '<button class="btn btn-o" onclick="navFrase(-1)">← Anterior</button>'+
+      '<button class="btn btn-d" onclick="navFrase(1)">Siguiente →</button>'+
+    '</div>'+
+    '<div class="hint"><b>Ojo con la fonética:</b> lo que ves en dorado (<i>'+esc(f.fon)+'</i>) es una guía escrita '+
+      'a la salvadoreña. Las MAYÚSCULAS marcan la sílaba fuerte — esa es la que debes golpear; el resto se apaga.</div>'+
+  '</div>';
+}
+function navFrase(dir){
+  var d = nivelActual();
+  ST.iFrase = (ST.iFrase + dir + d.frases.length) % d.frases.length;
+  pintar();
+}
+function micFrase(){
+  var f = nivelActual().frases[ST.iFrase];
+  var b = q("btnMic"); if(b){ b.className="btn rec"; b.textContent="🔴 Habla ahora..."; }
+  escuchar(function(alts){
+    if(b){ b.className="btn btn-g"; b.textContent="🎤 Mi turno"; }
+    var r = pintaResultado("res", f.en, alts, "Guía: "+f.fon);
+    if(r){
+      registrar(r.pct, "fr"+ST.iFrase);
+      if(r.pct>=85) setTimeout(function(){ navFrase(1); }, 2200);
+    }
+    pintaNiveles();
+  }, function(err){
+    if(b){ b.className="btn btn-g"; b.textContent="🎤 Mi turno"; }
+    pintaError("res", err);
+  });
+}
+
+/* ═══════════ MODO 3 · CONJUGADOR ═══════════ */
+function vistaConjugador(){
+  var d = nivelActual(), v = d.verbos[ST.iVerbo];
+  var sel = "";
+  for(var i=0;i<d.verbos.length;i++){
+    sel += '<option value="'+i+'"'+(i===ST.iVerbo?" selected":"")+'>'+esc(d.verbos[i].inf)+' — '+esc(d.verbos[i].es)+'</option>';
+  }
+  var tablas = "";
+  for(var t in v.tiempos){
+    if(!v.tiempos.hasOwnProperty(t)) continue;
+    var filas = "";
+    var arr = v.tiempos[t];
+    for(var j=0;j<arr.length;j++){
+      var en = arr[j][0], es = arr[j][1];
+      var limpio = en.replace(/\(.*?\)/g,"").replace(/[✗✓]/g,"").replace(/→/g," ").replace(/\s+/g," ").trim();
+      filas += '<tr>'+
+        '<td class="eng">'+esc(en)+'</td>'+
+        '<td class="esp">'+esc(es)+'</td>'+
+        '<td class="spk" onclick="decir(\''+limpio.replace(/'/g,"\\'")+'\')">🔊</td>'+
+      '</tr>';
+    }
+    tablas += '<div class="ttitulo">'+esc(t)+'</div>'+
+      '<table class="tabla"><tr><th>Inglés</th><th>Español</th><th></th></tr>'+filas+'</table>';
+  }
+  return barraStats()+
+  '<div class="card">'+
+    '<h2>🔁 Conjugador con voz</h2>'+
+    '<div class="sub">Un nativo no memoriza tablas: memoriza <b>frases enteras</b>. Por eso aquí cada forma viene '+
+      'en una oración de la óptica y con su audio. Escúchala, no la estudies en silencio.</div>'+
+    '<div class="selv">'+
+      '<select onchange="ST.iVerbo=parseInt(this.value);pintar()">'+sel+'</select>'+
+      '<button class="btn btn-c" onclick="leerTodo()">▶ Escuchar toda la tabla</button>'+
+      (REC_OK ? '<button class="btn btn-g" onclick="drill()">🎯 Modo práctica (te pregunto yo)</button>' : "")+
+    '</div>'+
+    '<div class="regla">💡 '+v.nota+'</div>'+
+    tablas+
+    controlVel()+
+  '</div>'+
+  '<div class="card" id="drillBox" style="display:none">'+
+    '<h2>🎯 Modo práctica</h2>'+
+    '<div class="sub" id="drillPreg"></div>'+
+    '<div id="drillIn"></div>'+
+    '<div class="resul" id="resDrill"></div>'+
+  '</div>';
+}
+function leerTodo(){
+  var v = nivelActual().verbos[ST.iVerbo], lista = [];
+  for(var t in v.tiempos){
+    if(!v.tiempos.hasOwnProperty(t)) continue;
+    var a = v.tiempos[t];
+    for(var i=0;i<a.length;i++){
+      lista.push(a[i][0].replace(/\(.*?\)/g,"").replace(/[✗✓]/g,"").replace(/→/g," ").replace(/\s+/g," ").trim());
+    }
+  }
+  decir(lista.join(". "));
+}
+var DRILL = null;
+function drill(){
+  var v = nivelActual().verbos[ST.iVerbo], pool = [];
+  for(var t in v.tiempos){
+    if(!v.tiempos.hasOwnProperty(t)) continue;
+    var a = v.tiempos[t];
+    for(var i=0;i<a.length;i++){
+      if(a[i][1].indexOf("incorrecto")>-1 || a[i][0].indexOf("✗")>-1) continue;
+      pool.push({en:a[i][0].replace(/\(.*?\)/g,"").replace(/→/g," ").replace(/[✓]/g,"").replace(/\s+/g," ").trim(), es:a[i][1]});
+    }
+  }
+  DRILL = pool[Math.floor(Math.random()*pool.length)];
+  q("drillBox").style.display = "block";
+  q("drillPreg").innerHTML = 'Dilo en inglés: <b style="color:var(--dark);font-size:1.05rem">"'+esc(DRILL.es)+'"</b>';
+  q("drillIn").innerHTML =
+    '<div class="controles">'+
+      '<button class="btn btn-g" id="btnMicD" onclick="micDrill()">🎤 Decirlo</button>'+
+      '<button class="btn btn-o" onclick="decir(\''+DRILL.en.replace(/'/g,"\\'")+'\')">👂 Darme la respuesta</button>'+
+      '<button class="btn btn-d" onclick="drill()">🎲 Otra</button>'+
+    '</div>';
+  q("resDrill").style.display = "none";
+  q("drillBox").scrollIntoView({behavior:"smooth", block:"center"});
+}
+function micDrill(){
+  if(!DRILL) return;
+  var b = q("btnMicD"); if(b){ b.className="btn rec"; b.textContent="🔴 Habla ahora..."; }
+  escuchar(function(alts){
+    if(b){ b.className="btn btn-g"; b.textContent="🎤 Decirlo"; }
+    var r = pintaResultado("resDrill", DRILL.en, alts, 'La respuesta correcta era: "'+DRILL.en+'"');
+    if(r) registrar(r.pct, "cj");
+    pintaNiveles();
+    if(r && r.pct>=85) setTimeout(drill, 2200);
+  }, function(err){
+    if(b){ b.className="btn btn-g"; b.textContent="🎤 Decirlo"; }
+    pintaError("resDrill", err);
+  });
+}
+
+/* ═══════════ MODO 4 · DIÁLOGOS ═══════════ */
+function vistaDialogos(){
+  var d = nivelActual(), dl = d.dialogos[ST.iDlg];
+  var tabs = "";
+  for(var i=0;i<d.dialogos.length;i++){
+    tabs += '<button class="chip" style="'+(i===ST.iDlg?"border-color:var(--cyan);background:var(--cyan-light)":"")+
+            '" onclick="ST.iDlg='+i+';pintar()">'+esc(d.dialogos[i].titulo)+'</button>';
+  }
+  var lineas = "";
+  for(var j=0;j<dl.lineas.length;j++){
+    var L = dl.lineas[j];
+    var yo = L.q === "yo";
+    lineas +=
+      '<div class="lin '+(yo?"yo":"cli")+'">'+
+        '<div class="qui">'+(yo?"TÚ":"CLIENTE")+'</div>'+
+        '<div class="txt">'+
+          '<div class="en">'+esc(L.en)+'</div>'+
+          '<div class="fon">'+esc(L.fon)+'</div>'+
+          '<div class="es">'+esc(L.es)+'</div>'+
+        '</div>'+
+        '<div class="acc">'+
+          '<button class="mini" title="Escuchar" onclick="decir(\''+L.en.replace(/'/g,"\\'")+'\')">🔊</button>'+
+          (yo && REC_OK ? '<button class="mini" id="mic'+j+'" title="Practicar mi línea" onclick="micLinea('+j+')">🎤</button>' : "")+
+        '</div>'+
+      '</div>'+
+      (yo ? '<div class="resul" id="resL'+j+'" style="margin:0 0 8px 12px"></div>' : "");
+  }
+  return barraStats()+
+  '<div class="card">'+
+    '<h2>💬 Diálogos reales de la óptica</h2>'+
+    '<div class="sub">Practica el guion completo. Las líneas <b>celestes son tuyas</b>: toca el micrófono y dilas '+
+      'en voz alta como si el cliente estuviera enfrente. Las blancas son del cliente, solo escúchalas.</div>'+
+    '<div class="chips">'+tabs+'</div>'+
+    '<div class="dlg">'+lineas+'</div>'+
+    '<div class="controles">'+
+      '<button class="btn btn-c" onclick="leerDialogo()">▶ Escuchar el diálogo completo</button>'+
+      '<button class="btn btn-o" onclick="ST.iDlg=(ST.iDlg+1)%nivelActual().dialogos.length;pintar()">Siguiente diálogo →</button>'+
+    '</div>'+
+    controlVel()+
+  '</div>';
+}
+function leerDialogo(){
+  var dl = nivelActual().dialogos[ST.iDlg], i = 0;
+  function sig(){
+    if(i >= dl.lineas.length) return;
+    var L = dl.lineas[i]; i++;
+    if(!window.speechSynthesis){ return; }
+    try{
+      var u = new SpeechSynthesisUtterance(L.en);
+      u.lang="en-US"; u.rate=ST.velocidad; if(VOZ) u.voice=VOZ;
+      u.pitch = L.q==="yo" ? 1.05 : 0.9;
+      u.onend = function(){ setTimeout(sig, 320); };
+      speechSynthesis.speak(u);
+    }catch(e){}
+  }
+  try{ speechSynthesis.cancel(); }catch(e){}
+  sig();
+}
+function micLinea(j){
+  var L = nivelActual().dialogos[ST.iDlg].lineas[j];
+  var b = q("mic"+j); if(b){ b.className="mini rec"; b.textContent="🔴"; }
+  escuchar(function(alts){
+    if(b){ b.className="mini"; b.textContent="🎤"; }
+    var r = pintaResultado("resL"+j, L.en, alts, "Guía: "+L.fon);
+    if(r) registrar(r.pct, "dl"+ST.iDlg+"_"+j);
+    pintaNiveles();
+  }, function(err){
+    if(b){ b.className="mini"; b.textContent="🎤"; }
+    pintaError("resL"+j, err);
+  });
+}
+
+/* ═══════════ MODO 5 · FLASHCARDS ═══════════ */
+function vistaCards(){
+  var d = nivelActual(), c = d.cards[ST.iCard];
+  var pct = Math.round((ST.iCard+1)*100/d.cards.length);
+  return barraStats()+
+  '<div class="card">'+
+    '<h2>🃏 Vocabulario con audio</h2>'+
+    '<div class="sub">Toca la tarjeta para voltearla. Regla de oro: <b>nunca leas la palabra sin escucharla</b>, '+
+      'o vas a guardar en tu memoria una pronunciación inventada que después cuesta borrar.</div>'+
+    '<div class="fc'+(ST.flip?" flip":"")+'" onclick="ST.flip=!ST.flip;pintar()">'+
+      '<div class="fcin">'+
+        '<div class="fcara fcfr">'+
+          '<div class="w">'+esc(c.en)+'</div>'+
+          '<div class="f">'+esc(c.fon)+'</div>'+
+          '<div class="t">TOCA PARA VER EL SIGNIFICADO</div>'+
+        '</div>'+
+        '<div class="fcara fcde">'+
+          '<div class="w">'+esc(c.es)+'</div>'+
+          '<div class="u">"'+esc(c.uso)+'"</div>'+
+        '</div>'+
+      '</div>'+
+    '</div>'+
+    '<div class="controles">'+
+      '<button class="btn btn-c" onclick="event.stopPropagation();decir(\''+c.en.replace(/'/g,"\\'")+'\')">🔊 La palabra</button>'+
+      '<button class="btn btn-o" onclick="event.stopPropagation();decir(\''+c.uso.replace(/'/g,"\\'")+'\')">🔊 La frase completa</button>'+
+      (REC_OK ? '<button class="btn btn-g" id="btnMic" onclick="event.stopPropagation();micCard()">🎤 Repetir la frase</button>' : "")+
+    '</div>'+
+    '<div class="resul" id="res"></div>'+
+    '<div class="barra"><i style="width:'+pct+'%"></i></div>'+
+    '<div class="paso">TARJETA '+(ST.iCard+1)+' DE '+d.cards.length+'</div>'+
+    '<div class="controles" style="margin-top:14px">'+
+      '<button class="btn btn-o" onclick="navCard(-1)">← Anterior</button>'+
+      '<button class="btn btn-d" onclick="navCard(1)">Siguiente →</button>'+
+    '</div>'+
+  '</div>';
+}
+function navCard(dir){
+  var d = nivelActual();
+  ST.iCard = (ST.iCard + dir + d.cards.length) % d.cards.length;
+  ST.flip = false; pintar();
+}
+function micCard(){
+  var c = nivelActual().cards[ST.iCard];
+  var b = q("btnMic"); if(b){ b.className="btn rec"; b.textContent="🔴 Habla ahora..."; }
+  escuchar(function(alts){
+    if(b){ b.className="btn btn-g"; b.textContent="🎤 Repetir la frase"; }
+    var r = pintaResultado("res", c.uso, alts, null);
+    if(r) registrar(r.pct, "cd"+ST.iCard);
+    pintaNiveles();
+  }, function(err){
+    if(b){ b.className="btn btn-g"; b.textContent="🎤 Repetir la frase"; }
+    pintaError("res", err);
+  });
+}
+
+/* ═══════════ MODO 6 · DICTADO ═══════════ */
+function vistaDictado(){
+  var d = nivelActual();
+  var pct = Math.round((ST.iDict+1)*100/d.frases.length);
+  return barraStats()+
+  '<div class="card">'+
+    '<h2>🎧 Dictado · entrena el oído</h2>'+
+    '<div class="sub">Aquí <b>no se ve la frase</b>. Escucha y escribe lo que oigas. Este ejercicio es el que '+
+      'más rápido te hace entender a un cliente hablando a velocidad real.</div>'+
+    '<div class="dictado">'+
+      '<div class="controles">'+
+        '<button class="btn btn-c" onclick="decir(\''+d.frases[ST.iDict].en.replace(/'/g,"\\'")+'\')">▶ Escuchar</button>'+
+        '<button class="btn btn-o" onclick="decir(\''+d.frases[ST.iDict].en.replace(/'/g,"\\'")+'\',0.55)">🐢 Despacio</button>'+
+      '</div>'+
+      '<input type="text" id="dictIn" placeholder="Escribe aquí lo que escuchaste..." autocomplete="off" '+
+        'onkeydown="if(event.key===\'Enter\')revisarDictado()">'+
+      '<div class="controles" style="margin-top:12px">'+
+        '<button class="btn btn-g" onclick="revisarDictado()">✔ Revisar</button>'+
+        '<button class="btn btn-d" onclick="navDict(1)">Siguiente →</button>'+
+      '</div>'+
+    '</div>'+
+    '<div class="resul" id="res"></div>'+
+    controlVel()+
+    '<div class="barra"><i style="width:'+pct+'%"></i></div>'+
+    '<div class="paso">DICTADO '+(ST.iDict+1)+' DE '+d.frases.length+'</div>'+
+    '<div class="hint"><b>Si no entendiste nada:</b> es normal al inicio y no significa que no sepas inglés. '+
+      'Significa que el oído todavía no separa las palabras pegadas. Escucha 5 veces seguidas antes de rendirte, '+
+      'y luego bájale la velocidad.</div>'+
+  '</div>';
+}
+function navDict(dir){
+  var d = nivelActual();
+  ST.iDict = (ST.iDict + dir + d.frases.length) % d.frases.length;
+  pintar();
+}
+function revisarDictado(){
+  var f = nivelActual().frases[ST.iDict];
+  var val = (q("dictIn")||{}).value || "";
+  var r = calificar(f.en, val);
+  var box = q("res");
+  box.className = "resul " + claseRes(r.pct);
+  var pal = "";
+  for(var k=0;k<r.marcas.length;k++){
+    pal += '<span class="pal '+(r.marcas[k].ok?"b":"m")+'">'+r.marcas[k].w+'</span>';
+  }
+  box.innerHTML =
+    '<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">'+
+      '<span class="pct">'+r.pct+'%</span>'+
+      '<span style="font-size:.86rem;font-weight:600">'+(r.pct>=85?"✅ ¡Excelente oído!":(r.pct>=60?"👍 Casi, revisa lo rojo":"🎧 Escucha otra vez"))+'</span>'+
+    '</div>'+
+    '<div style="margin-top:10px">'+pal+'</div>'+
+    '<div class="oiste">Era: <i>'+esc(f.en)+'</i></div>'+
+    '<div class="oiste">Significa: '+esc(f.es)+'</div>';
+  box.style.display = "block";
+  registrar(r.pct, "dt"+ST.iDict);
+  pintaNiveles();
+  if(r.pct>=85) setTimeout(function(){ navDict(1); }, 2400);
+}
+
+/* ═══════════ PINTAR ═══════════ */
+function pintar(){
+  var h = "";
+  if(ST.modo==="sonidos")        h = vistaSonidos();
+  else if(ST.modo==="frases")    h = vistaFrases();
+  else if(ST.modo==="conjugador")h = vistaConjugador();
+  else if(ST.modo==="dialogos")  h = vistaDialogos();
+  else if(ST.modo==="cards")     h = vistaCards();
+  else if(ST.modo==="dictado")   h = vistaDictado();
+  q("panel").innerHTML = h;
+}
+
+/* ═══════════ ARRANQUE ═══════════ */
+(function(){
+  /* nivel por URL: english-lab.html?nivel=2 */
+  var m = (location.search||"").match(/nivel=(\d)/);
+  if(m && DATA[parseInt(m[1])]) ST.nivel = parseInt(m[1]);
+
+  var avisos = [];
+  if(!window.speechSynthesis)
+    avisos.push("Este navegador no tiene voz sintetizada, así que no podrás escuchar el audio nativo. Usa <b>Google Chrome</b>.");
+  if(!REC_OK)
+    avisos.push("La evaluación de pronunciación por micrófono solo funciona en <b>Google Chrome</b> (computadora o Android). "+
+                "En iPad o iPhone puedes escuchar y repetir, pero no se calificará tu voz.");
+  if(location.protocol === "file:")
+    avisos.push("Estás abriendo el archivo directamente desde el disco. El micrófono se bloquea así; "+
+                "cuando esté publicado en el sitio de la Academia funcionará normal.");
+  if(avisos.length){
+    var a = q("aviso");
+    a.innerHTML = "⚠️ " + avisos.join("<br><br>⚠️ ");
+    a.className = "aviso show";
+  }
+
+  pintaNiveles();
+  pintaModos();
+  pintar();
+
+  /* algunos navegadores solo cargan las voces después de la primera interacción */
+  document.addEventListener("click", function once(){
+    elegirVoz();
+    document.removeEventListener("click", once);
+  });
+})();
+</script>
+</body>
+</html>
