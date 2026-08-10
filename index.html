@@ -546,6 +546,28 @@ min-height:260px;
       font-size:.88rem;font-weight:600;cursor:pointer;white-space:nowrap;
     }
     .cv-btn-odoo:hover{background:linear-gradient(135deg,#8b5cf6,#6d28d9);}
+    /* ═══ English Lab (módulos de inglés) ═══ */
+    .cv-eng-cta{
+      background:linear-gradient(135deg,#0D2137 0%,#123a5c 100%);
+      border:1px solid #1e5f8a;
+    }
+    .cv-btn-eng{background:linear-gradient(135deg,#F5B800,#e09b00);color:#0D2137;}
+    .cv-btn-eng:hover{background:linear-gradient(135deg,#ffc629,#f0a800);}
+    #modal-english{
+      display:none;position:fixed;inset:0;z-index:100000;
+      flex-direction:column;background:#F0F4F8;
+    }
+    #modal-english.abierto{display:flex}
+    #modal-english .cv-modal-bar{
+      display:flex;align-items:center;justify-content:space-between;
+      padding:12px 18px;background:#0D2137;color:#e9f2f2;
+      font-size:14px;font-weight:600;flex-shrink:0;
+    }
+    #modal-english .cv-cerrar{
+      background:rgba(255,255,255,.12);color:#fff;border:none;border-radius:8px;
+      padding:7px 14px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;
+    }
+    #modal-english .cv-cerrar:hover{background:rgba(255,255,255,.22)}
     #modal-miopia .cv-modal-bar{
       display:flex;align-items:center;justify-content:space-between;
       padding:12px 18px;background:#0d1b1e;color:#e9f2f2;
@@ -2424,6 +2446,477 @@ const MODULES_OPTO = [
   ]
 }];
 
+
+// ═══════════════════════════════════════════════════════════════════════
+// 🇺🇸 INGLÉS CV+ · 4 niveles compartidos por asesores y optometristas
+// El contenido se define UNA vez aquí y se inyecta en las dos academias
+// con distintos IDs (asesores 20-23 · optometristas 3-6).
+// Para agregar un nivel 5: agrégalo a este array y suma su id en CAT_INFO.
+// La propiedad chain:'ingles' hace que estos módulos tengan su PROPIA
+// cadena de desbloqueo, independiente de los módulos técnicos.
+// ═══════════════════════════════════════════════════════════════════════
+const MODULES_INGLES = [
+{
+  title:"Inglés Nivel 1 · Survival English", icon:"🇺🇸",
+  category:"ingles", chain:"ingles", quizCount:15,
+  content:`
+    <div class="cv-odoo-cta cv-eng-cta">
+      <div class="cv-odoo-txt">
+        <strong>🎧 English Lab · Nivel 1</strong>
+        <span>Voz nativa, laboratorio de sonidos y calificación de tu pronunciación con micrófono</span>
+      </div>
+      <button class="cv-btn-odoo cv-btn-eng" type="button" onclick="abrirEnglishLab(1)">Abrir el laboratorio</button>
+    </div>
+
+    <h2>Cómo vas a aprender inglés en este módulo</h2>
+    <p>Este módulo <strong>no funciona como la clase de inglés del colegio</strong>. No vas a empezar memorizando listas de verbos ni reglas gramaticales. Vas a aprender en el mismo orden en que aprende un niño que nació en Estados Unidos:</p>
+    <ol>
+      <li><strong>Primero el oído.</strong> Un bebé estadounidense escucha inglés durante casi un año antes de decir su primera palabra. Escuchar mucho antes de hablar no es perder el tiempo: es construir la base.</li>
+      <li><strong>Después la boca.</strong> Repetir en voz alta imitando el sonido exacto, sin traducir en la cabeza. Esta técnica se llama <em>shadowing</em> (hacerle sombra a la voz).</li>
+      <li><strong>Al final la gramática.</strong> La regla se aprende cuando ya sabes cómo suena la frase correcta. La gramática explica lo que tu oído ya reconoce.</li>
+    </ol>
+    <p><strong>Regla de oro del nivel 1:</strong> nunca leas una palabra en inglés sin haberla escuchado antes. Si la lees primero, tu cerebro le inventa una pronunciación en español y después cuesta muchísimo borrarla.</p>
+
+    <h2>1. Los 7 sonidos que no existen en español</h2>
+    <p>El acento marcado no viene de la gramática: viene de estos sonidos. El español tiene 5 vocales y el inglés más de 12, y hay consonantes que nuestra boca nunca ha practicado. Estos son los siete que más te delatan:</p>
+    <ul>
+      <li><strong>TH (think, thanks, the)</strong> — Punta de la lengua entre los dientes y soplas. Si lo cambias por S dices <em>sink</em> (lavamanos) en vez de <em>think</em> (pensar); si lo cambias por T dices <em>tree</em> (árbol) en vez de <em>three</em> (tres).</li>
+      <li><strong>H aspirada (hello, help, how)</strong> — En español la H es muda; en inglés siempre suena, como un suspiro que sale del pecho. Debes sentir el aire tibio en la mano. Excepciones donde sí es muda: <em>hour</em>, <em>honest</em>, <em>honor</em>.</li>
+      <li><strong>V labiodental (very, vision, have)</strong> — Los dientes de arriba muerden suave el labio de abajo y vibra. En español B y V suenan igual; en inglés <em>very</em> (muy) y <em>berry</em> (baya) son palabras distintas.</li>
+      <li><strong>R americana (red, ready, here)</strong> — No vibra. Nada de "rr" salvadoreña. La lengua se enrolla hacia atrás sin tocar el paladar y los labios se redondean un poco.</li>
+      <li><strong>Schwa /ə/ (about, problem, doctor)</strong> — El sonido más frecuente del inglés. En las sílabas sin acento la vocal se apaga hasta volverse una "e" perezosa: <em>doctor</em> suena DÁK-ter, <em>customer</em> suena KAS-te-mer. El error clásico del hispanohablante es pronunciar todas las vocales claras y fuertes.</li>
+      <li><strong>S líquida (school, store, Spanish)</strong> — Jamás le agregues la "e" del español. Es <em>school</em>, no "eschool"; <em>store</em>, no "estore".</li>
+      <li><strong>Vocal larga vs corta (see / sit)</strong> — La i larga se estira con sonrisa amplia; la i corta es breve y relajada, casi entre i y e. Confundirlas cambia la palabra por completo.</li>
+    </ul>
+
+    <h2>2. El ritmo: una sola sílaba brilla</h2>
+    <p>El español es un idioma de sílabas parejas: todas duran casi lo mismo. El inglés es un idioma de <strong>acentos</strong>: en cada palabra hay una sílaba fuerte y las demás se apagan. Si le pones el acento en el lugar equivocado, un nativo puede no entenderte aunque los sonidos estén correctos.</p>
+    <ul>
+      <li><strong>CUS</strong>-to-mer · pre-<strong>SCRIP</strong>-tion · ap-<strong>POINT</strong>-ment · <strong>GLA</strong>-sses · pro-<strong>GRE</strong>-ssive · war-<strong>RAN</strong>-ty</li>
+    </ul>
+    <p>Y en la frase completa los nativos <strong>pegan las palabras</strong>. No hablan más rápido que nosotros: hablan más pegado. <em>How are you</em> suena "jaua-riu". <em>Can I help you</em> suena "ca-nai-JEL-piu". Practica cada frase como si fuera <strong>una sola palabra larga</strong>.</p>
+
+    <h2>3. Chunks: aprende frases enteras, no palabras</h2>
+    <p>Un nativo no arma la frase palabra por palabra: guarda bloques completos en la memoria y los saca enteros. Eso se llama <em>chunk</em>. Estos son los bloques que necesitas para atender a un cliente desde tu primer día, incluso si todavía no sabes nada de gramática:</p>
+    <ul>
+      <li><strong>Good morning / afternoon / evening!</strong> — Buenos días / buenas tardes / buenas noches (al saludar).</li>
+      <li><strong>Welcome to CV Plus.</strong> — Bienvenido a CV Plus.</li>
+      <li><strong>How can I help you?</strong> — ¿Cómo puedo ayudarle? (jáu can ai JELP iu)</li>
+      <li><strong>Just a moment, please.</strong> — Un momento, por favor.</li>
+      <li><strong>I'm sorry, could you repeat that, please?</strong> — La frase más importante del nivel 1. No es vergüenza pedir que repitan: es profesionalismo.</li>
+      <li><strong>I speak a little English.</strong> — Hablo un poco de inglés. Dicha con una sonrisa, desarma cualquier tensión.</li>
+      <li><strong>One moment, I'll call my supervisor.</strong> — Un momento, llamaré a mi supervisor.</li>
+      <li><strong>Here you go.</strong> — Aquí tiene (al entregar algo).</li>
+      <li><strong>You're welcome.</strong> — De nada.</li>
+      <li><strong>Have a nice day!</strong> — ¡Que tenga un buen día!</li>
+    </ul>
+    <p><strong>Ojo cultural:</strong> el cliente estadounidense espera un saludo cálido y contacto visual desde el primer segundo. Para él, el tono de voz <em>es</em> parte del servicio. Una frase correcta dicha en tono plano se percibe como desinterés.</p>
+
+    <h2>4. Tus primeras tres conjugaciones</h2>
+    <h3>To be (ser / estar) — el verbo más usado del inglés</h3>
+    <p>Los nativos casi nunca lo dicen completo: lo contraen. Aprende la contracción primero, porque eso es lo que de verdad vas a escuchar.</p>
+    <ul>
+      <li>I <strong>am</strong> (I'm) — yo soy / estoy</li>
+      <li>You <strong>are</strong> (you're) — tú eres / estás</li>
+      <li>He / She / It <strong>is</strong> (he's / she's / it's) — él, ella, eso es / está</li>
+      <li>We <strong>are</strong> (we're) — nosotros somos / estamos</li>
+      <li>They <strong>are</strong> (they're) — ellos son / están</li>
+    </ul>
+    <p>Para preguntar, solo se invierte el orden: <em>Are you ready?</em> · <em>Is he here?</em> Para negar, se agrega <em>not</em>: <em>I'm not sure</em> · <em>It isn't ready</em>.</p>
+
+    <h3>To have (tener)</h3>
+    <p>Solo cambia en la tercera persona: <em>I have</em>, <em>you have</em>, <em>he/she/it <strong>has</strong></em>, <em>we have</em>, <em>they have</em>. La pregunta clave en la óptica: <strong>Do you have your prescription?</strong> (¿tiene su receta?).</p>
+
+    <h3>Can (poder)</h3>
+    <p><em>Can</em> es un modal, y los modales tienen tres reglas simples: <strong>nunca llevan -s</strong> (no existe "he cans"), el verbo que les sigue va <strong>sin "to"</strong> (<em>I can help</em>, no "I can to help"), y la negación es <em>can't</em>. De aquí sale la frase estrella de la atención al cliente: <strong>Can I help you?</strong></p>
+
+    <h2>5. Números, colores y días (lo mínimo indispensable)</h2>
+    <ul>
+      <li><strong>1-10:</strong> one, two, three, four, five, six, seven, eight, nine, ten.</li>
+      <li><strong>Decenas:</strong> twenty, thirty, forty, fifty... Ojo: <em>thirteen</em> (13) lleva el acento al final, <em>thirty</em> (30) al inicio. Esa diferencia de acento evita errores de precio.</li>
+      <li><strong>Colores:</strong> black, white, gray, brown, blue, red, gold, silver, tortoise (tortuga, el clásico de los aros).</li>
+      <li><strong>Días:</strong> Monday, Tuesday, Wednesday (UÉNS-dei, la "d" no se pronuncia), Thursday, Friday, Saturday, Sunday.</li>
+      <li><strong>Palabras clave de la óptica:</strong> glasses (lentes), frames (aros), lenses (los cristales), eye (ojo), prescription (receta), appointment (cita), price (precio), ready (listo).</li>
+    </ul>
+
+    <h2>Tu rutina de práctica</h2>
+    <p>Con <strong>10 minutos diarios</strong> en el laboratorio avanzas más que con dos horas una vez al mes. El oído se entrena por repetición frecuente, no por sesiones largas. Rutina sugerida: 3 minutos en <em>Sonidos nativos</em>, 4 minutos en <em>Repetir frases</em> y 3 minutos en <em>Dictado</em>. Cuando tu promedio de pronunciación pase de 85%, estás listo para el quiz.</p>
+  `,
+  quizBank:[
+    {q:"Según el método de este módulo, ¿en qué orden se aprende inglés de forma nativa?",opts:["Gramática, después vocabulario, después escuchar","Escuchar primero, después hablar, la gramática al final","Traducir del español y luego memorizar reglas","Leer en voz alta antes de escuchar cualquier audio"],c:1,e:"El orden nativo es oído → boca → gramática. Un niño en Estados Unidos escucha casi un año antes de hablar, y la regla se aprende cuando ya reconoce cómo suena la frase correcta."},
+    {q:"¿Por qué la regla de oro es nunca leer una palabra en inglés sin haberla escuchado primero?",opts:["Porque leer en inglés es más difícil que escuchar","Porque el cerebro le inventa una pronunciación en español que después cuesta borrar","Porque la escritura en inglés no tiene relación con el significado","Porque así se aprende más vocabulario por minuto"],c:1,e:"Si lees primero, tu cerebro asigna sonidos del español a esa palabra y guarda una pronunciación inventada. Corregir ese hábito después cuesta mucho más que aprenderlo bien de una vez."},
+    {q:"Si pronuncias 'think' cambiando el sonido TH por una S, ¿qué palabra dices en realidad?",opts:["sing (cantar)","sink (lavamanos)","thing (cosa)","sick (enfermo)"],c:1,e:"'Think' (pensar) se convierte en 'sink' (lavamanos). El TH se hace sacando la punta de la lengua entre los dientes y soplando: es el sonido que más delata el acento extranjero."},
+    {q:"¿Cómo se produce correctamente el sonido TH de 'thanks'?",opts:["Con la lengua pegada al paladar, como una T fuerte","Con la punta de la lengua entre los dientes, soplando aire","Con los labios juntos, como una P suave","Con la garganta, como una J española"],c:1,e:"La punta de la lengua se coloca entre los dientes y sale aire. En 'think' y 'thanks' es sorda (solo aire); en 'the', 'this' y 'that' la garganta vibra."},
+    {q:"En inglés, la letra H de 'hello' y 'help':",opts:["Es muda, igual que en español","Siempre suena, como un suspiro suave desde el pecho","Suena como la J española fuerte","Solo suena cuando va al final de la palabra"],c:1,e:"En inglés la H sí suena, como aire tibio que se siente en la mano. Las excepciones donde es muda son 'hour', 'honest' y 'honor'."},
+    {q:"¿Cuál es la diferencia entre 'very' y 'berry' en inglés?",opts:["Ninguna, se pronuncian igual como en español","'Very' se hace con los dientes sobre el labio inferior; 'berry' juntando los dos labios","'Very' lleva el acento al final y 'berry' al inicio","'Berry' se pronuncia con la lengua entre los dientes"],c:1,e:"La V es labiodental (dientes de arriba sobre el labio de abajo, vibrando) y la B es bilabial (los dos labios juntos). En español suenan igual, pero en inglés son palabras distintas: 'very' es muy y 'berry' es una fruta."},
+    {q:"¿Qué es el schwa /ə/ y por qué es tan importante para sonar nativo?",opts:["Una consonante muda que aparece al final de las palabras","La vocal relajada de las sílabas sin acento: 'doctor' suena DÁK-ter","El acento que se pone en la última sílaba de cada palabra","Una regla que alarga todas las vocales del inglés"],c:1,e:"El schwa es el sonido más frecuente del inglés: en las sílabas sin acento la vocal se apaga hasta volverse una 'e' perezosa. El error típico del hispanohablante es pronunciar todas las vocales claras y fuertes."},
+    {q:"¿Cómo se pronuncia correctamente el inicio de 'store' y 'school'?",opts:["Agregando una 'e' antes: 'estore', 'eschool'","Directamente con la S, sin ninguna vocal antes","Cambiando la S por Z: 'ztore', 'zchool'","Con la S muda, empezando por la T y la CH"],c:1,e:"En español no arrancamos palabras con S + consonante y por eso agregamos una 'e' (escuela, español). En inglés eso suena marcadamente extranjero: se empieza directo con el silbido de la S."},
+    {q:"Un cliente estadounidense dice que le cuesta entenderte aunque tus sonidos son correctos. Lo más probable es que el problema esté en:",opts:["La velocidad: hablas demasiado despacio","El acento de la palabra: pusiste la sílaba fuerte en el lugar equivocado","El vocabulario: usaste palabras muy técnicas","La cantidad de gramática que usaste"],c:1,e:"El inglés es un idioma de acentos: cada palabra tiene una sílaba fuerte y las demás se apagan. Decir 'appointMENT' en vez de 'apPOINTment' puede volver la palabra irreconocible para un nativo."},
+    {q:"¿Qué significa que los nativos 'pegan' las palabras (linking)?",opts:["Que hablan mucho más rápido que los hispanohablantes","Que unen el final de una palabra con el inicio de la siguiente: 'How are you' suena 'jaua-riu'","Que se comen la mitad de las palabras de cada frase","Que repiten la última sílaba de cada palabra"],c:1,e:"No hablan más rápido: hablan más pegado. Cuando una palabra termina en consonante y la siguiente empieza en vocal, se enlazan. Por eso conviene practicar la frase completa como si fuera una sola palabra larga."},
+    {q:"¿Qué es un 'chunk' y por qué se recomienda aprender así?",opts:["Una regla gramatical resumida en una tabla","Un bloque de frase completo que se guarda y se usa entero, como hacen los nativos","Una lista de verbos irregulares agrupados por terminación","Un ejercicio de traducción palabra por palabra"],c:1,e:"Los nativos no arman la frase palabra por palabra: guardan bloques completos ('How can I help you?') y los sacan enteros. Aprender por chunks te permite atender a un cliente aun sin dominar la gramática."},
+    {q:"Un cliente extranjero habla y no entendiste nada. ¿Cuál es la respuesta más profesional?",opts:["Quedarte callado y esperar a que repita solo","I'm sorry, could you repeat that, please?","Decirle 'no English' y retirarte","Pedirle que lo escriba en un papel de inmediato"],c:1,e:"Pedir que repitan no es vergüenza, es profesionalismo. 'I'm sorry, could you repeat that, please?' es la frase más útil del nivel 1, y puedes agregar 'a little slower' para pedir que hable más despacio."},
+    {q:"Completa correctamente: 'Welcome to CV Plus. ___ can I help you?'",opts:["What","How","Where","Which"],c:1,e:"'How can I help you?' es la fórmula estándar de atención en inglés. Se pronuncia pegado: 'jáu-can-ai-JELP-iu'."},
+    {q:"¿Cuál es la forma contraída correcta de 'they are'?",opts:["they're","their","theirs","they's"],c:0,e:"'They are' se contrae en 'they're'. Aprender las contracciones primero es clave porque es lo que realmente se escucha: I'm, you're, he's, she's, it's, we're, they're."},
+    {q:"¿Cuál de estas oraciones con el verbo 'to have' es correcta?",opts:["He have your prescription","She haves an appointment","He has your prescription","They has two frames"],c:2,e:"'To have' solo cambia en la tercera persona del singular: he/she/it HAS. Todos los demás usan 'have'."},
+    {q:"¿Cuál es el error en la frase 'He cans help you'?",opts:["Debe decir 'He can helps you'","Los modales como 'can' nunca llevan -s: es 'He can help you'","Debe decir 'He can to help you'","No hay error, la frase es correcta"],c:1,e:"'Can' es un modal: nunca lleva -s, el verbo que le sigue va sin 'to' y su negación es 'can't'. Lo correcto es 'He can help you'."},
+    {q:"¿Por qué es importante distinguir el acento de 'thirteen' (13) y 'thirty' (30)?",opts:["Porque son sinónimos y se usan indistintamente","Porque el acento es lo único que las diferencia y confundirlas cambia un precio o una cantidad","Porque 'thirty' no se usa en Estados Unidos","Porque una es formal y la otra informal"],c:1,e:"'ThirTEEN' lleva el acento al final y 'THIRty' al inicio. En una venta, confundir 13 con 30 cambia el precio o la cantidad, así que la diferencia de acento es crítica."},
+    {q:"Según el módulo, ¿cuál es la rutina de práctica más efectiva?",opts:["Dos horas seguidas una vez al mes","10 minutos diarios en el laboratorio","Solo repasar antes de tomar el quiz","Leer el módulo completo tres veces sin usar el audio"],c:1,e:"El oído se entrena con repetición frecuente, no con sesiones largas y esporádicas. Diez minutos diarios rinden más que dos horas una vez al mes."},
+    {q:"Para un cliente estadounidense, además de las palabras correctas, ¿qué forma parte esencial del buen servicio?",opts:["Hablar lo más rápido posible para demostrar fluidez","El tono de voz cálido y el contacto visual desde el primer segundo","Usar vocabulario técnico avanzado","Evitar hacer preguntas para no molestar"],c:1,e:"En la cultura de servicio estadounidense el tono es parte del servicio: una frase gramaticalmente correcta dicha en tono plano se percibe como desinterés."},
+    {q:"¿Cómo se pronuncia 'Wednesday'?",opts:["UÉD-nes-dei, pronunciando las tres sílabas","UÉNS-dei, la primera 'd' no se pronuncia","UÍD-nes-dai, con acento al final","BÉD-nes-dei, con B inicial"],c:1,e:"'Wednesday' se pronuncia UÉNS-dei: la 'd' del medio es muda. Es uno de los casos donde la escritura del inglés no corresponde con el sonido."}
+  ]
+},
+{
+  title:"Inglés Nivel 2 · Presente y rutina", icon:"🇺🇸",
+  category:"ingles", chain:"ingles", quizCount:15,
+  content:`
+    <div class="cv-odoo-cta cv-eng-cta">
+      <div class="cv-odoo-txt">
+        <strong>🎧 English Lab · Nivel 2</strong>
+        <span>La -s de tercera persona, el linking y los diálogos de venta con evaluación de voz</span>
+      </div>
+      <button class="cv-btn-odoo cv-btn-eng" type="button" onclick="abrirEnglishLab(2)">Abrir el laboratorio</button>
+    </div>
+
+    <h2>Lo que vas a lograr en este nivel</h2>
+    <p>En el nivel 1 aprendiste a saludar y a sobrevivir. En el nivel 2 aprendes a <strong>describir lo que pasa</strong>: los horarios de la tienda, lo que hace cada persona, lo que el cliente usa y lo que está pasando en este momento. Con el presente simple y el presente continuo ya puedes sostener una atención completa de mostrador.</p>
+
+    <h2>1. Presente simple: rutinas, horarios y hechos</h2>
+    <p>Se usa para lo que pasa siempre o habitualmente: <em>we open at nine</em> (abrimos a las nueve), <em>she wears contacts</em> (ella usa lentes de contacto). La buena noticia es que el verbo casi no cambia. La única trampa es la <strong>-s de la tercera persona</strong>.</p>
+    <ul>
+      <li>I work · You work · <strong>He works</strong> · <strong>She works</strong> · <strong>It works</strong> · We work · They work</li>
+    </ul>
+    <h3>El error número uno del hispanohablante</h3>
+    <p>Cuando la frase se vuelve negativa o pregunta, la <strong>-s se muda al auxiliar</strong> y el verbo principal vuelve a su forma simple:</p>
+    <ul>
+      <li>✅ He <strong>doesn't</strong> work on Sunday — ❌ He doesn't work<span>s</span> on Sunday</li>
+      <li>✅ <strong>Does</strong> she wear glasses? — ❌ Does she wears glasses?</li>
+    </ul>
+    <p>La lógica es simple: la marca de tercera persona se usa <strong>una sola vez</strong> por frase. Si ya está en <em>does</em>, no puede estar también en el verbo.</p>
+
+    <h3>Detalle nativo: la -s tiene tres sonidos</h3>
+    <p>Los nativos no pronuncian todas las -s igual, y lo hacen sin pensarlo. Copiarlo es lo que hace que tu inglés suene natural:</p>
+    <ul>
+      <li>Después de sonido sordo (p, t, k, f) suena <strong>/s/</strong>: <em>works</em> (uerks), <em>helps</em> (jelps), <em>wants</em> (uants).</li>
+      <li>Después de sonido sonoro o vocal suena <strong>/z/</strong>: <em>needs</em> (nidz), <em>sees</em> (siz), <em>wears</em> (uerz).</li>
+      <li>Después de s, sh, ch, x o ge suena <strong>/ɪz/</strong> y <strong>agrega una sílaba</strong>: <em>washes</em> (UÁ-shis), <em>watches</em> (UÁ-chis), <em>uses</em> (IÚ-sis).</li>
+    </ul>
+
+    <h2>2. Presente continuo: lo que está pasando ahora</h2>
+    <p>Se forma con <strong>am / is / are + verbo-ing</strong>. Es el tiempo que usas para narrar el momento frente al cliente, y transmite atención: <em>I'm checking the price for you</em> (estoy revisando el precio para usted) tranquiliza mucho más que un silencio.</p>
+    <ul>
+      <li>I'm working · You're waiting · He's coming · She's helping another customer · We're closing · They're looking at frames</li>
+    </ul>
+    <h3>Reglas de escritura del -ing</h3>
+    <ul>
+      <li>Si el verbo termina en <strong>e muda</strong>, la pierde: make → mak<strong>ing</strong>, come → com<strong>ing</strong>.</li>
+      <li>Si termina en <strong>consonante-vocal-consonante</strong> acentuada, la última consonante se duplica: get → ge<strong>tt</strong>ing, put → pu<strong>tt</strong>ing, sit → si<strong>tt</strong>ing.</li>
+      <li>Si termina en <strong>-ie</strong>, cambia a y: lie → l<strong>y</strong>ing.</li>
+    </ul>
+    <h3>Cuándo usar cada uno</h3>
+    <ul>
+      <li><em>The doctor <strong>works</strong> here</em> → es su trabajo, todos los días (presente simple).</li>
+      <li><em>The doctor <strong>is working</strong> right now</em> → en este momento está ocupado (presente continuo).</li>
+    </ul>
+
+    <h2>3. There is / there are: el "hay" del inglés</h2>
+    <p>En español "hay" nunca cambia. En inglés sí, y este es un error muy frecuente:</p>
+    <ul>
+      <li><strong>There is</strong> + singular: <em>There is a mirror right behind you</em> (hay un espejo justo detrás de usted).</li>
+      <li><strong>There are</strong> + plural: <em>There are three colors available</em> (hay tres colores disponibles).</li>
+      <li>Pregunta: <em>Is there a restroom?</em> · <em>Are there other options?</em></li>
+      <li>❌ Nunca digas "there is three colors".</li>
+    </ul>
+
+    <h2>4. Los tres verbos que más dice un cliente</h2>
+    <ul>
+      <li><strong>like</strong> (gustar) — Cuidado: en inglés el sujeto es la persona, al revés del español. Se dice <em>I like these frames</em> (yo gusto de estos aros), no "me gustan".</li>
+      <li><strong>need</strong> (necesitar) — <em>I need to check the price</em>. Después de <em>need</em>, el segundo verbo lleva <strong>to</strong>.</li>
+      <li><strong>want</strong> (querer) — <em>She wants to try them on</em>. Con un cliente, en vez de <em>Do you want...?</em> conviene la forma cortés <strong>Would you like...?</strong></li>
+    </ul>
+
+    <h2>5. Vocabulario del mostrador</h2>
+    <ul>
+      <li><strong>frames</strong> (aros) · <strong>lenses</strong> (los cristales) · <strong>glasses</strong> (los lentes completos) · <strong>sunglasses</strong> (lentes de sol) · <strong>contact lenses</strong> (lentes de contacto)</li>
+      <li><strong>single vision</strong> (visión sencilla) · <strong>progressive lenses</strong> (progresivos) · <strong>blue light filter</strong> (filtro de luz azul) · <strong>anti-reflective coating</strong> (antirreflejo)</li>
+      <li><strong>titanium</strong> (titanio) · <strong>acetate</strong> (acetato) · <strong>lightweight</strong> (liviano) · <strong>flexible</strong> (flexible)</li>
+      <li><strong>on sale</strong> (en promoción) · <strong>in stock</strong> (en existencia) · <strong>available</strong> (disponible) · <strong>insurance</strong> (seguro)</li>
+      <li><strong>to try on</strong> (probarse) · <strong>measurements</strong> (medidas) · <strong>appointment</strong> (cita) · <strong>mirror</strong> (espejo)</li>
+    </ul>
+
+    <h2>6. Frases de venta que puedes usar hoy mismo</h2>
+    <ul>
+      <li><strong>These frames are on sale this week.</strong> — Estos aros están en promoción esta semana.</li>
+      <li><strong>The price includes the frame and the lenses.</strong> — El precio incluye el aro y los lentes.</li>
+      <li><strong>This one looks great on you.</strong> — Este le queda muy bien.</li>
+      <li><strong>Can I take your measurements?</strong> — ¿Puedo tomarle las medidas?</li>
+      <li><strong>Does your insurance cover the exam?</strong> — ¿Su seguro cubre el examen?</li>
+      <li><strong>We don't have that model in stock right now.</strong> — No tenemos ese modelo en existencia en este momento.</li>
+      <li><strong>The doctor is with a patient right now.</strong> — El doctor está con un paciente en este momento.</li>
+    </ul>
+    <p><strong>Consejo de pronunciación:</strong> practica estas frases en el laboratorio hasta que te salgan sin pensarlas. Una frase que tienes que armar mentalmente sale entrecortada; una frase que ya es un chunk sale fluida y el cliente percibe seguridad.</p>
+  `,
+  quizBank:[
+    {q:"¿Cuál de estas oraciones en presente simple es correcta?",opts:["She wear glasses every day","She wears glasses every day","She is wear glasses every day","She wearing glasses every day"],c:1,e:"En presente simple, he/she/it agrega -s al verbo: 'She wears glasses every day'."},
+    {q:"¿Cuál es el error en 'He doesn't works on Sunday'?",opts:["Debe decir 'He don't works'","La -s ya está en 'doesn't', el verbo va simple: 'He doesn't work'","Debe decir 'He doesn't working'","No hay error"],c:1,e:"La marca de tercera persona se usa una sola vez por frase. Si ya está en el auxiliar 'does', el verbo principal vuelve a su forma simple: 'He doesn't work on Sunday'."},
+    {q:"Forma correctamente la pregunta: '¿Ella usa lentes progresivos?'",opts:["Does she wears progressive lenses?","Do she wear progressive lenses?","Does she wear progressive lenses?","Is she wear progressive lenses?"],c:2,e:"Con he/she/it el auxiliar es 'does' y el verbo queda en infinitivo: 'Does she wear progressive lenses?'."},
+    {q:"¿Cómo se pronuncia la -s final de 'needs'?",opts:["Como /s/, igual que en 'works'","Como /z/: suena 'nidz'","Como /ɪz/, agregando una sílaba","No se pronuncia"],c:1,e:"Después de un sonido sonoro o vocal la -s suena /z/: 'needs' se oye 'nidz', igual que 'sees' y 'wears'."},
+    {q:"¿En cuál de estos verbos la terminación -s agrega una sílaba completa al pronunciarse?",opts:["works","helps","watches","wears"],c:2,e:"Después de s, sh, ch, x o ge la terminación suena /ɪz/ y agrega una sílaba: 'watches' se pronuncia UÁ-chis, 'washes' UÁ-shis, 'uses' IÚ-sis."},
+    {q:"El doctor está ocupado en este momento. ¿Cuál es la forma correcta de decirlo?",opts:["The doctor works with a patient right now","The doctor is working with a patient right now","The doctor work with a patient right now","The doctor is work with a patient right now"],c:1,e:"Para lo que ocurre en este momento se usa el presente continuo: am/is/are + verbo-ing. 'The doctor is working with a patient right now'."},
+    {q:"¿Cuál es el -ing correcto del verbo 'get'?",opts:["geting","getting","geteing","gettting"],c:1,e:"Cuando el verbo termina en consonante-vocal-consonante acentuada, la última consonante se duplica: get → getting, put → putting, sit → sitting."},
+    {q:"¿Cuál es el -ing correcto del verbo 'make'?",opts:["makeing","making","makking","makein"],c:1,e:"Si el verbo termina en 'e' muda, esa 'e' se pierde al agregar -ing: make → making, come → coming, take → taking."},
+    {q:"Un cliente pregunta si hay otros colores. ¿Cómo se dice 'hay tres colores disponibles'?",opts:["There is three colors available","There are three colors available","It has three colors available","Have three colors available"],c:1,e:"'There is' es para singular y 'there are' para plural. Con 'three colors' (plural) corresponde 'There are three colors available'."},
+    {q:"¿Cómo se dice correctamente 'hay un espejo detrás de usted'?",opts:["There are a mirror behind you","There is a mirror behind you","It is a mirror behind you","Have a mirror behind you"],c:1,e:"Con un solo objeto (a mirror) se usa 'There is': 'There is a mirror right behind you'."},
+    {q:"¿Cuál es la traducción correcta de 'me gustan estos aros'?",opts:["Me like these frames","These frames like me","I like these frames","It likes me these frames"],c:2,e:"En inglés el sujeto de 'like' es la persona, al contrario del español: 'I like these frames'. Literalmente sería 'yo gusto de estos aros'."},
+    {q:"Con un cliente, ¿cuál de estas dos formas es la profesional?",opts:["Do you want to try them on?","Would you like to try them on?","You want try them?","Try them on"],c:1,e:"'Would you like...?' es la forma cortés y profesional del servicio en inglés. 'Do you want...?' es correcto gramaticalmente pero suena directo o brusco con un cliente."},
+    {q:"Después de los verbos 'need' y 'want', el segundo verbo:",opts:["Va en -ing: I need checking","Va con 'to': I need to check","Va sin nada: I need check","Va con 'for': I need for check"],c:1,e:"'Need' y 'want' se construyen con 'to' + infinitivo: 'I need to check the price', 'She wants to try them on'."},
+    {q:"¿Qué significa 'These frames are on sale this week'?",opts:["Estos aros se venden solo esta semana","Estos aros están en promoción esta semana","Estos aros están agotados esta semana","Estos aros llegan esta semana"],c:1,e:"'On sale' significa en promoción o con descuento. Ojo: 'for sale' es distinto, significa que algo está a la venta."},
+    {q:"¿Qué significa 'in stock'?",opts:["En existencia, disponible en tienda","En el laboratorio","En promoción","En garantía"],c:0,e:"'In stock' significa que el producto está en existencia. Para decir lo contrario: 'We don't have that model in stock right now'."},
+    {q:"¿Cómo se dice 'lentes progresivos' y 'visión sencilla'?",opts:["Progressive lenses / single vision","Progress glasses / simple vision","Multifocal frames / one vision","Bifocal lenses / normal sight"],c:0,e:"'Progressive lenses' son los progresivos y 'single vision' es visión sencilla. Son los dos términos que más vas a usar al explicar opciones de lente."},
+    {q:"¿Cuál es la diferencia entre 'The doctor works here' y 'The doctor is working right now'?",opts:["Ninguna, significan lo mismo","La primera es su trabajo habitual; la segunda es lo que está haciendo en este momento","La primera es futuro y la segunda es presente","La primera es informal y la segunda es formal"],c:1,e:"El presente simple describe lo habitual o permanente ('trabaja aquí') y el presente continuo describe el momento ('está trabajando ahora')."},
+    {q:"¿Qué frase usarías para hacerle sentir al cliente que estás atendiendo su solicitud en ese instante?",opts:["I check the price","I checked the price","I'm checking the price for you","I will check the price someday"],c:2,e:"'I'm checking the price for you' está en presente continuo y transmite que la acción está en curso. Narrar el momento tranquiliza al cliente mucho más que quedarse en silencio."},
+    {q:"Un cliente pregunta si su seguro cubre el examen. ¿Cómo se lo preguntas al sistema o al supervisor?",opts:["Does your insurance cover the exam?","Do your insurance covers the exam?","Is your insurance cover the exam?","Your insurance covers the exam?"],c:0,e:"'Insurance' es tercera persona del singular, así que el auxiliar es 'does' y el verbo va simple: 'Does your insurance cover the exam?'."},
+    {q:"¿Por qué conviene practicar las frases hasta convertirlas en chunks automáticos?",opts:["Para poder hablar más rápido que el cliente","Porque una frase que hay que armar mentalmente sale entrecortada y una automática transmite seguridad","Porque así no hace falta aprender gramática nunca","Porque los nativos hablan solo con frases hechas"],c:1,e:"Cuando la frase ya es un chunk sale fluida y el cliente percibe seguridad. Si tienes que armarla palabra por palabra en la cabeza, sale entrecortada aunque sea correcta."}
+  ]
+},
+{
+  title:"Inglés Nivel 3 · Pasado y futuro", icon:"🇺🇸",
+  category:"ingles", chain:"ingles", quizCount:15,
+  content:`
+    <div class="cv-odoo-cta cv-eng-cta">
+      <div class="cv-odoo-txt">
+        <strong>🎧 English Lab · Nivel 3</strong>
+        <span>Las 3 pronunciaciones de -ed, los irregulares con audio y el diálogo del pedido retrasado</span>
+      </div>
+      <button class="cv-btn-odoo cv-btn-eng" type="button" onclick="abrirEnglishLab(3)">Abrir el laboratorio</button>
+    </div>
+
+    <h2>Lo que vas a lograr en este nivel</h2>
+    <p>Aquí dejas de hablar solo del presente. Vas a poder <strong>explicar qué pasó con un pedido</strong>, tomar la historia visual de un paciente y <strong>prometer una fecha</strong> con seguridad. Es el nivel que te vuelve realmente útil frente a un cliente extranjero, porque casi todo problema de servicio se explica en pasado y se resuelve en futuro.</p>
+
+    <h2>1. Pasado simple regular: agrega -ed y ya</h2>
+    <p>La gran ventaja del pasado en inglés es que <strong>es igual para todas las personas</strong>: I called, you called, he called, we called, they called. No hay conjugación que memorizar.</p>
+    <p>En negativo y pregunta se usa <strong>did</strong> y el verbo vuelve al infinitivo:</p>
+    <ul>
+      <li>✅ I <strong>didn't call</strong> — ❌ I didn't called</li>
+      <li>✅ <strong>Did</strong> you order it? — ❌ Did you ordered it?</li>
+      <li><em>When did you get your last eye exam?</em> — ¿Cuándo fue su último examen visual?</li>
+    </ul>
+
+    <h3>El detalle que delata a quien aprendió en libro: las 3 pronunciaciones de -ed</h3>
+    <p>La terminación <strong>-ed</strong> casi nunca suena "ed". Tiene tres sonidos y los nativos los aplican automáticamente:</p>
+    <ul>
+      <li>Después de sonido <strong>sordo</strong> (k, p, f, s, sh, ch) suena <strong>/t/</strong>: <em>worked</em> = uerkt, <em>helped</em> = jelpt, <em>looked</em> = lukt.</li>
+      <li>Después de sonido <strong>sonoro o vocal</strong> suena <strong>/d/</strong>: <em>called</em> = cold, <em>tried</em> = traid, <em>ordered</em> = ÓR-derd.</li>
+      <li><strong>Solo</strong> si el verbo termina en <strong>t</strong> o <strong>d</strong> suena <strong>/ɪd/</strong> y suma una sílaba: <em>wanted</em> = UÁN-tid, <em>needed</em> = NÍ-did, <em>waited</em> = UÉI-tid.</li>
+    </ul>
+    <p>Pronunciar "UÉR-ked" en vez de "uerkt" es uno de los errores que más marcan el acento, y se corrige en pocos días de práctica.</p>
+
+    <h2>2. Los 20 verbos irregulares que sí vas a usar</h2>
+    <p>No siguen regla: se memorizan como pareja. Y ojo, no solo cambia la escritura: <strong>cambia el sonido de la vocal</strong>, y ahí está el reto para el oído.</p>
+    <ul>
+      <li>be → <strong>was / were</strong> · have → <strong>had</strong> · do → <strong>did</strong> · go → <strong>went</strong> · get → <strong>got</strong></li>
+      <li>say → <strong>said</strong> (sed) · tell → <strong>told</strong> · see → <strong>saw</strong> · come → <strong>came</strong> · take → <strong>took</strong></li>
+      <li>give → <strong>gave</strong> · make → <strong>made</strong> · find → <strong>found</strong> · buy → <strong>bought</strong> (bot) · bring → <strong>brought</strong> (brot)</li>
+      <li>send → <strong>sent</strong> · pay → <strong>paid</strong> · wear → <strong>wore</strong> · break → <strong>broke</strong> · lose → <strong>lost</strong></li>
+    </ul>
+
+    <h3>Was / were: el único verbo que cambia en pasado</h3>
+    <ul>
+      <li><strong>was</strong> → I, he, she, it: <em>I was here</em>, <em>it was ready</em>.</li>
+      <li><strong>were</strong> → you, we, they: <em>you were right</em>, <em>they were on sale</em>.</li>
+    </ul>
+
+    <h2>3. Futuro: will y going to no son lo mismo</h2>
+    <p>Los dos se traducen igual al español, pero un nativo los siente distinto:</p>
+    <ul>
+      <li><strong>will ('ll)</strong> → decisión del momento, promesa, ofrecimiento espontáneo: <em>I'll call you as soon as they arrive</em> (le llamaré en cuanto lleguen). Es el futuro del buen servicio.</li>
+      <li><strong>going to (gonna)</strong> → plan ya decidido antes de hablar: <em>We're going to order it today</em> (lo vamos a pedir hoy).</li>
+    </ul>
+    <p><strong>Detalle nativo:</strong> nadie dice "I will call you" en la vida real; se dice <em>I'll</em> y suena casi como una sola sílaba, "ail". Y <em>going to</em> se reduce a <strong>gonna</strong>: "áim GÁ-na chek". La negación de will es <em>won't</em> (uóunt): <em>We won't charge you for the adjustment</em>.</p>
+
+    <h2>4. Presente perfecto: el puente entre pasado y presente</h2>
+    <p>Se forma con <strong>have / has + participio</strong> y se usa para algo que pasó pero <strong>todavía importa ahora</strong>. Es el tiempo que el español muchas veces resuelve con el pasado simple, y por eso cuesta al inicio.</p>
+    <ul>
+      <li><em>I've already sent your measurements to the lab.</em> — Ya envié sus medidas al laboratorio (y eso explica la situación actual).</li>
+      <li><em>They haven't arrived yet.</em> — Todavía no han llegado.</li>
+      <li><em>Have you ever worn progressive lenses?</em> — ¿Ha usado progresivos alguna vez? (en toda su vida hasta hoy).</li>
+      <li><em>How long have you had these glasses?</em> — ¿Cuánto tiempo ha tenido estos lentes?</li>
+    </ul>
+    <p>Palabras que lo acompañan: <strong>ever</strong> (alguna vez), <strong>never</strong> (nunca), <strong>already</strong> (ya), <strong>yet</strong> (todavía, en negativo y pregunta), <strong>just</strong> (recién), <strong>since</strong> (desde), <strong>for</strong> (durante).</p>
+
+    <h2>5. Cómo explicar un retraso sin perder al cliente</h2>
+    <p>Esta es la situación más delicada del mostrador. La estructura profesional en inglés tiene cuatro pasos y todos usan lo que aprendiste arriba:</p>
+    <ol>
+      <li><strong>Reconoce con un dato concreto (pasado):</strong> <em>We ordered your lenses on Monday and the lab sent them this morning.</em></li>
+      <li><strong>Discúlpate sin excusas largas:</strong> <em>I'm sorry — it took a little longer than expected.</em></li>
+      <li><strong>Da una fecha (futuro):</strong> <em>They should be here by tomorrow afternoon.</em></li>
+      <li><strong>Comprométete personalmente:</strong> <em>I'll call you as soon as they arrive.</em></li>
+    </ol>
+    <p>El cliente estadounidense tolera bastante bien un retraso si recibe <strong>información concreta y un compromiso claro</strong>. Lo que no tolera es la vaguedad: "maybe tomorrow" o "I don't know" destruyen la confianza.</p>
+
+    <h2>6. Vocabulario de pedidos y garantía</h2>
+    <ul>
+      <li><strong>order</strong> (pedido) · <strong>lab</strong> (laboratorio) · <strong>to arrive</strong> (llegar) · <strong>ready</strong> (listo) · <strong>delay</strong> (retraso)</li>
+      <li><strong>warranty</strong> (garantía) · <strong>adjustment</strong> (ajuste) · <strong>to charge</strong> (cobrar) · <strong>receipt</strong> (recibo, se pronuncia ri-SÍT, la p es muda)</li>
+      <li><strong>yesterday</strong> (ayer) · <strong>last week</strong> (la semana pasada) · <strong>ago</strong> (hace) · <strong>already</strong> (ya) · <strong>yet</strong> (todavía)</li>
+    </ul>
+  `,
+  quizBank:[
+    {q:"¿Cómo se pronuncia la terminación -ed de 'worked'?",opts:["Como /ɪd/: UÉR-ked","Como /t/: uerkt","Como /d/: uerkd","No se pronuncia"],c:1,e:"Después de un sonido sordo (k, p, f, s, sh, ch) el -ed suena /t/: 'worked' se pronuncia uerkt, igual que 'helped' (jelpt) y 'looked' (lukt)."},
+    {q:"¿En cuál de estos verbos el -ed agrega una sílaba completa?",opts:["called","tried","wanted","ordered"],c:2,e:"Solo cuando el verbo termina en t o d el -ed suena /ɪd/ y suma una sílaba: 'wanted' = UÁN-tid, 'needed' = NÍ-did, 'waited' = UÉI-tid."},
+    {q:"¿Cómo se pronuncia el -ed de 'called'?",opts:["Como /t/: colt","Como /d/: cold","Como /ɪd/: CÓ-led","Como /s/: cols"],c:1,e:"Después de un sonido sonoro o vocal el -ed suena /d/: 'called' se pronuncia cold, igual que 'tried' (traid) y 'ordered' (ÓR-derd)."},
+    {q:"¿Cuál es el error en 'I didn't called you'?",opts:["Debe decir 'I don't called you'","Con 'did' el verbo vuelve al infinitivo: 'I didn't call you'","Debe decir 'I didn't calling you'","No hay error"],c:1,e:"El auxiliar 'did' ya marca el pasado, así que el verbo principal va en infinitivo: 'I didn't call you', 'Did you order it?'."},
+    {q:"Forma correctamente: '¿Cuándo fue su último examen visual?'",opts:["When did you got your last eye exam?","When you got your last eye exam?","When did you get your last eye exam?","When did you getting your last eye exam?"],c:2,e:"Con el auxiliar 'did' el verbo va en infinitivo: 'When did you get your last eye exam?'."},
+    {q:"¿Cuál es el pasado de 'buy' y cómo se pronuncia?",opts:["buyed, BÁI-ed","bought, bot","buys, bais","boughted, BÓT-ed"],c:1,e:"'Buy' es irregular: su pasado es 'bought' y se pronuncia 'bot'. Igual que 'bring' → 'brought' (brot)."},
+    {q:"Completa: 'You ___ right, the frame was defective.'",opts:["was","were","been","being"],c:1,e:"'Was' se usa con I, he, she, it; 'were' con you, we, they. Con 'you' corresponde 'You were right'."},
+    {q:"Un cliente pregunta si sus lentes están listos y todavía no llegan. ¿Cuál respuesta es correcta?",opts:["They don't arrive yet","They haven't arrived yet","They didn't arriving yet","They aren't arrive yet"],c:1,e:"'Yet' pide presente perfecto en negativo: 'They haven't arrived yet' (todavía no han llegado)."},
+    {q:"¿Cuál es la diferencia entre 'I'll call you' y 'I'm going to call you'?",opts:["Ninguna, son idénticas","'I'll' es una decisión o promesa del momento; 'going to' es un plan ya decidido antes","'I'll' es pasado y 'going to' es futuro","'I'll' es informal y 'going to' es incorrecto"],c:1,e:"'Will' expresa decisiones del momento, promesas y ofrecimientos espontáneos; 'going to' expresa planes ya decididos. Los dos se traducen igual al español pero un nativo los siente distinto."},
+    {q:"¿Cómo dicen los nativos 'I am going to check' en el habla real?",opts:["I am going to check, palabra por palabra","I'm gonna check","I will going check","I go to check"],c:1,e:"'Going to' se reduce a 'gonna' y suena 'áim GÁ-na chek'. Entrenar el oído con estas reducciones es lo que permite entender a un cliente real."},
+    {q:"¿Cuál es la negación de 'will' y qué significa 'We won't charge you'?",opts:["willn't — no le cobraremos","won't — no le cobraremos","don't will — no le cobramos","not will — le cobraremos"],c:1,e:"La negación de 'will' es 'won't' (se pronuncia uóunt). 'We won't charge you for the adjustment' significa que no le cobrarán por el ajuste."},
+    {q:"¿Para qué se usa el presente perfecto (have/has + participio)?",opts:["Para hablar de algo que pasó y ya no tiene relación con el presente","Para algo que pasó pero todavía importa o tiene efecto ahora","Solo para hablar del futuro cercano","Para dar órdenes de forma cortés"],c:1,e:"El presente perfecto es el puente entre pasado y presente: describe algo ocurrido que sigue siendo relevante ahora, como 'I've already sent your measurements to the lab'."},
+    {q:"¿Cómo se pregunta '¿Ha usado lentes progresivos alguna vez?'",opts:["Did you ever wear progressive lenses?","Have you ever worn progressive lenses?","Do you ever wear progressive lenses?","Are you ever wearing progressive lenses?"],c:1,e:"Para experiencias de toda la vida hasta hoy se usa el presente perfecto con 'ever': 'Have you ever worn progressive lenses?'. 'Worn' es el participio de 'wear'."},
+    {q:"¿Qué palabra acompaña al presente perfecto para decir 'todavía no' en negativo?",opts:["already","yet","ago","now"],c:1,e:"'Yet' se usa en negativos y preguntas: 'They haven't arrived yet'. 'Already' se usa en afirmativo: 'I've already sent it'."},
+    {q:"Según el módulo, ¿cuáles son los 4 pasos profesionales para explicar un retraso?",opts:["Negar el problema, culpar al laboratorio, ofrecer descuento, despedirse","Dar un dato concreto en pasado, disculparse sin excusas, dar una fecha en futuro y comprometerse personalmente","Pedir el recibo, llamar al supervisor, cobrar el envío, esperar","Decir 'maybe tomorrow' y pedir paciencia"],c:1,e:"La estructura es: dato concreto en pasado → disculpa breve → fecha en futuro → compromiso personal. El cliente tolera un retraso con información clara; lo que destruye la confianza es la vaguedad."},
+    {q:"¿Por qué frases como 'maybe tomorrow' o 'I don't know' son problemáticas con un cliente estadounidense?",opts:["Porque son gramaticalmente incorrectas","Porque la vaguedad destruye la confianza: espera información concreta y un compromiso claro","Porque suenan demasiado formales","Porque no se usan en inglés americano"],c:1,e:"El cliente estadounidense tolera bastante bien un retraso si recibe datos concretos y un compromiso. Lo que no tolera es la incertidumbre sin responsable."},
+    {q:"¿Cómo se pronuncia 'receipt'?",opts:["ri-SÍPT, pronunciando la p","ri-SÍT, la p es muda","RÉ-seipt","re-SÉIP-tu"],c:1,e:"'Receipt' se pronuncia ri-SÍT: la 'p' es muda. Es una de esas palabras donde la escritura del inglés no corresponde al sonido."},
+    {q:"Traduce: 'Le llamaré en cuanto lleguen.'",opts:["I call you when they arrive","I'll call you as soon as they arrive","I called you as soon as they arrived","I'm calling you as soon as they arrive"],c:1,e:"'I'll call you as soon as they arrive' — 'will' para la promesa del momento y presente simple después de 'as soon as' (nunca 'will' dos veces)."},
+    {q:"¿Cuál es el participio correcto en 'The lab has ___ them this morning'?",opts:["send","sended","sent","sending"],c:2,e:"'Send' es irregular: su pasado y participio son 'sent'. 'The lab has sent them this morning'."},
+    {q:"Un cliente dice 'My frame broke'. ¿Qué te está diciendo?",opts:["Que quiere comprar un aro nuevo","Que su aro se rompió","Que su aro está en el laboratorio","Que no le gusta su aro"],c:1,e:"'Broke' es el pasado irregular de 'break' (romper). El cliente le está diciendo que su aro se rompió, lo que abre la conversación de garantía: 'Do you have your receipt?'."}
+  ]
+},
+{
+  title:"Inglés Nivel 4 · Conversación real", icon:"🇺🇸",
+  category:"ingles", chain:"ingles", quizCount:15,
+  content:`
+    <div class="cv-odoo-cta cv-eng-cta">
+      <div class="cv-odoo-txt">
+        <strong>🎧 English Lab · Nivel 4</strong>
+        <span>Reducciones nativas (gonna, wanna), t-flapping, cortesía profesional y manejo de quejas</span>
+      </div>
+      <button class="cv-btn-odoo cv-btn-eng" type="button" onclick="abrirEnglishLab(4)">Abrir el laboratorio</button>
+    </div>
+
+    <h2>Lo que vas a lograr en este nivel</h2>
+    <p>Ya puedes hablar. Ahora vas a <strong>sonar como alguien que creció allá</strong> y a manejar las conversaciones difíciles: una queja, una negociación de precio, una llamada telefónica. Este nivel tiene dos mitades: cómo <em>suena</em> el inglés real y cómo se es <em>cortés</em> en inglés real.</p>
+
+    <h2>1. Por qué sientes que "hablan rapidísimo"</h2>
+    <p>No hablan rápido: <strong>hablan comprimido</strong>. Las palabras funcionales (going, want, to, of, and) se reducen a casi nada, mientras las palabras con significado se mantienen fuertes. Estas son las reducciones que aparecen en cada conversación:</p>
+    <ul>
+      <li>going to → <strong>gonna</strong> · <em>I'm gonna check with the lab</em> (áim GÁ-na chek)</li>
+      <li>want to → <strong>wanna</strong> · <em>Do you wanna try it on?</em> (du iu UÁ-na)</li>
+      <li>got to → <strong>gotta</strong> · <em>I gotta ask my manager</em></li>
+      <li>let me → <strong>lemme</strong> · give me → <strong>gimme</strong> · <em>Lemme see what I can do</em></li>
+      <li>what do you → <strong>whaddaya</strong> · <em>Whaddaya think?</em></li>
+      <li>kind of → <strong>kinda</strong> · a lot of → <strong>a lotta</strong> · because → <strong>'cause</strong></li>
+    </ul>
+    <p><strong>Importante:</strong> el objetivo no es que escribas así, sino que <strong>reconozcas estas formas al oírlas</strong>. Un cliente nunca te va a decir "I am going to"; te va a decir "I'm gonna". Si tu oído solo conoce la versión de libro, no vas a entender una conversación normal.</p>
+
+    <h2>2. La T que suena a D (t-flapping)</h2>
+    <p>En inglés americano, la <strong>t entre dos vocales se relaja y suena como una d suave</strong>. Este es probablemente el rasgo más característico del acento estadounidense:</p>
+    <ul>
+      <li><em>water</em> = UÁ-der · <em>better</em> = BÉ-der · <em>later</em> = LÉI-der · <em>little</em> = LÍ-del · <em>photo</em> = FÓU-dou</li>
+    </ul>
+    <p>Y cuando la t va <strong>después de n</strong>, muchas veces desaparece por completo: <em>twenty</em> = TUÉ-ni, <em>center</em> = SÉ-ner, <em>internet</em> = Í-ner-net. Si pronuncias todas las t marcadas suenas británico o extranjero.</p>
+
+    <h2>3. La entonación es servicio</h2>
+    <p>En inglés el <strong>tono comunica más que las palabras</strong>. La regla básica:</p>
+    <ul>
+      <li><strong>Sube al final ↗</strong> para preguntas de sí/no y para sonar amable: <em>Can I help you? ↗</em></li>
+      <li><strong>Baja al final ↘</strong> para afirmaciones y para sonar seguro: <em>Your glasses are ready. ↘</em></li>
+    </ul>
+    <p>Un ejemplo que vale más que cualquier regla: <em>"Sure!"</em> con tono cálido y ascendente significa "con mucho gusto". El mismo <em>"Sure."</em> plano y seco significa "qué fastidio". La palabra es idéntica; lo que el cliente escucha es completamente distinto.</p>
+
+    <h2>4. Cortesía profesional: would y could</h2>
+    <p>En la cultura de servicio estadounidense, la diferencia entre sonar profesional y sonar mandón está en dos palabras. Compara:</p>
+    <ul>
+      <li>❌ <em>Do you want this?</em> → correcto pero directo. ✅ <strong>Would you like this?</strong></li>
+      <li>❌ <em>Give me your receipt.</em> → suena a orden. ✅ <strong>Could I see your receipt, please?</strong></li>
+      <li>❌ <em>I want to check.</em> → con un cliente, nunca. ✅ <strong>I'd like to check.</strong></li>
+      <li>✅ <strong>I'd be happy to help you with that.</strong> — Con mucho gusto le ayudo con eso.</li>
+      <li>✅ <strong>Could you spell your last name, please?</strong> — ¿Podría deletrear su apellido?</li>
+    </ul>
+    <p>Regla práctica: si dudas, agrega <strong>would, could o please</strong>. Es casi imposible sonar demasiado cortés atendiendo a un cliente estadounidense.</p>
+
+    <h2>5. Modales: consejo, posibilidad y obligación</h2>
+    <ul>
+      <li><strong>should</strong> (consejo) — <em>You should wear them all day at first.</em> / <em>You shouldn't clean them with your shirt.</em></li>
+      <li><strong>might / may</strong> (posibilidad) — <em>It might take a couple of days.</em> / <em>You may feel a little dizzy at first.</em> Usar <em>might</em> en vez de afirmar te protege de prometer lo que no controlas.</li>
+      <li><strong>must / have to</strong> (obligación) — <em>You have to sign here.</em> / <em>You must not use hot water on the lenses.</em></li>
+    </ul>
+    <p>Los tres son modales: van sin "to" después y nunca llevan -s.</p>
+
+    <h2>6. Condicional tipo 1: la estructura para explicar políticas</h2>
+    <p>Se forma con <strong>if + presente simple</strong> y en la otra mitad <strong>will o can</strong>. Es la fórmula para explicar garantía, promociones y condiciones:</p>
+    <ul>
+      <li><em>If you bring the receipt, we can replace it.</em></li>
+      <li><em>If the coating peels under normal use, the warranty covers it.</em></li>
+      <li><em>If you pay today, I'll apply the discount.</em></li>
+    </ul>
+    <p><strong>Error muy común:</strong> nunca pongas "will" después de "if". Se dice <em>if you bring</em>, no "if you will bring".</p>
+
+    <h2>7. Phrasal verbs: hablar como nativo, no como diccionario</h2>
+    <p>Un phrasal verb es verbo + partícula, y los nativos los prefieren sobre la palabra formal. Dicen <em>pick up</em>, no "collect":</p>
+    <ul>
+      <li><strong>to try on</strong> (probarse) · <strong>to pick up</strong> (recoger el pedido) · <strong>to fill out</strong> (llenar un formulario)</li>
+      <li><strong>to look for</strong> (buscar) · <strong>to come back</strong> (regresar) · <strong>to hold on</strong> (esperar en el teléfono)</li>
+      <li><strong>to run out of</strong> (quedarse sin) · <strong>to take care of</strong> (encargarse de) · <strong>to figure out</strong> (resolver) · <strong>to come up</strong> (surgir)</li>
+    </ul>
+    <p>En contexto: <em>You can pick them up on Friday</em> · <em>Please fill out this form</em> · <em>Hold on one second, please</em> · <em>We ran out of that color</em> · <em>I'll take care of it</em>.</p>
+
+    <h2>8. Manejar una queja en inglés: los 5 pasos</h2>
+    <p>Cuando un cliente llega molesto, el idioma importa menos que la estructura. Esta secuencia funciona y usa todo lo del nivel:</p>
+    <ol>
+      <li><strong>Disculpa + validación emocional:</strong> <em>I'm really sorry about that. I completely understand your frustration.</em> Nunca empieces defendiéndote ni explicando la política.</li>
+      <li><strong>Pregunta abierta para entender:</strong> <em>Could you tell me exactly what's bothering you when you wear them?</em></li>
+      <li><strong>Confirma que escuchaste:</strong> <em>Okay, thank you. Let me see what I can do for you.</em></li>
+      <li><strong>Propón una solución concreta:</strong> <em>I'm gonna have the doctor check the prescription again — at no cost.</em></li>
+      <li><strong>Compromiso personal + agradecimiento:</strong> <em>I'll call you myself to make sure it gets done. Thanks for being so patient.</em></li>
+    </ol>
+    <p>Frases puente que salvan cualquier momento incómodo: <strong>I hear you</strong> (le entiendo), <strong>No worries at all</strong> (no hay problema), <strong>That makes sense</strong> (eso tiene sentido), <strong>My pleasure</strong> (con gusto), <strong>Is there anything else I can do for you?</strong> (¿algo más?).</p>
+
+    <h2>9. Inglés telefónico</h2>
+    <p>Por teléfono no hay gestos ni lectura de labios, así que se usan fórmulas fijas:</p>
+    <ul>
+      <li><strong>CV Plus, this is Oscar speaking. How may I help you?</strong> — La apertura estándar.</li>
+      <li><strong>Could you spell your last name for me, please?</strong> — Deletrear es indispensable con nombres extranjeros.</li>
+      <li><strong>Hold on one second while I pull it up.</strong> — Espere un segundo mientras lo busco en el sistema.</li>
+      <li><strong>I'm sorry, we have a bad connection. Could you speak up a little?</strong> — Hay mala señal, ¿podría hablar más fuerte?</li>
+      <li><strong>Let me make sure I got that right: Miller, M-I-L-L-E-R.</strong> — Confirmar repitiendo evita el 90% de los errores.</li>
+    </ul>
+  `,
+  quizBank:[
+    {q:"Un cliente dice 'I'm gonna think about it'. ¿Qué significa 'gonna'?",opts:["Es un error de pronunciación del cliente","Es la reducción natural de 'going to'","Significa 'quiero'","Es una palabra del inglés británico"],c:1,e:"'Gonna' es la reducción de 'going to' y es lo que dice un nativo en el habla normal. El objetivo no es escribirlo así, sino reconocerlo al oírlo."},
+    {q:"¿A qué corresponde la reducción 'wanna'?",opts:["want to","went to","will not","was not"],c:0,e:"'Wanna' = 'want to': 'Do you wanna try it on?' (du iu UÁ-na trái it on)."},
+    {q:"¿Por qué sentimos que los nativos 'hablan rapidísimo'?",opts:["Porque realmente hablan al doble de velocidad","Porque comprimen las palabras funcionales y pegan las palabras entre sí","Porque usan vocabulario que no conocemos","Porque no pronuncian las vocales"],c:1,e:"No hablan más rápido: hablan comprimido. Las palabras funcionales (going, want, to, of) se reducen casi a nada mientras las palabras con significado se mantienen fuertes."},
+    {q:"¿Cómo pronuncia un estadounidense la palabra 'better'?",opts:["BÉT-ter, marcando las dos t","BÉ-der, la t suena como una d suave","BÉ-ter, con t muy fuerte","bi-TÉR, con acento al final"],c:1,e:"Es el t-flapping: la t entre dos vocales se relaja y suena como d suave. 'water' = UÁ-der, 'better' = BÉ-der, 'little' = LÍ-del."},
+    {q:"¿Cómo suena normalmente 'twenty' en inglés americano?",opts:["TUÉN-ti, con la t clara","TUÉ-ni, la t casi desaparece","tuen-TÍ, con acento final","TÉN-ti"],c:1,e:"Cuando la t va después de n suele desaparecer: 'twenty' = TUÉ-ni, 'center' = SÉ-ner, 'internet' = Í-ner-net."},
+    {q:"Un cliente pide algo y respondes 'Sure.' en tono plano y seco. ¿Qué escucha el cliente?",opts:["Que estás encantado de ayudar","Fastidio o desinterés, aunque la palabra sea correcta","Que no entendiste","Que estás siendo formal y profesional"],c:1,e:"En inglés la entonación comunica más que las palabras. '¡Sure!' cálido y ascendente significa 'con mucho gusto'; 'Sure.' plano se percibe como fastidio. La palabra es la misma."},
+    {q:"En inglés, ¿cuándo sube la entonación al final de la frase?",opts:["En afirmaciones, para sonar seguro","En preguntas de sí/no y para sonar amable","Siempre, en toda frase","Nunca en inglés americano"],c:1,e:"Sube al final en preguntas de sí/no y para sonar amable ('Can I help you? ↗'); baja al final en afirmaciones y para sonar seguro ('Your glasses are ready. ↘')."},
+    {q:"¿Cuál de estas frases es la profesional para atender a un cliente?",opts:["Give me your receipt","I want to see your receipt","Could I see your receipt, please?","You must show the receipt"],c:2,e:"'Could I see your receipt, please?' es la forma cortés. 'Give me...' suena a orden y con un cliente estadounidense se percibe como grosero."},
+    {q:"¿Cuál es la forma correcta y cortés de decir 'me gustaría revisarlo'?",opts:["I want to check it","I'd like to check it","I am liking to check it","I will want check it"],c:1,e:"'I'd like' (I would like) es la forma cortés y profesional. 'I want' con un cliente suena directo o brusco."},
+    {q:"¿Qué expresa el modal 'might' en 'It might take a couple of days'?",opts:["Una obligación","Una posibilidad, sin prometer","Una orden","Algo que ya ocurrió"],c:1,e:"'Might' expresa posibilidad. Usarlo en vez de afirmar te protege de prometer algo que no controlas, como los tiempos del laboratorio."},
+    {q:"¿Cuál es el error en 'If you will bring the receipt, we can replace it'?",opts:["Debe decir 'we will can replace'","Después de 'if' no se usa 'will': es 'If you bring the receipt'","Debe decir 'If you bringing'","No hay error"],c:1,e:"En el condicional tipo 1 la estructura es 'if + presente simple' y en la otra mitad 'will' o 'can'. Nunca se pone 'will' después de 'if'."},
+    {q:"¿Qué significa el phrasal verb 'to pick up' en 'You can pick them up on Friday'?",opts:["Escoger entre varias opciones","Recoger el pedido","Levantar del suelo","Pagar el saldo"],c:1,e:"'To pick up' es recoger el pedido. Los nativos lo prefieren sobre la palabra formal 'collect'."},
+    {q:"¿Qué significa 'We ran out of that color'?",opts:["Ese color se está agotando pronto","Nos quedamos sin ese color","Ese color salió de línea","Ese color está en promoción"],c:1,e:"'To run out of' significa quedarse sin algo. 'We ran out of that color' = nos quedamos sin ese color."},
+    {q:"¿Qué significa 'Hold on one second, please'?",opts:["Sostenga esto un segundo","Espere un segundo, por favor (en el teléfono)","Aguante el dolor un momento","Deténgase ahí"],c:1,e:"'Hold on' es esperar, especialmente por teléfono. Se acompaña de 'while I pull it up' (mientras lo busco en el sistema)."},
+    {q:"Un cliente llega molesto porque es la segunda vez que sus lentes salen mal. ¿Cómo debes empezar?",opts:["Explicando la política de la tienda","Con disculpa y validación: 'I'm really sorry. I completely understand your frustration.'","Pidiendo el recibo de inmediato","Llamando al supervisor sin decirle nada"],c:1,e:"El primer paso es disculpa más validación emocional. Empezar defendiéndose o explicando la política escala el conflicto; validar la emoción lo baja."},
+    {q:"Según los 5 pasos para manejar una queja, ¿qué va inmediatamente después de la disculpa y validación?",opts:["Ofrecer un descuento","Una pregunta abierta para entender exactamente el problema","Pedirle que regrese otro día","Explicar que el laboratorio tiene la culpa"],c:1,e:"Después de validar, se hace una pregunta abierta: 'Could you tell me exactly what's bothering you when you wear them?'. Sin entender el problema real no hay solución posible."},
+    {q:"¿Qué significa la frase puente 'I hear you'?",opts:["Lo escucho por el teléfono","Le entiendo (reconozco lo que siente)","Repita, por favor","Lo llamo después"],c:1,e:"'I hear you' significa 'le entiendo' o 'lo escucho y lo reconozco'. Es una de las frases puente más útiles para bajar la tensión en una queja."},
+    {q:"¿Cuál es la apertura estándar de una llamada profesional en inglés?",opts:["Hello? Who is it?","CV Plus, this is Oscar speaking. How may I help you?","Yes? What do you want?","CV Plus. Wait a moment."],c:1,e:"'[Empresa], this is [nombre] speaking. How may I help you?' es la fórmula estándar. 'How may I help you?' es incluso más formal que 'how can'."},
+    {q:"Por teléfono, ¿cuál es la técnica que evita la mayoría de los errores con nombres extranjeros?",opts:["Anotarlo como suene y corregir después","Pedir que lo deletreen y confirmar repitiendo: 'Let me make sure I got that right: M-I-L-L-E-R'","Pedir que llamen otro día","Pedir el número de teléfono en vez del nombre"],c:1,e:"Deletrear ('Could you spell your last name?') y confirmar repitiendo lo escuchado evita el 90% de los errores de registro con nombres extranjeros."},
+    {q:"¿Cuál es la regla práctica de cortesía de este nivel?",opts:["Hablar lo más rápido posible para demostrar fluidez","Si dudas, agrega 'would', 'could' o 'please': es casi imposible sonar demasiado cortés","Usar siempre frases cortas y directas","Evitar los modales porque complican la frase"],c:1,e:"Con un cliente estadounidense es casi imposible pasarse de cortés. Agregar would, could o please convierte una orden en una solicitud profesional."}
+  ]
+}
+];
+
+// Inyectar en las dos academias con sus propios IDs
+MODULES_ASESOR.push.apply(MODULES_ASESOR, MODULES_INGLES.map(function(m,i){
+  var c = {}; for(var k in m) c[k] = m[k]; c.id = 20 + i; return c;
+}));
+MODULES_OPTO.push.apply(MODULES_OPTO, MODULES_INGLES.map(function(m,i){
+  var c = {}; for(var k in m) c[k] = m[k]; c.id = 3 + i; return c;
+}));
+
 // MODULES es la lista "activa"; por defecto la de asesores
 let MODULES = MODULES_ASESOR;
 
@@ -2696,14 +3189,16 @@ const CAT_INFO_ASESOR = {
   sistema: { label:'Sistema', dashTitle:'🔄 Sistema', ids:[19] },
   akkurat: { label:'Portafolio Akkurat', dashTitle:'✨ Portafolio Akkurat', ids:[9,10,11,12,13,14] },
   ventas: { label:'Ventas y Productos', dashTitle:'💼 Ventas y Productos', ids:[15,16,17,18] },
+  ingles: { label:'Inglés CV+', dashTitle:'🇺🇸 Inglés CV+ · English Lab', ids:[20,21,22,23] },
 };
 // Categorías de Optometristas
 const CAT_INFO_OPTO = {
   fundamentos: { label:'Control de Miopía', dashTitle:'👁️ Control de Miopía', ids:[1] },
   sistema: { label:'Sistema', dashTitle:'🔄 Sistema', ids:[2] },
+  ingles: { label:'Inglés CV+', dashTitle:'🇺🇸 Inglés CV+ · English Lab', ids:[3,4,5,6] },
 };
 let CAT_INFO = CAT_INFO_ASESOR;
-const CAT_ICONS = { fundamentos:'🔬', fabricacion:'⚙️', akkurat:'✨', ventas:'💼', sistema:'🔄' };
+const CAT_ICONS = { fundamentos:'🔬', fabricacion:'⚙️', akkurat:'✨', ventas:'💼', sistema:'🔄', ingles:'🇺🇸' };
 
 // Cambia el contenido (módulos + categorías) según el rol leído en Firebase
 window.aplicarRolContenido = function(role){
@@ -2741,6 +3236,24 @@ function getModuleOrder() {
   return order;
 }
 
+// ═══════════════════════════════════════════════════════
+// 🔗 CADENAS DE DESBLOQUEO INDEPENDIENTES
+// Un módulo con la propiedad chain:'ingles' solo depende de los
+// otros módulos de esa misma cadena, NO de los módulos técnicos.
+// Así el Nivel 1 de inglés está abierto desde el primer día.
+// Para crear otra ruta paralela en el futuro, basta ponerle
+// chain:'nombre' a sus módulos.
+// ═══════════════════════════════════════════════════════
+function getModuleChain(id) {
+  const m = MODULES.find(x => x.id === id);
+  return (m && m.chain) ? m.chain : 'main';
+}
+// Orden de los módulos que pertenecen a la misma cadena que 'id'
+function getChainOrder(id) {
+  const chain = getModuleChain(id);
+  return getModuleOrder().filter(mid => getModuleChain(mid) === chain);
+}
+
 // Devuelve la última nota de un módulo (0 si no lo ha hecho)
 function getLastScore(id) {
   const data = QUIZ_SCORES[id];
@@ -2756,10 +3269,10 @@ function isModuleUnlocked(id) {
     const u = JSON.parse(localStorage.getItem('cvplus_user') || '{}');
     if (u.role === 'admin' || u.role === 'viewer' || u.role === 'admin_opto') return true;
   } catch(e) {}
-  const order = getModuleOrder();
+  const order = getChainOrder(id);      // solo los módulos de su misma ruta
   const pos = order.indexOf(id);
-  if (pos <= 0) return true;            // el primero siempre abierto
-  const prevId = order[pos - 1];        // módulo anterior en el orden
+  if (pos <= 0) return true;            // el primero de la ruta siempre abierto
+  const prevId = order[pos - 1];        // módulo anterior de la MISMA ruta
   return getLastScore(prevId) >= PASSING_SCORE;
 }
 
@@ -3875,6 +4388,41 @@ Cerrar
     if(e.key === 'Escape' && o && o.classList.contains('abierto')) window.cerrarSimuladorOdoo();
   });
 </script>
+<!-- ═══ English Lab · Módulos de Inglés CV+ ═══ -->
+<div id="modal-english" role="dialog" aria-modal="true" aria-label="English Lab" aria-hidden="true">
+  <div class="cv-modal-bar">
+    <span id="english-titulo">🇺🇸 English Lab · Academia CV+</span>
+    <button class="cv-cerrar" type="button" onclick="cerrarEnglishLab()">✕ Cerrar</button>
+  </div>
+  <iframe id="english-frame" title="English Lab"
+          allow="microphone"
+          style="flex:1;border:none;width:100%;"></iframe>
+</div>
+<script>
+  // Abre el laboratorio de inglés en el nivel indicado (1 a 4).
+  // El permiso allow="microphone" del iframe es indispensable para que
+  // funcione la evaluación de pronunciación dentro del modal.
+  window.abrirEnglishLab = function(nivel){
+    var n = nivel || 1;
+    var m = document.getElementById('modal-english');
+    document.getElementById('english-frame').src = 'herramientas/english-lab.html?nivel=' + n;
+    document.getElementById('english-titulo').textContent =
+      '🇺🇸 English Lab · Nivel ' + n + ' · escucha, repite y te calificamos la pronunciación';
+    m.classList.add('abierto');
+    m.setAttribute('aria-hidden','false');
+  };
+  window.cerrarEnglishLab = function(){
+    var m = document.getElementById('modal-english');
+    m.classList.remove('abierto');
+    m.setAttribute('aria-hidden','true');
+    document.getElementById('english-frame').src = '';
+  };
+  document.addEventListener('keydown', function(e){
+    var m = document.getElementById('modal-english');
+    if(e.key === 'Escape' && m && m.classList.contains('abierto')) window.cerrarEnglishLab();
+  });
+</script>
+
 <!-- ═══ Simulador de Lectura de Recetas (Módulo 4) ═══ -->
 <div id="modal-recetas" role="dialog" aria-modal="true" aria-label="Simulador de lectura de recetas" aria-hidden="true">
   <div class="cv-modal-bar">
@@ -3942,6 +4490,9 @@ Cerrar
   #cvpBot-header strong { font-size: 14px; }
   #cvpBot-header span.sub { display:block; font-size: 11px; color: var(--cyan); }
   #cvpBot-close { background:none; border:none; color:var(--white); font-size:18px; cursor:pointer; }
+  #cvpBot-voz { background:none; border:none; color:var(--white); font-size:16px; cursor:pointer; opacity:.85; }
+  #cvpBot-voz.activo { opacity:1; }
+  #cvpBot-headBtns { display:flex; align-items:center; gap:8px; }
   #cvpBot-msgs {
     flex: 1; overflow-y: auto; padding: 12px; background: var(--gray-bg);
     display:flex; flex-direction:column; gap:8px;
@@ -3965,6 +4516,11 @@ Cerrar
     background: var(--gold); color: var(--dark); border:none; border-radius:10px;
     width:38px; cursor:pointer; font-size:16px;
   }
+  #cvpBot-mic {
+    background: var(--gray-light); color: var(--dark); border:1px solid var(--gray-mid);
+    border-radius:10px; width:38px; cursor:pointer; font-size:15px;
+  }
+  #cvpBot-mic.grabando { background:#e23; color:#fff; border-color:#e23; }
   .cvpBot-accion {
     background: var(--gold); color: var(--dark); border:none; font-weight:600;
     border-radius: 14px; padding: 6px 12px; font-size: 11.5px; cursor:pointer;
@@ -3986,10 +4542,14 @@ Cerrar
       <strong>🤖 Asistente Academia CV+</strong>
       <span class="sub">Responde con base en tus módulos</span>
     </div>
-    <button id="cvpBot-close" onclick="cvpBotToggle()">✕</button>
+    <div id="cvpBot-headBtns">
+      <button id="cvpBot-voz" onclick="cvpBotToggleVoz()" title="Voz desactivada (clic para activar)">🔇</button>
+      <button id="cvpBot-close" onclick="cvpBotToggle()">✕</button>
+    </div>
   </div>
   <div id="cvpBot-msgs"></div>
   <div id="cvpBot-inputRow">
+    <button id="cvpBot-mic" onclick="cvpBotToggleMic()" title="Hablar (dictar tu pregunta)">🎤</button>
     <input id="cvpBot-input" type="text" placeholder="Escribe tu pregunta…" onkeydown="if(event.key==='Enter') cvpBotSend();">
     <button id="cvpBot-send" onclick="cvpBotSend()">➤</button>
   </div>
@@ -4613,6 +5173,9 @@ function cvpBotAgregarMsg(texto, tipo, fuente, chips, relacionados, acciones, re
     cont.appendChild(chipWrap);
   }
   cont.scrollTop = cont.scrollHeight;
+  // Si la voz está activada, lee en voz alta la respuesta del bot
+  // (no durante la restauración del historial, para no hablar solo al abrir).
+  if (tipo === "bot" && !CVPBOT_REPLAY) cvpBotSpeak(texto);
 }
 
 function cvpBotEnviarTexto(texto){
@@ -4637,6 +5200,88 @@ function cvpBotSend(){
   var texto = input.value;
   input.value = "";
   cvpBotEnviarTexto(texto);
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  VOZ (TTS) — leer las respuestas en voz alta con la Web Speech API.
+//  Sin costo, sin servicios externos: lo hace el propio navegador.
+// ═══════════════════════════════════════════════════════════════════
+var CVPBOT_VOZ = false;     // apagado por defecto (el usuario lo activa con 🔊)
+var CVPBOT_VOZ_ES = null;   // voz en español elegida del dispositivo
+
+function cvpBotElegirVozEs(){
+  if (!('speechSynthesis' in window)) return null;
+  var voces = window.speechSynthesis.getVoices() || [];
+  var pref = ['es-sv','es-mx','es-us','es-419','es-es','es']; // orden de preferencia
+  for (var i=0;i<pref.length;i++){
+    for (var j=0;j<voces.length;j++){
+      if ((voces[j].lang||'').toLowerCase().indexOf(pref[i])===0) return voces[j];
+    }
+  }
+  return voces[0] || null;
+}
+// Las voces cargan de forma asíncrona en algunos navegadores
+if ('speechSynthesis' in window){
+  CVPBOT_VOZ_ES = cvpBotElegirVozEs();
+  window.speechSynthesis.onvoiceschanged = function(){ CVPBOT_VOZ_ES = cvpBotElegirVozEs(); };
+}
+
+function cvpBotSpeak(texto){
+  if (!CVPBOT_VOZ || !('speechSynthesis' in window) || !texto) return;
+  try {
+    window.speechSynthesis.cancel(); // corta cualquier lectura anterior
+    var u = new SpeechSynthesisUtterance(texto);
+    u.lang = (CVPBOT_VOZ_ES && CVPBOT_VOZ_ES.lang) || 'es-ES';
+    if (CVPBOT_VOZ_ES) u.voice = CVPBOT_VOZ_ES;
+    u.rate = 1; u.pitch = 1;
+    window.speechSynthesis.speak(u);
+  } catch(e) {}
+}
+
+function cvpBotToggleVoz(){
+  var btn = document.getElementById('cvpBot-voz');
+  if (!('speechSynthesis' in window)){
+    if (btn){ btn.title = 'Tu navegador no soporta lectura por voz'; }
+    return;
+  }
+  CVPBOT_VOZ = !CVPBOT_VOZ;
+  if (btn){
+    btn.textContent = CVPBOT_VOZ ? '🔊' : '🔇';
+    btn.classList.toggle('activo', CVPBOT_VOZ);
+    btn.title = CVPBOT_VOZ ? 'Voz activada (clic para silenciar)' : 'Voz desactivada (clic para activar)';
+  }
+  if (!CVPBOT_VOZ){ try { window.speechSynthesis.cancel(); } catch(e){} }
+}
+
+// ═══════════════════════════════════════════════════════════════════
+//  MICRÓFONO (voz a texto) — el usuario dicta su pregunta.
+//  Funciona mejor en Chrome / Edge; si no hay soporte, avisa al usuario.
+// ═══════════════════════════════════════════════════════════════════
+var CVPBOT_REC = null;
+var CVPBOT_GRABANDO = false;
+
+function cvpBotToggleMic(){
+  var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  var btn = document.getElementById('cvpBot-mic');
+  if (!SR){
+    cvpBotAgregarMsg("Tu navegador no permite dictar por voz. Prueba con Google Chrome o Microsoft Edge.", "bot");
+    return;
+  }
+  if (CVPBOT_GRABANDO && CVPBOT_REC){ try { CVPBOT_REC.stop(); } catch(e){} return; }
+  CVPBOT_REC = new SR();
+  CVPBOT_REC.lang = 'es-ES';
+  CVPBOT_REC.interimResults = false;
+  CVPBOT_REC.maxAlternatives = 1;
+  CVPBOT_REC.onstart  = function(){ CVPBOT_GRABANDO = true;  if(btn){ btn.classList.add('grabando');    btn.textContent='⏺'; } };
+  CVPBOT_REC.onerror  = function(){ CVPBOT_GRABANDO = false; if(btn){ btn.classList.remove('grabando'); btn.textContent='🎤'; } };
+  CVPBOT_REC.onend    = function(){ CVPBOT_GRABANDO = false; if(btn){ btn.classList.remove('grabando'); btn.textContent='🎤'; } };
+  CVPBOT_REC.onresult = function(e){
+    var t = (e.results[0][0].transcript || '').trim();
+    if (t) cvpBotEnviarTexto(t);
+    var input = document.getElementById('cvpBot-input');
+    if (input) input.value = '';
+  };
+  try { CVPBOT_REC.start(); } catch(e){}
 }
 
 // ─── Visibilidad del botón: solo después de login, y NUNCA sobre el panel admin ───
