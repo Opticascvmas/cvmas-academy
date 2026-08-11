@@ -41,6 +41,7 @@ const MODULE_NAMES = {
   "17": "Cierre de ventas",
   "18": "Aros oftalmicos y ficha de marca",
   "19": "Flujo de Servicio al Cliente en Odoo",
+  "24": "Ingles Nivel 0 - Desde cero",
   "20": "Ingles Nivel 1 - Survival English",
   "21": "Ingles Nivel 2 - Presente y rutina",
   "22": "Ingles Nivel 3 - Pasado y futuro",
@@ -58,6 +59,7 @@ const TOTAL_MODULES = Object.keys(MODULE_NAMES).length;
 const MODULE_NAMES_OPTO = {
   "1": "Lentes para el Control de la Miopía",
   "2": "Flujo de Servicio al Cliente en Odoo",
+  "7": "Ingles Nivel 0 - Desde cero",
   "3": "Ingles Nivel 1 - Survival English",
   "4": "Ingles Nivel 2 - Presente y rutina",
   "5": "Ingles Nivel 3 - Pasado y futuro",
