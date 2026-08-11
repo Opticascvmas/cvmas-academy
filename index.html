@@ -771,7 +771,7 @@ margin-bottom:15px;
         <div class="dash-welcome">
           <div class="dash-welcome-text">
             <h2>¡Bienvenido a la Academia Ópticas CV+! 👋</h2>
-            <p>Tu plataforma de capacitación en el mundo de la óptica. Estudia los 18 módulos, practica con los quizzes y conviértete en un experto asesor.</p>
+            <p id="dash-intro">Tu plataforma de capacitación en el mundo de la óptica. Estudia los módulos, practica con los quizzes y conviértete en un experto asesor.</p>
           </div>
           <div class="dash-welcome-stats">
             <div class="dash-stat">
@@ -2917,6 +2917,160 @@ MODULES_OPTO.push.apply(MODULES_OPTO, MODULES_INGLES.map(function(m,i){
   var c = {}; for(var k in m) c[k] = m[k]; c.id = 3 + i; return c;
 }));
 
+// ═══════════════════════════════════════════════════════════════════════
+// 🌱 NIVEL 0 · DESDE CERO
+// Para quien nunca ha hablado inglés. Va PRIMERO en la lista visual pero
+// tiene su propia cadena (chain:'ingles0'), de un solo módulo: así queda
+// siempre abierto y NO bloquea el Nivel 1 — los dos arrancan disponibles.
+// ═══════════════════════════════════════════════════════════════════════
+const MODULO_INGLES_0 = {
+  title:"Inglés Nivel 0 · Desde cero", icon:"🌱",
+  category:"ingles", chain:"ingles0", quizCount:12,
+  content:`
+    <div class="cv-odoo-cta cv-eng-cta">
+      <div class="cv-odoo-txt">
+        <strong>🌱 English Lab · Nivel 0</strong>
+        <span>Abecedario con audio, las 120 palabras que ya sabes, números y precios, y el kit de emergencia</span>
+      </div>
+      <button class="cv-btn-odoo cv-btn-eng" type="button" onclick="abrirEnglishLab(0)">Abrir el laboratorio</button>
+    </div>
+
+    <h2>Este módulo es para ti si sientes que no sabes NADA de inglés</h2>
+    <p>Empecemos por lo más importante: <strong>no estás empezando de cero de verdad</strong>. Lo sientes así, pero no lo es. Ya reconoces cientos de palabras en inglés sin haberlas estudiado nunca, y en este módulo lo vas a comprobar en los primeros cinco minutos.</p>
+    <p>Aquí no hay gramática. No vas a conjugar nada ni a memorizar reglas. Solo cuatro cosas que te permiten <strong>sobrevivir y no congelarte</strong> frente a un cliente extranjero:</p>
+    <ol>
+      <li>El <strong>abecedario</strong>, para poder anotar un nombre cuando te lo deletreen.</li>
+      <li>Las <strong>120 palabras que ya sabes</strong> sin saberlo.</li>
+      <li>Los <strong>números, precios y horas</strong>, para cobrar y para dar una fecha.</li>
+      <li>El <strong>kit de emergencia</strong>: qué decir cuando no entendiste nada.</li>
+    </ol>
+    <p><strong>Un permiso que te damos desde ya:</strong> no tienes que hablar bien para atender bien. Un cliente extranjero no espera que seas bilingüe; espera que lo trates con amabilidad y que no lo dejes botado. Con lo de este módulo ya puedes hacer las dos cosas.</p>
+
+    <h2>1. El abecedario: lo primero que vas a necesitar</h2>
+    <p>Parece un tema de niños, pero es al revés: es el tema más urgente. Un cliente llega, le pides su nombre, y te dice <em>"Smith. S-M-I-T-H."</em> Si no reconoces las letras cuando las oyes, <strong>no puedes registrarlo en el sistema</strong>, y ahí se detiene toda la venta.</p>
+    <p>Las letras en inglés <strong>no se llaman como en español</strong>. Estas son las que más confusión causan:</p>
+    <ul>
+      <li><strong>E</strong> suena <em>"i"</em> y <strong>I</strong> suena <em>"ái"</em> — están al revés del español. Es el error número uno.</li>
+      <li><strong>A</strong> suena <em>"éi"</em> (no "a").</li>
+      <li><strong>G</strong> suena <em>"lli"</em> y <strong>J</strong> suena <em>"lléi"</em> — se parecen mucho entre ellas, pon atención.</li>
+      <li><strong>W</strong> se llama <em>"dábol-iu"</em> (doble u). Es la más larga de todas.</li>
+      <li><strong>Y</strong> suena <em>"uái"</em> y <strong>H</strong> suena <em>"éich"</em>.</li>
+    </ul>
+    <p>En el laboratorio tienes las 26 letras con audio, una herramienta para <strong>escuchar tu propio nombre deletreado</strong>, y un reto donde la voz te deletrea una palabra y tú la escribes — que es exactamente lo que vas a hacer en el mostrador.</p>
+    <p><strong>Frase indispensable:</strong> <em>Could you spell that, please?</em> (¿podría deletrear eso, por favor?) — se oye "cud iu SPEL dat plis".</p>
+
+    <h2>2. Ya sabes 120 palabras en inglés</h2>
+    <p>El español y el inglés comparten miles de palabras casi idénticas. Se llaman <strong>cognados</strong>. Mira estas y dime si no las entiendes todas:</p>
+    <ul>
+      <li><strong>De la óptica:</strong> vision, optical, lens, contact, patient, doctor, medical, cornea, retina, pupil, iris, astigmatism, myopia, presbyopia, correction, prescription, protection, filter, progressive.</li>
+      <li><strong>Del trabajo:</strong> client, information, service, product, promotion, total, quantity, quality, option, problem, moment, minute, important, necessary, possible, different.</li>
+      <li><strong>Idénticas:</strong> hospital, hotel, animal, natural, normal, final, general, color, error, favor, actor, radio, video, idea, area, family, music, chocolate, taxi, popular, terrible, simple.</li>
+    </ul>
+    <p><strong>Lo único que cambia es cómo suenan.</strong> Se escriben casi igual pero la boca las dice distinto: <em>information</em> no es "informachión", es <strong>in-for-MÉI-shon</strong>. Por eso hay que escucharlas, no solo leerlas.</p>
+
+    <h3>Seis reglas que te regalan cientos de palabras más</h3>
+    <p>No son coincidencias, son patrones. Aprende la regla y puedes convertir palabras nuevas tú solo:</p>
+    <ul>
+      <li>Español <strong>-ción</strong> → inglés <strong>-tion</strong>: información → <em>information</em>, promoción → <em>promotion</em>, atención → <em>attention</em>.</li>
+      <li>Español <strong>-dad / -tad</strong> → inglés <strong>-ty</strong>: calidad → <em>quality</em>, cantidad → <em>quantity</em>, dificultad → <em>difficulty</em>.</li>
+      <li>Español <strong>-ico</strong> → inglés <strong>-ic / -ical</strong>: médico → <em>medical</em>, óptico → <em>optical</em>, técnico → <em>technical</em>.</li>
+      <li>Español <strong>-oso</strong> → inglés <strong>-ous</strong>: famoso → <em>famous</em>, nervioso → <em>nervous</em>.</li>
+      <li>Español <strong>-ente / -ante</strong> → inglés <strong>-ent / -ant</strong>: paciente → <em>patient</em>, importante → <em>important</em>.</li>
+      <li>Español <strong>-mente</strong> → inglés <strong>-ly</strong>: normalmente → <em>normally</em>, exactamente → <em>exactly</em>.</li>
+    </ul>
+
+    <h3>Cuidado con los falsos amigos</h3>
+    <p>Algunas se parecen pero significan otra cosa, y unas cuantas causan malentendidos serios. Las más peligrosas para nosotros:</p>
+    <ul>
+      <li><strong>lentils</strong> NO es lentes: son <em>lentejas</em>. Los lentes son <strong>glasses</strong> o <strong>lenses</strong>.</li>
+      <li><strong>embarrassed</strong> NO es embarazada: es <em>avergonzado</em>. Embarazada es <strong>pregnant</strong>.</li>
+      <li><strong>actually</strong> NO es actualmente: es <em>de hecho</em>. Actualmente es <strong>currently</strong>.</li>
+      <li><strong>large</strong> NO es largo: es <em>grande</em>. Largo es <strong>long</strong>.</li>
+      <li><strong>sensible</strong> NO es sensible: es <em>sensato</em>. Sensible es <strong>sensitive</strong> (<em>sensitive eyes</em> = ojos sensibles).</li>
+      <li><strong>exit</strong> NO es éxito: es <em>salida</em>. Éxito es <strong>success</strong>.</li>
+      <li><strong>library</strong> NO es librería: es <em>biblioteca</em>. Librería es <strong>bookstore</strong>.</li>
+      <li><strong>fabric</strong> NO es fábrica: es <em>tela</em>. Fábrica es <strong>factory</strong> y el laboratorio es <strong>lab</strong>.</li>
+    </ul>
+
+    <h2>3. Números, precios y horas</h2>
+    <p>Los números son lo que más cuesta al inicio, y son justo lo que no puedes fallar: con ellos cobras y con ellos prometes una fecha.</p>
+    <h3>La trampa que te puede costar dinero</h3>
+    <p>13 y 30 suenan casi igual. Lo único que los diferencia es <strong>dónde golpea la voz</strong>:</p>
+    <ul>
+      <li>Los <strong>-TEEN</strong> golpean al final: thir<strong>TEEN</strong> (13), four<strong>TEEN</strong> (14), fif<strong>TEEN</strong> (15).</li>
+      <li>Los <strong>-TY</strong> golpean al inicio: <strong>THIR</strong>ty (30), <strong>FOR</strong>ty (40), <strong>FIF</strong>ty (50).</li>
+    </ul>
+    <p><strong>Regla de oro en caja:</strong> si tienes la menor duda con un número, di <em>"Can you repeat the number, please?"</em> o pídele que lo escriba. Nadie se molesta por eso. Sí se molesta si le cobras mal.</p>
+
+    <h3>Precios</h3>
+    <p>En Estados Unidos casi nadie dice el precio completo. En vez de "twelve dollars and fifty cents" dicen simplemente <strong>"twelve fifty"</strong> ($12.50). Los dos son correctos, pero el corto es el que vas a oír.</p>
+    <ul>
+      <li><em>How much is it?</em> — ¿Cuánto cuesta?</li>
+      <li><em>It's twenty-five dollars.</em> — Cuesta veinticinco dólares.</li>
+      <li><em>Your total is forty-two fifty.</em> — Su total es cuarenta y dos con cincuenta.</li>
+      <li><em>Cash or card?</em> — ¿Efectivo o tarjeta?</li>
+      <li><em>Here is your change.</em> — Aquí está su cambio.</li>
+    </ul>
+
+    <h3>La hora y los días</h3>
+    <p>La forma fácil y siempre correcta es <strong>decir los números tal cual</strong>: 9:45 = <em>"nine forty-five"</em>. Y usa <strong>a.m.</strong> (mañana) y <strong>p.m.</strong> (tarde y noche), porque en Estados Unidos no se usa el reloj de 24 horas: nadie dice "las quince horas".</p>
+    <ul>
+      <li><em>They'll be ready on Friday at three.</em> — Estarán listos el viernes a las tres.</li>
+      <li><em>We open at nine and close at six.</em> — Abrimos a las nueve y cerramos a las seis.</li>
+      <li>Ojo con <strong>Wednesday</strong> (miércoles): se pronuncia <em>UÉNS-dei</em>, la primera "d" no suena.</li>
+    </ul>
+
+    <h2>4. Kit de emergencia: qué hacer cuando no entiendes nada</h2>
+    <p>Te va a pasar, y está bien. Lo que no debe pasar es que te quedes congelado o que le des la espalda al cliente. Con estas cinco frases sales de cualquier situación:</p>
+    <ol>
+      <li><strong>Sorry, I don't understand.</strong> — Disculpe, no entiendo. (SÓ-ri, ai dóunt an-der-STÁND)</li>
+      <li><strong>I speak a little English.</strong> — Hablo un poco de inglés. Dicha con una sonrisa, desarma cualquier tensión.</li>
+      <li><strong>Can you write it, please?</strong> — ¿Puede escribirlo, por favor? Sirve para nombres, números y direcciones.</li>
+      <li><strong>One moment, please.</strong> — Un momento, por favor.</li>
+      <li><strong>I'll get help.</strong> — Voy a traer ayuda. (ail get JELP)</li>
+    </ol>
+    <h3>Tres recursos que no son inglés pero funcionan</h3>
+    <ul>
+      <li><strong>Señala y muestra.</strong> Enseña el aro, el espejo, la calculadora con el precio. Señalar no es de mala educación: es comunicación.</li>
+      <li><strong>Escribe el número.</strong> Un precio escrito en papel o en la pantalla no tiene acento y no se malentiende.</li>
+      <li><strong>Busca apoyo sin desaparecer.</strong> Nunca te vayas en silencio. Di <em>"One moment, please. I'll get help."</em> y regresa con un compañero.</li>
+    </ul>
+    <p><strong>Y lo más importante de todo:</strong> saluda y despídete siempre, aunque sea lo único que digas en inglés. <em>"Good morning!"</em> al entrar y <em>"Thank you! Have a nice day!"</em> al salir. Un cliente que fue recibido con calidez perdona cualquier problema de idioma; uno que fue recibido con cara de susto no perdona nada.</p>
+
+    <h2>Cómo practicar en el laboratorio</h2>
+    <p>Empieza por <strong>🎁 Palabras que ya sabes</strong> — es el que más ánimo da, porque comprobás que ya entendés muchísimo. Después <strong>🔤 Abecedario</strong> hasta que puedas anotar un apellido deletreado. Luego <strong>🔢 Números</strong> con el reto de escucha, y al final <strong>🗣️ Repetir frases</strong> con el kit de emergencia. Diez minutos al día, y en dos semanas pasas al Nivel 1.</p>
+  `,
+  quizBank:[
+    {q:"¿Por qué el abecedario es lo primero y más urgente en este nivel?",opts:["Porque es lo más fácil de todo","Porque el cliente te va a deletrear su nombre y sin eso no lo puedes registrar","Porque las letras se llaman igual que en español","Porque no sirve para nada práctico"],c:1,e:"Un cliente dice 'Smith. S-M-I-T-H.' Si no reconoces las letras al oírlas, no puedes registrarlo en el sistema y ahí se detiene toda la venta."},
+    {q:"En inglés, ¿cómo suenan las letras E e I?",opts:["E suena 'e' e I suena 'i', igual que en español","E suena 'i' e I suena 'ái' — están al revés del español","Las dos suenan igual","E suena 'éi' e I suena 'ei'"],c:1,e:"La E suena 'i' y la I suena 'ái': están al revés del español. Es el error número uno al deletrear y confundirlas cambia el nombre completo."},
+    {q:"¿Cómo se llama la letra W en inglés?",opts:["ve doble","dábol-iu (doble u)","uve","vi"],c:1,e:"La W se llama 'dábol-iu' (double u) y es el nombre de letra más largo del abecedario inglés."},
+    {q:"¿Qué significa 'Could you spell that, please?'",opts:["¿Podría hablar más despacio?","¿Podría deletrear eso, por favor?","¿Podría repetir el precio?","¿Podría escribirlo?"],c:1,e:"'Could you spell that, please?' (cud iu SPEL dat plis) es la frase para pedir que te deletreen algo. Es indispensable al registrar nombres extranjeros."},
+    {q:"¿Qué son los cognados?",opts:["Palabras en inglés que no tienen traducción","Palabras casi idénticas en español e inglés, como vision, doctor o hospital","Verbos irregulares","Palabras que se escriben igual pero significan lo contrario"],c:1,e:"Los cognados son las miles de palabras que el español y el inglés comparten casi idénticas. Ya reconoces cientos de ellas sin haberlas estudiado: lo único que cambia es cómo suenan."},
+    {q:"¿Cómo se pronuncia 'information'?",opts:["informachión","in-for-MÉI-shon","IN-for-ma-tion","in-for-ma-SIÓN"],c:1,e:"Se pronuncia in-for-MÉI-shon. La terminación '-tion' siempre suena 'shon'. Se escribe parecido al español pero suena muy distinto, por eso hay que escucharla."},
+    {q:"Según la regla de conversión, ¿cómo se dice 'calidad' en inglés?",opts:["calidity","quality","qualidad","calitation"],c:1,e:"Las palabras en -dad / -tad pasan a -ty en inglés: calidad → quality, cantidad → quantity, dificultad → difficulty."},
+    {q:"Español '-ción' se convierte en inglés en:",opts:["-cion","-tion","-sion","-shion"],c:1,e:"Español -ción → inglés -tion: información → information, promoción → promotion, atención → attention, prescripción → prescription."},
+    {q:"Un cliente dice 'lentils'. ¿De qué le está hablando?",opts:["De sus lentes","De lentejas, que es comida","De los lentes de contacto","Del laboratorio"],c:1,e:"'Lentils' son lentejas. Los lentes son 'glasses' o 'lenses'. Es uno de los falsos amigos más peligrosos justo en nuestro rubro."},
+    {q:"¿Qué significa realmente la palabra 'embarrassed'?",opts:["Embarazada","Avergonzado","Enredado","Ocupado"],c:1,e:"'Embarrassed' significa avergonzado. Embarazada es 'pregnant'. Es uno de los errores más comunes y más incómodos."},
+    {q:"Si un aro es 'large', ¿cómo es?",opts:["Largo","Grande","Delgado","Liviano"],c:1,e:"'Large' significa grande. Largo es 'long'. Es un falso amigo que aparece seguido al hablar de tallas y medidas."},
+    {q:"Un cliente dice que tiene 'sensitive eyes'. ¿Qué te está diciendo?",opts:["Que tiene ojos sensatos","Que tiene ojos sensibles","Que no ve bien de lejos","Que le duele la cabeza"],c:1,e:"'Sensitive' es sensible (que siente mucho). 'Sensible' en inglés significa sensato o razonable. 'Sensitive eyes' = ojos sensibles."},
+    {q:"¿Cuál es la diferencia al oído entre 'thirteen' (13) y 'thirty' (30)?",opts:["No hay diferencia, se dicen igual","Los -TEEN golpean la voz al final y los -TY al inicio","El 13 se dice más rápido","El 30 lleva una S al final"],c:1,e:"Los -TEEN golpean al final (thirTEEN) y los -TY al inicio (THIRty). Es lo único que los diferencia, y confundirlos cambia un precio o una cantidad."},
+    {q:"Tienes duda de si el cliente dijo 15 o 50. ¿Qué haces?",opts:["Cobrar el monto menor por seguridad","Decir 'Can you repeat the number, please?' o pedirle que lo escriba","Adivinar y seguir adelante","Pedirle que hable en español"],c:1,e:"Ante la menor duda con un número, pide que lo repita o que lo escriba. Nadie se molesta por eso; sí se molesta si le cobras mal."},
+    {q:"En Estados Unidos, ¿cómo se dice normalmente el precio $12.50?",opts:["twelve dollars and fifty cents, siempre completo","twelve fifty","twelve point fifty","one two five zero"],c:1,e:"Los dos son correctos, pero en la práctica casi todos dicen la forma corta: 'twelve fifty'. Esa es la que vas a escuchar."},
+    {q:"¿Cómo se dice la hora 9:45 de la forma más fácil y siempre correcta?",opts:["a quarter to ten, obligatoriamente","nine forty-five, diciendo los números tal cual","nine and three quarters","forty-five past nine"],c:1,e:"Decir los números tal cual siempre funciona: 'nine forty-five'. Y recuerda usar a.m. y p.m., porque allá no se usa el reloj de 24 horas."},
+    {q:"¿Cómo se pronuncia 'Wednesday'?",opts:["UÉD-nes-dei, con las tres sílabas","UÉNS-dei, la primera d no suena","ued-nes-DÉI","BÉD-nes-dei"],c:1,e:"'Wednesday' (miércoles) se pronuncia UÉNS-dei: la primera 'd' es muda. Es una de las palabras donde la escritura engaña."},
+    {q:"No entendiste absolutamente nada de lo que dijo el cliente. ¿Qué es lo correcto?",opts:["Quedarte callado esperando que se vaya","Decir 'Sorry, I don't understand. One moment, please. I'll get help.' e ir por un compañero","Darle la espalda e irte sin decir nada","Contestarle cualquier cosa para salir del momento"],c:1,e:"Lo peor es congelarse o desaparecer en silencio. Reconoce que no entendiste, pide un momento y avisa que vas por ayuda: 'One moment, please. I'll get help.'"},
+    {q:"¿Cuál de estos recursos NO verbales recomienda el módulo?",opts:["Señalar el producto y mostrar el precio escrito","Escribir el número en papel o en la pantalla","Irse en silencio a buscar a alguien","Buscar apoyo avisándole al cliente primero"],c:2,e:"Señalar y escribir números son recursos válidos y muy efectivos. Lo que nunca debes hacer es irte en silencio: siempre avisa 'One moment, please. I'll get help.'"},
+    {q:"Según el módulo, ¿qué es lo mínimo que debes decir siempre en inglés, aunque no digas nada más?",opts:["El precio del producto","Saludar al entrar y despedirte al salir","La política de garantía","Tu nombre completo"],c:1,e:"Saludar ('Good morning!') y despedirse ('Thank you! Have a nice day!') es el mínimo indispensable. Un cliente recibido con calidez perdona cualquier problema de idioma."},
+    {q:"¿Por cuál modo del laboratorio recomienda empezar este módulo?",opts:["Por el dictado, para entrenar el oído de una vez","Por 🎁 Palabras que ya sabes, porque comprobás que ya entiendes muchísimo","Por el conjugador de verbos","Por los diálogos completos"],c:1,e:"Se recomienda empezar por los cognados porque es el que más ánimo da: comprobás de inmediato que ya reconoces cientos de palabras. Después abecedario, números y frases."},
+    {q:"¿Cuál es la actitud correcta según este módulo?",opts:["Hay que hablar inglés perfecto antes de atender a un extranjero","No tienes que hablar bien para atender bien: el cliente espera amabilidad, no que seas bilingüe","Es mejor evitar a los clientes extranjeros hasta terminar los 4 niveles","Solo el supervisor debe atender extranjeros"],c:1,e:"Un cliente extranjero no espera que seas bilingüe: espera que lo trates con amabilidad y que no lo dejes botado. Con el kit de emergencia ya puedes hacer las dos cosas."}
+  ]
+};
+
+// Nivel 0 se inyecta con id propio y va PRIMERO en la lista de la categoría
+MODULES_ASESOR.push((function(){ var c={}; for(var k in MODULO_INGLES_0) c[k]=MODULO_INGLES_0[k]; c.id=24; return c; })());
+MODULES_OPTO.push((function(){ var c={}; for(var k in MODULO_INGLES_0) c[k]=MODULO_INGLES_0[k]; c.id=7;  return c; })());
+
+
 // MODULES es la lista "activa"; por defecto la de asesores
 let MODULES = MODULES_ASESOR;
 
@@ -3189,13 +3343,13 @@ const CAT_INFO_ASESOR = {
   sistema: { label:'Sistema', dashTitle:'🔄 Sistema', ids:[19] },
   akkurat: { label:'Portafolio Akkurat', dashTitle:'✨ Portafolio Akkurat', ids:[9,10,11,12,13,14] },
   ventas: { label:'Ventas y Productos', dashTitle:'💼 Ventas y Productos', ids:[15,16,17,18] },
-  ingles: { label:'Inglés CV+', dashTitle:'🇺🇸 Inglés CV+ · English Lab', ids:[20,21,22,23] },
+  ingles: { label:'Inglés CV+', dashTitle:'🇺🇸 Inglés CV+ · English Lab', ids:[24,20,21,22,23] },
 };
 // Categorías de Optometristas
 const CAT_INFO_OPTO = {
   fundamentos: { label:'Control de Miopía', dashTitle:'👁️ Control de Miopía', ids:[1] },
   sistema: { label:'Sistema', dashTitle:'🔄 Sistema', ids:[2] },
-  ingles: { label:'Inglés CV+', dashTitle:'🇺🇸 Inglés CV+ · English Lab', ids:[3,4,5,6] },
+  ingles: { label:'Inglés CV+', dashTitle:'🇺🇸 Inglés CV+ · English Lab', ids:[7,3,4,5,6] },
 };
 let CAT_INFO = CAT_INFO_ASESOR;
 const CAT_ICONS = { fundamentos:'🔬', fabricacion:'⚙️', akkurat:'✨', ventas:'💼', sistema:'🔄', ingles:'🇺🇸' };
@@ -3368,7 +3522,19 @@ function updateStats() {
 // ═══════════════════════════════════════════════════════
 // RENDER GRIDS
 // ═══════════════════════════════════════════════════════
+// El texto de bienvenida se arma con el total real de módulos del rol activo
+// (antes decía "los 18 módulos" fijo y quedaba desactualizado al agregar módulos).
+function actualizarIntroDash(){
+  const el = document.getElementById('dash-intro');
+  if (!el) return;
+  const total = getModuleOrder().length;
+  const quien = window.CVP_IS_OPTOMETRA ? 'optometrista' : 'asesor';
+  el.textContent = `Tu plataforma de capacitación en el mundo de la óptica. Estudia los ${total} módulos, `
+                 + `practica con los quizzes y conviértete en un experto ${quien}.`;
+}
+
 function renderDashSections(){
+  actualizarIntroDash();
   const wrap = document.getElementById('dash-sections');
   if(!wrap) return;
   const cats = Object.entries(CAT_INFO);
@@ -4403,7 +4569,10 @@ Cerrar
   // El permiso allow="microphone" del iframe es indispensable para que
   // funcione la evaluación de pronunciación dentro del modal.
   window.abrirEnglishLab = function(nivel){
-    var n = nivel || 1;
+    // OJO: no usar (nivel || 1) — el Nivel 0 es un valor "falso" en JavaScript
+    // y el laboratorio abriría el Nivel 1 en su lugar.
+    var n = (nivel === undefined || nivel === null || isNaN(nivel)) ? 1 : Number(nivel);
+    if (n < 0 || n > 4) n = 1;
     var m = document.getElementById('modal-english');
     document.getElementById('english-frame').src = 'herramientas/english-lab.html?nivel=' + n;
     document.getElementById('english-titulo').textContent =
