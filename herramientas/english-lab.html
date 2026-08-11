@@ -29,7 +29,7 @@ body{font-family:'Poppins',sans-serif;background:var(--bg);color:var(--text);
 
 /* ── Niveles ── */
 .niveles{display:flex;gap:8px;margin:16px 0 6px;flex-wrap:wrap}
-.niv{flex:1;min-width:150px;background:#fff;border:2px solid var(--gray-light);border-radius:12px;
+.niv{flex:1;min-width:143px;background:#fff;border:2px solid var(--gray-light);border-radius:12px;
   padding:11px 14px;cursor:pointer;transition:.16s;text-align:left}
 .niv:hover{border-color:var(--cyan);transform:translateY(-2px)}
 .niv.on{border-color:var(--cyan);background:var(--cyan-light);box-shadow:0 4px 14px rgba(0,185,214,.18)}
@@ -174,6 +174,40 @@ select:focus,input[type=text]:focus{border-color:var(--cyan)}
 .dictado input{width:100%;max-width:460px;text-align:center;font-size:1rem;font-weight:600;margin-top:14px}
 .vok{color:var(--ok);font-weight:700}.vno{color:var(--bad);font-weight:700}
 
+/* ── Nivel 0 · abecedario ── */
+.niv.cero{border-color:#F5D48A;background:#FFFBF0}
+.niv.cero.on{border-color:var(--gold);background:#FFF6E0;box-shadow:0 4px 14px rgba(245,184,0,.22)}
+.abcgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:9px;margin-top:6px}
+.letra{background:#fff;border:2px solid var(--gray-light);border-radius:11px;padding:11px 8px;
+  text-align:center;cursor:pointer;transition:.15s}
+.letra:hover{border-color:var(--cyan);background:var(--cyan-light);transform:translateY(-2px)}
+.letra .lgr{font-size:1.7rem;font-weight:800;color:var(--dark);line-height:1}
+.letra .lfon{font-size:.82rem;font-weight:700;color:var(--cyan-dark);margin-top:2px}
+.letra .lej{font-size:.68rem;color:var(--gray-text);margin-top:6px;border-top:1px solid var(--gray-light);
+  padding-top:5px;line-height:1.35}
+.letra .lej span{color:var(--gray-mid)}
+.letra .lej:hover{color:var(--cyan-dark)}
+
+/* ── Nivel 0 · cognados ── */
+.coggrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(215px,1fr));gap:8px;margin-top:12px}
+.cog{display:flex;align-items:center;gap:8px;background:#fff;border:1.5px solid var(--gray-light);
+  border-radius:10px;padding:9px 12px;cursor:pointer;transition:.15s}
+.cog:hover{border-color:var(--cyan);background:var(--cyan-light)}
+.cog b{font-size:.84rem;color:var(--dark);flex-shrink:0}
+.cog span{font-size:.74rem;color:var(--gray-text);flex:1;text-align:right}
+.cog i{font-style:normal;font-size:.85rem;color:var(--cyan-dark)}
+
+/* ── Nivel 0 · falsos amigos ── */
+.falsogrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(265px,1fr));gap:11px;margin-top:12px}
+.falso{background:#FDECEA;border:1px solid #F5B7B1;border-radius:12px;padding:13px 15px}
+.falso .fen{font-size:1.05rem;font-weight:800;color:#8a231a}
+.falso .fno{font-size:.73rem;font-weight:700;color:#b03a2e;text-transform:uppercase;
+  letter-spacing:.3px;margin-top:4px}
+.falso .fsi{font-size:.82rem;color:#1a2a3a;margin-top:6px}
+.falso .fsi b{color:#0a7d3c}
+.falso .fojo{font-size:.74rem;color:var(--gray-text);margin-top:7px;line-height:1.5;
+  border-top:1px solid #F5B7B1;padding-top:7px}
+
 /* ── Avisos ── */
 .aviso{background:#FDECEA;border:1px solid #F5B7B1;color:#8a231a;border-radius:10px;
   padding:12px 15px;font-size:.79rem;line-height:1.55;margin-bottom:14px;display:none}
@@ -215,6 +249,199 @@ select:focus,input[type=text]:focus{border-color:var(--cyan)}
    objeto DATA: la interfaz se dibuja sola.
    ═══════════════════════════════════════════════════════════════ */
 const DATA = {
+
+/* ────────────────────── NIVEL 0 · DESDE CERO ──────────────────────
+   Para quien nunca ha hablado inglés. Usa modos propios (abecedario,
+   cognados, números) en vez de los de los otros niveles.
+   ------------------------------------------------------------------ */
+0:{
+ nombre:"Nivel 0 · Desde cero",
+ corto:"Nunca he hablado inglés",
+ modos:["abc","cognados","frases","numeros","cards","dictado"],
+
+ /* ── Abecedario: cómo suena cada letra ── */
+ letras:[
+  {L:"A",fon:"éi",  ej:"apple",   es:"manzana"},
+  {L:"B",fon:"bi",  ej:"book",    es:"libro"},
+  {L:"C",fon:"si",  ej:"cat",     es:"gato"},
+  {L:"D",fon:"di",  ej:"doctor",  es:"doctor"},
+  {L:"E",fon:"i",   ej:"eye",     es:"ojo"},
+  {L:"F",fon:"ef",  ej:"frame",   es:"aro"},
+  {L:"G",fon:"lli", ej:"glasses", es:"lentes"},
+  {L:"H",fon:"éich",ej:"help",    es:"ayuda"},
+  {L:"I",fon:"ái",  ej:"insurance",es:"seguro"},
+  {L:"J",fon:"lléi",ej:"July",    es:"julio"},
+  {L:"K",fon:"quéi",ej:"key",     es:"llave"},
+  {L:"L",fon:"el",  ej:"lens",    es:"lente"},
+  {L:"M",fon:"em",  ej:"money",   es:"dinero"},
+  {L:"N",fon:"en",  ej:"name",    es:"nombre"},
+  {L:"O",fon:"óu",  ej:"order",   es:"pedido"},
+  {L:"P",fon:"pi",  ej:"price",   es:"precio"},
+  {L:"Q",fon:"quiú",ej:"question",es:"pregunta"},
+  {L:"R",fon:"ar",  ej:"ready",   es:"listo"},
+  {L:"S",fon:"es",  ej:"store",   es:"tienda"},
+  {L:"T",fon:"ti",  ej:"today",   es:"hoy"},
+  {L:"U",fon:"iú",  ej:"use",     es:"usar"},
+  {L:"V",fon:"vi",  ej:"vision",  es:"visión"},
+  {L:"W",fon:"dábol-iu",ej:"water",es:"agua"},
+  {L:"X",fon:"eks", ej:"x-ray",   es:"radiografía"},
+  {L:"Y",fon:"uái", ej:"yes",     es:"sí"},
+  {L:"Z",fon:"zi",  ej:"zero",    es:"cero"}
+ ],
+ /* palabras que el laboratorio deletrea en voz alta para que el
+    colaborador las escriba: entrena entender a un cliente que
+    deletrea su nombre o su apellido */
+ deletreo:["MILLER","SMITH","JONES","BROWN","DAVIS","WILSON","TAYLOR","ANDERSON",
+           "GLASSES","FRAME","LENS","VISION","ORDER","PRICE","READY","STORE"],
+
+ /* ── Las palabras que ya sabes (cognados) ── */
+ cognados:[
+  {cat:"Óptica y salud",
+   items:[["vision","visión"],["optical","óptico"],["lens","lente"],["contact","contacto"],
+          ["patient","paciente"],["doctor","doctor"],["medical","médico"],["examination","examinación / examen"],
+          ["diagnostic","diagnóstico"],["correction","corrección"],["prescription","prescripción / receta"],
+          ["astigmatism","astigmatismo"],["myopia","miopía"],["presbyopia","presbicia"],
+          ["cornea","córnea"],["retina","retina"],["pupil","pupila"],["iris","iris"],
+          ["anatomy","anatomía"],["muscle","músculo"],["infection","infección"],["irritation","irritación"],
+          ["inflammation","inflamación"],["allergy","alergia"],["symptom","síntoma"],["treatment","tratamiento"],
+          ["protection","protección"],["filter","filtro"],["ultraviolet","ultravioleta"],["progressive","progresivo"]]},
+  {cat:"Trabajo y tienda",
+   items:[["client","cliente"],["information","información"],["service","servicio"],["product","producto"],
+          ["promotion","promoción"],["commercial","comercial"],["professional","profesional"],
+          ["personal","personal"],["inventory","inventario"],["invoice","factura"],["total","total"],
+          ["quantity","cantidad"],["quality","calidad"],["option","opción"],["condition","condición"],
+          ["solution","solución"],["attention","atención"],["reception","recepción"],["direction","dirección"],
+          ["moment","momento"],["minute","minuto"],["important","importante"],["necessary","necesario"],
+          ["possible","posible"],["problem","problema"],["different","diferente"],["elegant","elegante"],
+          ["specific","específico"],["technical","técnico"],["plastic","plástico"]]},
+  {cat:"Idénticas o casi",
+   items:[["hospital","hospital"],["hotel","hotel"],["animal","animal"],["natural","natural"],
+          ["normal","normal"],["final","final"],["general","general"],["metal","metal"],
+          ["capital","capital"],["color","color"],["error","error"],["favor","favor"],
+          ["honor","honor"],["actor","actor"],["radio","radio"],["video","video"],
+          ["area","área"],["idea","idea"],["family","familia"],["music","música"],
+          ["public","público"],["chocolate","chocolate"],["taxi","taxi"],["banana","banana"],
+          ["popular","popular"],["terrible","terrible"],["horrible","horrible"],["simple","simple"],
+          ["double","doble"],["central","central"]]},
+  {cat:"Día a día y turista",
+   items:[["restaurant","restaurante"],["pharmacy","farmacia"],["ambulance","ambulancia"],
+          ["emergency","emergencia"],["police","policía"],["bank","banco"],["credit","crédito"],
+          ["dollar","dólar"],["telephone","teléfono"],["cellular","celular"],["internet","internet"],
+          ["computer","computadora"],["application","aplicación"],["calendar","calendario"],
+          ["temperature","temperatura"],["tropical","tropical"],["national","nacional"],
+          ["international","internacional"],["local","local"],["distance","distancia"],
+          ["second","segundo"],["reservation","reservación"],["ticket","tiquete / boleto"],
+          ["station","estación"],["museum","museo"],["beach","playa (no es cognado, pero la vas a oír)"],
+          ["coffee","café"],["fruit","fruta"],["salad","ensalada"],["menu","menú"]]}
+ ],
+ /* reglas para convertir cientos de palabras de golpe */
+ reglas:[
+  {de:"-ción",a:"-tion",ej:[["información","information"],["promoción","promotion"],["atención","attention"],["opción","option"],["prescripción","prescription"]]},
+  {de:"-dad / -tad",a:"-ty",ej:[["calidad","quality"],["cantidad","quantity"],["dificultad","difficulty"],["oportunidad","opportunity"],["universidad","university"]]},
+  {de:"-ico / -ica",a:"-ic / -ical",ej:[["médico","medical"],["óptico","optical"],["técnico","technical"],["específico","specific"],["plástico","plastic"]]},
+  {de:"-oso / -osa",a:"-ous",ej:[["famoso","famous"],["nervioso","nervous"],["generoso","generous"],["delicioso","delicious"]]},
+  {de:"-ente / -ante",a:"-ent / -ant",ej:[["paciente","patient"],["importante","important"],["diferente","different"],["elegante","elegant"]]},
+  {de:"-mente",a:"-ly",ej:[["normalmente","normally"],["exactamente","exactly"],["probablemente","probably"],["perfectamente","perfectly"]]}
+ ],
+ /* falsos amigos: las trampas que causan malentendidos reales */
+ falsos:[
+  {en:"lentils",mal:"lentes",bien:"lentejas",ojo:"Los lentes son <b>glasses</b> o <b>lenses</b>. Si le dices <i>lentils</i> a un cliente, le estás hablando de comida."},
+  {en:"embarrassed",mal:"embarazada",bien:"avergonzado",ojo:"Embarazada es <b>pregnant</b>. Este error es de los más comunes y de los más incómodos."},
+  {en:"actually",mal:"actualmente",bien:"de hecho, en realidad",ojo:"Actualmente es <b>currently</b> o <b>right now</b>."},
+  {en:"library",mal:"librería",bien:"biblioteca",ojo:"Librería (donde se compran libros) es <b>bookstore</b>."},
+  {en:"exit",mal:"éxito",bien:"salida",ojo:"Éxito es <b>success</b>. En una tienda vas a ver el letrero EXIT en la salida."},
+  {en:"large",mal:"largo",bien:"grande",ojo:"Largo es <b>long</b>. Un aro <i>large</i> es grande, no largo."},
+  {en:"sensible",mal:"sensible",bien:"sensato, razonable",ojo:"Sensible (que siente mucho) es <b>sensitive</b>: <i>sensitive eyes</i> = ojos sensibles."},
+  {en:"support",mal:"soportar (tolerar)",bien:"apoyar, dar soporte",ojo:"Soportar algo molesto es <b>to stand</b> o <b>to tolerate</b>."},
+  {en:"realize",mal:"realizar",bien:"darse cuenta",ojo:"Realizar una tarea es <b>to carry out</b> o <b>to do</b>."},
+  {en:"fabric",mal:"fábrica",bien:"tela",ojo:"Fábrica es <b>factory</b>. El laboratorio es <b>lab</b>."},
+  {en:"carpet",mal:"carpeta",bien:"alfombra",ojo:"Carpeta es <b>folder</b>."},
+  {en:"discuss",mal:"discutir (pelear)",bien:"hablar de un tema",ojo:"Pelear o discutir es <b>to argue</b>. <i>Let's discuss the options</i> = hablemos de las opciones."}
+ ],
+
+ /* ── Kit de emergencia: qué decir cuando no sabes nada ── */
+ frases:[
+  {en:"Hello!",es:"¡Hola!",fon:"je-LÓU"},
+  {en:"Good morning!",es:"¡Buenos días!",fon:"gud MOR-ning"},
+  {en:"Yes. / No.",es:"Sí. / No.",fon:"ies · nou"},
+  {en:"Please.",es:"Por favor.",fon:"plis"},
+  {en:"Thank you!",es:"¡Gracias!",fon:"ZÉNK iu"},
+  {en:"Sorry.",es:"Disculpe. / Lo siento.",fon:"SÓ-ri"},
+  {en:"I speak a little English.",es:"Hablo un poco de inglés.",fon:"ai spik a LÍ-tel ÍN-glish"},
+  {en:"I don't understand.",es:"No entiendo.",fon:"ai dóunt an-der-STÁND"},
+  {en:"One moment, please.",es:"Un momento, por favor.",fon:"uán MÓU-ment plis"},
+  {en:"Can you write it, please?",es:"¿Puede escribirlo, por favor?",fon:"can iu ráit it plis"},
+  {en:"I'll get help.",es:"Voy a traer ayuda.",fon:"ail get JELP"},
+  {en:"My name is Oscar.",es:"Mi nombre es Oscar.",fon:"mai néim is OS-car"},
+  {en:"What is your name?",es:"¿Cuál es su nombre?",fon:"uát is ior NÉIM"},
+  {en:"How can I help you?",es:"¿Cómo puedo ayudarle?",fon:"jáu can ai JELP iu"},
+  {en:"Have a nice day!",es:"¡Que tenga un buen día!",fon:"jav a náis DÉI"}
+ ],
+
+ /* ── Números, precios y horas ── */
+ numeros:{
+  basicos:[["0","zero","ZÍ-rou"],["1","one","uán"],["2","two","tu"],["3","three","zri"],["4","four","for"],
+           ["5","five","fáiv"],["6","six","siks"],["7","seven","SÉ-ven"],["8","eight","éit"],["9","nine","náin"],
+           ["10","ten","ten"],["11","eleven","i-LÉ-ven"],["12","twelve","tuélv"],["13","thirteen","zer-TÍN"],
+           ["14","fourteen","for-TÍN"],["15","fifteen","fif-TÍN"],["16","sixteen","siks-TÍN"],
+           ["17","seventeen","se-ven-TÍN"],["18","eighteen","ei-TÍN"],["19","nineteen","náin-TÍN"],["20","twenty","TUÉ-ni"]],
+  decenas:[["20","twenty","TUÉ-ni"],["30","thirty","ZÉR-ti"],["40","forty","FÓR-ti"],["50","fifty","FÍF-ti"],
+           ["60","sixty","SÍKS-ti"],["70","seventy","SÉ-ven-ti"],["80","eighty","ÉI-ti"],["90","ninety","NÁIN-ti"],
+           ["100","one hundred","uán JÁN-dred"],["1000","one thousand","uán ZÁU-sand"]],
+  trampas:[["13 / 30","thirTEEN / THIRty","el 13 lleva la fuerza al final, el 30 al inicio"],
+           ["14 / 40","fourTEEN / FORty","si te equivocas, cambias el precio"],
+           ["15 / 50","fifTEEN / FIFty","escucha dónde golpea la voz"],
+           ["16 / 60","sixTEEN / SIXty","los -TEEN terminan fuerte"],
+           ["17 / 70","sevenTEEN / SEVenty","los -TY terminan suave"],
+           ["18 / 80","eighTEEN / EIGHty","pide que lo repita si dudas"],
+           ["19 / 90","nineTEEN / NINEty","o pídele que lo escriba"]],
+  precios:[["$5.00","five dollars"],["$12.50","twelve fifty"],["$25.00","twenty-five dollars"],
+           ["$39.99","thirty-nine ninety-nine"],["$45.75","forty-five seventy-five"],
+           ["$99.00","ninety-nine dollars"],["$120.00","one hundred twenty dollars"],
+           ["$150.50","one fifty fifty"]],
+  horas:[["9:00","nine o'clock"],["9:15","nine fifteen"],["9:30","nine thirty"],["9:45","nine forty-five"],
+         ["10:00 a.m.","ten a.m."],["3:00 p.m.","three p.m."],["12:00","twelve noon"],["6:30 p.m.","six thirty p.m."]],
+  fechas:[["Monday","lunes"],["Tuesday","martes"],["Wednesday","miércoles (UÉNS-dei)"],["Thursday","jueves"],
+          ["Friday","viernes"],["Saturday","sábado"],["Sunday","domingo"],
+          ["January","enero"],["February","febrero"],["March","marzo"],["April","abril"],["May","mayo"],
+          ["June","junio"],["July","julio"],["August","agosto"],["September","septiembre"],
+          ["October","octubre"],["November","noviembre"],["December","diciembre"],
+          ["August 10th","10 de agosto (ÓG-est TENZ)"],["the 1st / 2nd / 3rd","el 1º / 2º / 3º (ferst · SÉ-cond · zerd)"]],
+  frases:[["How much is it?","¿Cuánto cuesta?"],["It's twenty-five dollars.","Cuesta veinticinco dólares."],
+          ["Your total is forty-two fifty.","Su total es cuarenta y dos con cincuenta."],
+          ["They'll be ready on Friday at three.","Estarán listos el viernes a las tres."],
+          ["We open at nine and close at six.","Abrimos a las nueve y cerramos a las seis."],
+          ["Cash or card?","¿Efectivo o tarjeta?"],
+          ["Here is your change.","Aquí está su cambio."],
+          ["Can you repeat the number, please?","¿Puede repetir el número, por favor?"]],
+  /* ejercicio de escucha: el laboratorio lo dice, el colaborador lo escribe */
+  reto:[["seven","7"],["twelve","12"],["thirteen","13"],["thirty","30"],["fifteen","15"],["fifty","50"],
+        ["forty-four","44"],["sixty-eight","68"],["ninety-nine","99"],["one hundred twenty","120"],
+        ["twelve fifty","12.50"],["twenty-five dollars","25"],["thirty-nine ninety-nine","39.99"],
+        ["forty-five seventy-five","45.75"],["nine thirty","9:30"],["ten fifteen","10:15"],
+        ["three forty-five","3:45"],["six o'clock","6:00"]]
+ },
+
+ /* ── Flashcards de supervivencia ── */
+ cards:[
+  {en:"yes / no",es:"sí / no",fon:"ies · nou",uso:"Yes, of course."},
+  {en:"please",es:"por favor",fon:"plis",uso:"Sit here, please."},
+  {en:"thank you",es:"gracias",fon:"ZÉNK iu",uso:"Thank you very much!"},
+  {en:"sorry",es:"disculpe / lo siento",fon:"SÓ-ri",uso:"Sorry, one moment."},
+  {en:"hello / goodbye",es:"hola / adiós",fon:"je-LÓU · gud-BÁI",uso:"Hello! Welcome."},
+  {en:"my name is...",es:"mi nombre es...",fon:"mai néim is",uso:"My name is Oscar."},
+  {en:"I don't understand",es:"no entiendo",fon:"ai dóunt an-der-STÁND",uso:"Sorry, I don't understand."},
+  {en:"one moment",es:"un momento",fon:"uán MÓU-ment",uso:"One moment, please."},
+  {en:"help",es:"ayuda",fon:"jelp",uso:"Can I help you?"},
+  {en:"glasses",es:"lentes",fon:"GLÁ-ses",uso:"Your glasses are ready."},
+  {en:"eye",es:"ojo",fon:"ai",uso:"Cover your right eye."},
+  {en:"how much?",es:"¿cuánto?",fon:"jáu match",uso:"How much is it?"},
+  {en:"today / tomorrow",es:"hoy / mañana",fon:"tu-DÉI · tu-MÓ-rou",uso:"Ready tomorrow."},
+  {en:"ready",es:"listo",fon:"RÉ-di",uso:"It's ready!"},
+  {en:"write it, please",es:"escríbalo, por favor",fon:"ráit it plis",uso:"Can you write it, please?"}
+ ]
+},
+
 
 /* ────────────────────────── NIVEL 1 ────────────────────────── */
 1:{
@@ -875,38 +1102,60 @@ function esc(s){ return (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").repla
 function q(id){ return document.getElementById(id); }
 function nivelActual(){ return DATA[ST.nivel]; }
 
-var MODOS = [
-  {k:"sonidos",   n:"🔊 Sonidos nativos"},
-  {k:"frases",    n:"🗣️ Repetir frases"},
-  {k:"conjugador",n:"🔁 Conjugador"},
-  {k:"dialogos",  n:"💬 Diálogos"},
-  {k:"cards",     n:"🃏 Flashcards"},
-  {k:"dictado",   n:"🎧 Dictado"}
-];
+/* Catálogo completo de modos. Cada nivel declara los suyos en DATA[n].modos;
+   si no declara nada, se usan los seis de los niveles 1 a 4. */
+var MODOS = {
+  abc:       "🔤 Abecedario y deletreo",
+  cognados:  "🎁 Palabras que ya sabes",
+  numeros:   "🔢 Números y precios",
+  sonidos:   "🔊 Sonidos nativos",
+  frases:    "🗣️ Repetir frases",
+  conjugador:"🔁 Conjugador",
+  dialogos:  "💬 Diálogos",
+  cards:     "🃏 Flashcards",
+  dictado:   "🎧 Dictado"
+};
+var MODOS_DEFECTO = ["sonidos","frases","conjugador","dialogos","cards","dictado"];
+function modosDe(n){
+  var d = DATA[n];
+  return (d && d.modos) ? d.modos : MODOS_DEFECTO;
+}
+/* Lista de niveles disponibles, en orden (incluye el 0) */
+function nivelesDisponibles(){
+  var ns = [];
+  for(var k in DATA){ if(DATA.hasOwnProperty(k)) ns.push(parseInt(k,10)); }
+  return ns.sort(function(a,b){ return a-b; });
+}
 
 function pintaNiveles(){
-  var h = "";
-  for(var n=1;n<=4;n++){
-    var d = DATA[n], p = nivProg(n);
+  var h = "", ns = nivelesDisponibles();
+  for(var i=0;i<ns.length;i++){
+    var n = ns[i], d = DATA[n], p = nivProg(n);
     var prom = p.intentos ? Math.round(p.suma/p.intentos) : 0;
-    h += '<div class="niv'+(ST.nivel===n?" on":"")+'" onclick="irNivel('+n+')">'+
-           '<b>Nivel '+n+' · '+esc(d.corto)+'</b>'+
-           '<span>'+(p.intentos ? p.intentos+" prácticas · "+prom+"% promedio" : "sin practicar aún")+'</span>'+
+    var cero = (n === 0);
+    h += '<div class="niv'+(ST.nivel===n?" on":"")+(cero?" cero":"")+'" onclick="irNivel('+n+')">'+
+           '<b>'+(cero?"🌱 ":"")+'Nivel '+n+' · '+esc(d.corto)+'</b>'+
+           '<span>'+(p.intentos ? p.intentos+" prácticas · "+prom+"% promedio"
+                               : (cero ? "empieza aquí si nunca has hablado inglés" : "sin practicar aún"))+'</span>'+
          '</div>';
   }
   q("niveles").innerHTML = h;
 }
 function pintaModos(){
-  var h = "";
-  for(var i=0;i<MODOS.length;i++){
-    h += '<button class="modo'+(ST.modo===MODOS[i].k?" on":"")+'" onclick="irModo(\''+MODOS[i].k+'\')">'+MODOS[i].n+'</button>';
+  var h = "", ms = modosDe(ST.nivel);
+  for(var i=0;i<ms.length;i++){
+    h += '<button class="modo'+(ST.modo===ms[i]?" on":"")+'" onclick="irModo(\''+ms[i]+'\')">'+(MODOS[ms[i]]||ms[i])+'</button>';
   }
   q("modos").innerHTML = h;
 }
 function irNivel(n){
   ST.nivel = n;
   ST.iFrase=0; ST.iSon=0; ST.iDlg=0; ST.iCard=0; ST.iDict=0; ST.iVerbo=0;
-  pintaNiveles(); pintar();
+  COG_CAT = 0; RETO_PAL = null; RETO_NUM = null;
+  /* si el modo activo no existe en este nivel, cae en el primero suyo */
+  var ms = modosDe(n);
+  if(ms.indexOf(ST.modo) === -1) ST.modo = ms[0];
+  pintaNiveles(); pintaModos(); pintar();
 }
 function irModo(k){ ST.modo = k; pintaModos(); pintar(); }
 function setVel(v){ ST.velocidad = parseFloat(v); var e=q("velTxt"); if(e) e.textContent = ST.velocidad.toFixed(2)+"x"; }
@@ -1319,10 +1568,356 @@ function revisarDictado(){
   if(r.pct>=85) setTimeout(function(){ navDict(1); }, 2400);
 }
 
+/* ═══════════════════════════════════════════════════════════════
+   MODOS EXCLUSIVOS DEL NIVEL 0 (para quien empieza de cero)
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Habla letra por letra, con pausa entre cada una ── */
+function decirDeletreado(txt, cb){
+  if(!window.speechSynthesis){ return; }
+  var letras = txt.toUpperCase().replace(/[^A-Z]/g,"").split(""), i = 0;
+  try{ speechSynthesis.cancel(); }catch(e){}
+  function sig(){
+    if(i >= letras.length){ if(cb) cb(); return; }
+    var L = letras[i]; i++;
+    try{
+      var u = new SpeechSynthesisUtterance(L);
+      u.lang = "en-US"; u.rate = 0.7; if(VOZ) u.voice = VOZ;
+      u.onend = function(){ setTimeout(sig, 260); };
+      speechSynthesis.speak(u);
+    }catch(e){}
+  }
+  sig();
+}
+
+/* ═══════════ MODO · ABECEDARIO Y DELETREO ═══════════ */
+function vistaAbc(){
+  var d = nivelActual(), grid = "";
+  for(var i=0;i<d.letras.length;i++){
+    var L = d.letras[i];
+    grid += '<div class="letra" onclick="decir(\''+L.L+'\',0.7)">'+
+              '<div class="lgr">'+L.L+'</div>'+
+              '<div class="lfon">'+esc(L.fon)+'</div>'+
+              '<div class="lej" onclick="event.stopPropagation();decir(\''+L.ej+'\')">'+esc(L.ej)+'<br><span>'+esc(L.es)+'</span></div>'+
+            '</div>';
+  }
+  return barraStats()+
+  '<div class="card">'+
+    '<h2>🔤 El abecedario en inglés</h2>'+
+    '<div class="sub">Las letras <b>no se llaman igual</b> que en español, y esto es lo primero que necesitas: '+
+      'un cliente extranjero te va a deletrear su nombre y su apellido. Toca cada letra para escucharla, '+
+      'y toca la palabra de abajo para oír un ejemplo.</div>'+
+    '<div class="abcgrid">'+grid+'</div>'+
+    '<div class="hint"><b>Las 5 que más cuestan:</b> la <b>E</b> suena "i" y la <b>I</b> suena "ái" '+
+      '(están al revés del español, y es el error más común). La <b>G</b> suena "lli" y la <b>J</b> suena "lléi". '+
+      'La <b>W</b> se llama "dábol-iu" (doble u) y es la más larga de todas.</div>'+
+    '<div class="controles">'+
+      '<button class="btn btn-c" onclick="decirDeletreado(\'ABCDEFGHIJKLMNOPQRSTUVWXYZ\')">▶ Escuchar el abecedario completo</button>'+
+    '</div>'+
+  '</div>'+
+
+  '<div class="card">'+
+    '<h2>✍️ Deletrea tu nombre</h2>'+
+    '<div class="sub">Escribe tu nombre o tu apellido y escúchalo deletreado en inglés. '+
+      'Repítelo en voz alta hasta que te salga sin pensar: lo vas a usar todos los días.</div>'+
+    '<div class="controles">'+
+      '<input type="text" id="miNombre" placeholder="Escribe tu nombre..." autocomplete="off" '+
+        'style="min-width:220px" onkeydown="if(event.key===\'Enter\')escucharNombre()">'+
+      '<button class="btn btn-c" onclick="escucharNombre()">🔊 Escucharlo deletreado</button>'+
+    '</div>'+
+    '<div id="nombreChips" style="margin-top:14px"></div>'+
+  '</div>'+
+
+  '<div class="card">'+
+    '<h2>🎧 Reto: entiende lo que te deletrean</h2>'+
+    '<div class="sub">Esta es la habilidad de verdad: el cliente deletrea y <b>tú anotas</b>. '+
+      'El laboratorio va a deletrear una palabra letra por letra. Escríbela abajo. '+
+      'Si no la agarras, dale a escuchar otra vez — un nativo también pide que le repitan.</div>'+
+    '<div class="controles">'+
+      '<button class="btn btn-c" onclick="retoDeletreo()">▶ Deletréame una palabra</button>'+
+      '<button class="btn btn-o" onclick="repetirDeletreo()">🔁 Repetir</button>'+
+    '</div>'+
+    '<div class="dictado">'+
+      '<input type="text" id="retoIn" placeholder="Escribe la palabra que te deletrearon..." autocomplete="off" '+
+        'onkeydown="if(event.key===\'Enter\')revisarDeletreo()">'+
+      '<div class="controles" style="margin-top:12px">'+
+        '<button class="btn btn-g" onclick="revisarDeletreo()">✔ Revisar</button>'+
+      '</div>'+
+    '</div>'+
+    '<div class="resul" id="res"></div>'+
+  '</div>';
+}
+function escucharNombre(){
+  var v = (q("miNombre")||{}).value || "";
+  var letras = v.toUpperCase().replace(/[^A-ZÑ ]/g,"").split("");
+  var d = nivelActual(), h = "";
+  for(var i=0;i<letras.length;i++){
+    if(letras[i]===" "){ h += '<span style="display:inline-block;width:14px"></span>'; continue; }
+    var f = "";
+    for(var j=0;j<d.letras.length;j++){ if(d.letras[j].L===letras[i]) f = d.letras[j].fon; }
+    h += '<span class="chip" style="margin:3px" onclick="decir(\''+letras[i]+'\',0.7)">'+
+           '<b>'+letras[i]+'</b> <span style="color:var(--cyan-dark);font-size:.72rem">'+esc(f)+'</span></span>';
+  }
+  var box = q("nombreChips");
+  if(box) box.innerHTML = h ? '<div class="chips">'+h+'</div>' : '';
+  if(v.trim()) decirDeletreado(v);
+}
+var RETO_PAL = null;
+function retoDeletreo(){
+  var lista = nivelActual().deletreo;
+  RETO_PAL = lista[Math.floor(Math.random()*lista.length)];
+  var e = q("retoIn"); if(e){ e.value = ""; }
+  var r = q("res"); if(r){ r.style.display = "none"; }
+  decirDeletreado(RETO_PAL);
+}
+function repetirDeletreo(){
+  if(!RETO_PAL){ retoDeletreo(); return; }
+  decirDeletreado(RETO_PAL);
+}
+function revisarDeletreo(){
+  var box = q("res"); if(!box) return;
+  if(!RETO_PAL){
+    box.className = "resul med";
+    box.innerHTML = '<div style="font-size:.84rem;font-weight:600">Primero toca <b>Deletréame una palabra</b>.</div>';
+    box.style.display = "block"; return;
+  }
+  var v = ((q("retoIn")||{}).value || "").toUpperCase().replace(/[^A-Z]/g,"");
+  var ok = (v === RETO_PAL);
+  var pct = ok ? 100 : Math.round(100 * coincideLetras(RETO_PAL, v) / RETO_PAL.length);
+  box.className = "resul " + claseRes(pct);
+  box.innerHTML =
+    '<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">'+
+      '<span class="pct">'+pct+'%</span>'+
+      '<span style="font-size:.86rem;font-weight:600">'+(ok?"✅ ¡Exacto! Así se anota un apellido":(pct>=60?"👍 Casi, escucha otra vez":"🎧 Vuelve a escucharlo despacio"))+'</span>'+
+    '</div>'+
+    '<div class="oiste">Era: <i>'+esc(RETO_PAL)+'</i></div>'+
+    '<div class="oiste">Escribiste: <i>'+esc(v||"(nada)")+'</i></div>';
+  box.style.display = "block";
+  registrar(pct, "abc");
+  pintaNiveles();
+  if(ok) setTimeout(retoDeletreo, 2000);
+}
+function coincideLetras(a,b){
+  var n = 0, m = Math.min(a.length,b.length);
+  for(var i=0;i<m;i++){ if(a[i]===b[i]) n++; }
+  return n;
+}
+
+/* ═══════════ MODO · LAS PALABRAS QUE YA SABES ═══════════ */
+var COG_CAT = 0;
+function vistaCognados(){
+  var d = nivelActual();
+  var tabs = "";
+  for(var i=0;i<d.cognados.length;i++){
+    tabs += '<button class="chip" style="'+(i===COG_CAT?"border-color:var(--cyan);background:var(--cyan-light)":"")+
+            '" onclick="COG_CAT='+i+';pintar()">'+esc(d.cognados[i].cat)+' ('+d.cognados[i].items.length+')</button>';
+  }
+  var g = d.cognados[COG_CAT], items = "";
+  for(var j=0;j<g.items.length;j++){
+    items += '<div class="cog" onclick="decir(\''+g.items[j][0]+'\')">'+
+               '<b>'+esc(g.items[j][0])+'</b><span>'+esc(g.items[j][1])+'</span><i>🔊</i>'+
+             '</div>';
+  }
+  var reglas = "";
+  for(var k=0;k<d.reglas.length;k++){
+    var R = d.reglas[k], ejs = "";
+    for(var m=0;m<R.ej.length;m++){
+      ejs += '<span class="chip" style="font-size:.74rem" onclick="decir(\''+R.ej[m][1]+'\')">'+
+               esc(R.ej[m][0])+' → <b>'+esc(R.ej[m][1])+'</b></span>';
+    }
+    reglas += '<div class="regla" style="margin-bottom:10px">'+
+                '<div style="font-weight:700;color:#063a45;margin-bottom:7px">Español <b>'+esc(R.de)+'</b> '+
+                '→ inglés <b>'+esc(R.a)+'</b></div><div class="chips">'+ejs+'</div></div>';
+  }
+  var falsos = "";
+  for(var f=0;f<d.falsos.length;f++){
+    var F = d.falsos[f];
+    falsos += '<div class="falso">'+
+                '<div class="fen">'+esc(F.en)+'</div>'+
+                '<div class="fno">NO significa "'+esc(F.mal)+'"</div>'+
+                '<div class="fsi">Significa: <b>'+esc(F.bien)+'</b></div>'+
+                '<div class="fojo">'+F.ojo+'</div>'+
+              '</div>';
+  }
+  var total = 0;
+  for(var t=0;t<d.cognados.length;t++) total += d.cognados[t].items.length;
+  return barraStats()+
+  '<div class="card">'+
+    '<h2>🎁 Ya sabes '+total+' palabras en inglés (y no lo sabías)</h2>'+
+    '<div class="sub">El español y el inglés comparten miles de palabras casi idénticas: se llaman <b>cognados</b>. '+
+      'Si crees que no sabes nada de inglés, empieza por aquí: ya reconoces todas estas. '+
+      'Toca cada palabra para escuchar cómo se pronuncia — <b>eso</b> es lo único que cambia.</div>'+
+    '<div class="chips">'+tabs+'</div>'+
+    '<div class="coggrid">'+items+'</div>'+
+    '<div class="controles">'+
+      '<button class="btn btn-c" onclick="leerCognados()">▶ Escuchar toda la lista</button>'+
+    '</div>'+
+    controlVel()+
+  '</div>'+
+  '<div class="card">'+
+    '<h2>🔑 6 reglas que te regalan cientos de palabras</h2>'+
+    '<div class="sub">No son coincidencias: son patrones. Aprende la regla y convertís palabras nuevas tú solo.</div>'+
+    reglas+
+    '<div class="hint"><b>Ojo con la pronunciación:</b> la palabra se escribe casi igual pero <b>suena distinto</b>. '+
+      '<i>Information</i> no es "informachión": es in-for-MÉI-shon. La terminación <b>-tion</b> siempre suena "shon".</div>'+
+  '</div>'+
+  '<div class="card">'+
+    '<h2>⚠️ Falsos amigos · las trampas</h2>'+
+    '<div class="sub">Estas se parecen pero significan otra cosa, y algunas causan malentendidos serios frente a un cliente. '+
+      'Vale la pena memorizar estas '+d.falsos.length+'.</div>'+
+    '<div class="falsogrid">'+falsos+'</div>'+
+  '</div>';
+}
+function leerCognados(){
+  var g = nivelActual().cognados[COG_CAT], lista = [];
+  for(var i=0;i<g.items.length;i++) lista.push(g.items[i][0]);
+  decir(lista.join(", "));
+}
+
+/* ═══════════ MODO · NÚMEROS, PRECIOS Y HORAS ═══════════ */
+function vistaNumeros(){
+  var N = nivelActual().numeros;
+  function tabla3(arr, th){
+    var f = "";
+    for(var i=0;i<arr.length;i++){
+      f += '<tr><td class="eng" style="width:90px">'+esc(arr[i][0])+'</td>'+
+           '<td class="eng">'+esc(arr[i][1])+'</td>'+
+           '<td class="esp">'+esc(arr[i][2]||"")+'</td>'+
+           '<td class="spk" onclick="decir(\''+String(arr[i][1]).replace(/'/g,"\\'")+'\')">🔊</td></tr>';
+    }
+    return '<table class="tabla"><tr><th>'+th[0]+'</th><th>'+th[1]+'</th><th>'+(th[2]||"")+'</th><th></th></tr>'+f+'</table>';
+  }
+  var tr = "";
+  for(var i=0;i<N.trampas.length;i++){
+    tr += '<div class="par" style="background:#FFF6E5;border-color:#F5D48A;min-width:150px" '+
+            'onclick="decir(\''+N.trampas[i][1].replace(/'/g,"\\'").replace(/ \/ /g," ... ")+'\',0.75)">'+
+            '<b>'+esc(N.trampas[i][0])+'</b><span>'+esc(N.trampas[i][1])+'</span>'+
+            '<span style="display:block;margin-top:5px;font-size:.67rem">'+esc(N.trampas[i][2])+'</span></div>';
+  }
+  var fr = "";
+  for(var j=0;j<N.frases.length;j++){
+    fr += '<div class="lin yo" style="margin-bottom:5px">'+
+            '<div class="txt"><div class="en">'+esc(N.frases[j][0])+'</div>'+
+            '<div class="es">'+esc(N.frases[j][1])+'</div></div>'+
+            '<div class="acc"><button class="mini" onclick="decir(\''+N.frases[j][0].replace(/'/g,"\\'")+'\')">🔊</button></div>'+
+          '</div>';
+  }
+  return barraStats()+
+  '<div class="card">'+
+    '<h2>🔢 Los números del 0 al 20</h2>'+
+    '<div class="sub">Escúchalos en orden y luego uno por uno. No los memorices leyendo: memorízalos <b>oyendo</b>.</div>'+
+    tabla3(N.basicos, ["#","Inglés","Se oye"])+
+    '<div class="controles">'+
+      '<button class="btn btn-c" onclick="leerNumeros(\'basicos\')">▶ Escuchar del 0 al 20</button>'+
+    '</div>'+
+  '</div>'+
+  '<div class="card">'+
+    '<h2>🔟 Decenas, cientos y miles</h2>'+
+    tabla3(N.decenas, ["#","Inglés","Se oye"])+
+    '<div class="controles">'+
+      '<button class="btn btn-c" onclick="leerNumeros(\'decenas\')">▶ Escuchar las decenas</button>'+
+    '</div>'+
+  '</div>'+
+  '<div class="card">'+
+    '<h2>⚠️ La trampa que te puede costar dinero</h2>'+
+    '<div class="sub">13 y 30 se parecen muchísimo. Lo único que los diferencia es <b>dónde golpea la voz</b>: '+
+      'los <b>-TEEN</b> terminan fuerte, los <b>-TY</b> terminan suave. Confundirlos cambia un precio o una cantidad. '+
+      'Toca cada par para escuchar la diferencia.</div>'+
+    '<div class="pares">'+tr+'</div>'+
+    '<div class="hint"><b>Regla de oro en caja:</b> si tienes la menor duda con un número, di '+
+      '<i>"Can you repeat the number, please?"</i> o pídele que lo escriba. '+
+      'Nadie se molesta por eso; sí se molesta si le cobras mal.</div>'+
+  '</div>'+
+  '<div class="card">'+
+    '<h2>💵 Precios en dólares</h2>'+
+    '<div class="sub">En Estados Unidos casi nadie dice "twelve dollars and fifty cents": dicen <b>"twelve fifty"</b>. '+
+      'Los dos son correctos, pero el corto es el que vas a escuchar.</div>'+
+    tabla3(N.precios, ["Precio","Se dice", ""])+
+  '</div>'+
+  '<div class="card">'+
+    '<h2>🕐 La hora</h2>'+
+    '<div class="sub">La forma fácil y siempre correcta: <b>di los números tal cual</b>. 9:45 = "nine forty-five". '+
+      'Y recuerda <b>a.m.</b> (mañana) y <b>p.m.</b> (tarde y noche), porque allá no se usa el reloj de 24 horas.</div>'+
+    tabla3(N.horas, ["Hora","Se dice", ""])+
+  '</div>'+
+  '<div class="card">'+
+    '<h2>📅 Días, meses y fechas</h2>'+
+    tabla3(N.fechas, ["Inglés","Español", ""])+
+  '</div>'+
+  '<div class="card">'+
+    '<h2>💬 Frases de caja y de entrega</h2>'+
+    '<div class="dlg">'+fr+'</div>'+
+    controlVel()+
+  '</div>'+
+  '<div class="card">'+
+    '<h2>🎧 Reto: escucha y escribe el número</h2>'+
+    '<div class="sub">Lo más difícil de un número no es decirlo: es <b>entenderlo</b> cuando el cliente lo dice. '+
+      'Escucha y escribe lo que oigas, con números (por ejemplo <i>12.50</i> o <i>9:30</i>).</div>'+
+    '<div class="controles">'+
+      '<button class="btn btn-c" onclick="retoNumero()">▶ Dime un número</button>'+
+      '<button class="btn btn-o" onclick="repetirNumero()">🔁 Repetir</button>'+
+      '<button class="btn btn-o" onclick="repetirNumero(0.55)">🐢 Más despacio</button>'+
+    '</div>'+
+    '<div class="dictado">'+
+      '<input type="text" id="numIn" placeholder="Escríbelo con números..." autocomplete="off" '+
+        'onkeydown="if(event.key===\'Enter\')revisarNumero()">'+
+      '<div class="controles" style="margin-top:12px">'+
+        '<button class="btn btn-g" onclick="revisarNumero()">✔ Revisar</button>'+
+      '</div>'+
+    '</div>'+
+    '<div class="resul" id="res"></div>'+
+  '</div>';
+}
+function leerNumeros(cual){
+  var arr = nivelActual().numeros[cual], lista = [];
+  for(var i=0;i<arr.length;i++) lista.push(arr[i][1]);
+  decir(lista.join(", "));
+}
+var RETO_NUM = null;
+function retoNumero(){
+  var lista = nivelActual().numeros.reto;
+  RETO_NUM = lista[Math.floor(Math.random()*lista.length)];
+  var e = q("numIn"); if(e) e.value = "";
+  var r = q("res"); if(r) r.style.display = "none";
+  decir(RETO_NUM[0], 0.8);
+}
+function repetirNumero(vel){
+  if(!RETO_NUM){ retoNumero(); return; }
+  decir(RETO_NUM[0], vel || 0.8);
+}
+function soloDigitos(s){ return (s||"").replace(/[^0-9:.]/g,"").replace(/\.00$/,"").replace(/:00$/,":00"); }
+function revisarNumero(){
+  var box = q("res"); if(!box) return;
+  if(!RETO_NUM){
+    box.className = "resul med";
+    box.innerHTML = '<div style="font-size:.84rem;font-weight:600">Primero toca <b>Dime un número</b>.</div>';
+    box.style.display = "block"; return;
+  }
+  var mio = soloDigitos((q("numIn")||{}).value);
+  var esp = soloDigitos(RETO_NUM[1]);
+  var ok = (mio === esp) || (mio.replace(/[.:]/g,"") === esp.replace(/[.:]/g,""));
+  var pct = ok ? 100 : 0;
+  box.className = "resul " + (ok ? "ok" : "no");
+  box.innerHTML =
+    '<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">'+
+      '<span class="pct">'+pct+'%</span>'+
+      '<span style="font-size:.86rem;font-weight:600">'+(ok?"✅ ¡Correcto!":"🎧 No era esa, escúchala otra vez")+'</span>'+
+    '</div>'+
+    '<div class="oiste">Se dijo: <i>'+esc(RETO_NUM[0])+'</i></div>'+
+    '<div class="oiste">Se escribe: <i>'+esc(RETO_NUM[1])+'</i></div>';
+  box.style.display = "block";
+  registrar(pct, "num");
+  pintaNiveles();
+  if(ok) setTimeout(retoNumero, 1900);
+}
+
 /* ═══════════ PINTAR ═══════════ */
 function pintar(){
   var h = "";
-  if(ST.modo==="sonidos")        h = vistaSonidos();
+  if(ST.modo==="abc")            h = vistaAbc();
+  else if(ST.modo==="cognados")  h = vistaCognados();
+  else if(ST.modo==="numeros")   h = vistaNumeros();
+  else if(ST.modo==="sonidos")   h = vistaSonidos();
   else if(ST.modo==="frases")    h = vistaFrases();
   else if(ST.modo==="conjugador")h = vistaConjugador();
   else if(ST.modo==="dialogos")  h = vistaDialogos();
@@ -1335,7 +1930,8 @@ function pintar(){
 (function(){
   /* nivel por URL: english-lab.html?nivel=2 */
   var m = (location.search||"").match(/nivel=(\d)/);
-  if(m && DATA[parseInt(m[1])]) ST.nivel = parseInt(m[1]);
+  if(m && DATA[parseInt(m[1],10)]) ST.nivel = parseInt(m[1],10);
+  ST.modo = modosDe(ST.nivel)[0];
 
   var avisos = [];
   if(!window.speechSynthesis)
