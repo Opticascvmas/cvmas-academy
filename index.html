@@ -3283,6 +3283,21 @@ function isModuleFree(id) {
   return MODULOS_LIBRES_ASESOR.indexOf(id) !== -1;
 }
 
+// ═══════════════════════════════════════════════════════
+// 🔓 RUTAS COMPLETAMENTE LIBRES (sin candado en ningún nivel)
+// Los módulos de estas rutas están SIEMPRE abiertos, para las dos
+// academias: el colaborador elige por dónde empezar según lo que
+// ya sabe. 'ingles' = todos los niveles del English Lab.
+// Para liberar otra ruta completa, agrega su nombre a esta lista.
+// ═══════════════════════════════════════════════════════
+const RUTAS_LIBRES = ['ingles'];
+
+function isRutaLibre(id) {
+  const m = MODULES.find(x => x.id === id);
+  if (!m) return false;
+  return RUTAS_LIBRES.indexOf(m.chain) !== -1 || RUTAS_LIBRES.indexOf(m.category) !== -1;
+}
+
 // ¿Está desbloqueado este módulo?
 function isModuleUnlocked(id) {
  // Admin y visores ven TODO desbloqueado, sin aprobar quizzes
@@ -3290,6 +3305,7 @@ function isModuleUnlocked(id) {
     const u = JSON.parse(localStorage.getItem('cvplus_user') || '{}');
     if (u.role === 'admin' || u.role === 'viewer' || u.role === 'admin_opto') return true;
   } catch(e) {}
+  if (isRutaLibre(id)) return true;            // 🇺🇸 ruta libre (inglés): siempre abierta
   if (isModuleFree(id)) return true;           // 🔓 módulo libre: siempre abierto
   const order = getChainOrder(id);      // solo los módulos de su misma ruta
   const pos = order.indexOf(id);
@@ -3749,7 +3765,7 @@ try {
     const order = getModuleOrder();
     const pos = order.indexOf(qs.module);
     const nextId = order[pos + 1];
-    if (nextId && !isModuleFree(nextId)) {   // no anunciar los módulos libres
+    if (nextId && !isModuleFree(nextId) && !isRutaLibre(nextId)) {   // no anunciar módulos ni rutas libres
       const nextMod = MODULES.find(m => m.id === nextId);
       setTimeout(() => alert(`🔓 ¡Desbloqueaste: ${nextMod ? nextMod.title : ''}!`), 300);
     }
