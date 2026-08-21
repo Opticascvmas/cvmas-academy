@@ -16,7 +16,6 @@
 body{font-family:'Poppins',sans-serif;background:var(--bg);color:var(--text);
   -webkit-font-smoothing:antialiased;padding-bottom:40px}
 .wrap{max-width:1080px;margin:0 auto;padding:18px 16px 60px}
-
 /* ── Encabezado ── */
 .eltop{background:linear-gradient(135deg,var(--dark) 0%,var(--dark2) 100%);
   border-radius:16px;padding:20px 24px;color:#fff;position:relative;overflow:hidden}
@@ -26,7 +25,6 @@ body{font-family:'Poppins',sans-serif;background:var(--bg);color:var(--text);
 .eltop p{color:#9db4c9;font-size:.86rem;margin-top:6px;max-width:640px;line-height:1.5}
 .elbadge{background:var(--gold);color:var(--dark);font-size:.7rem;font-weight:700;
   padding:3px 10px;border-radius:20px;letter-spacing:.4px}
-
 /* ── Niveles ── */
 .niveles{display:flex;gap:8px;margin:16px 0 6px;flex-wrap:wrap}
 .niv{flex:1;min-width:143px;background:#fff;border:2px solid var(--gray-light);border-radius:12px;
@@ -35,7 +33,6 @@ body{font-family:'Poppins',sans-serif;background:var(--bg);color:var(--text);
 .niv.on{border-color:var(--cyan);background:var(--cyan-light);box-shadow:0 4px 14px rgba(0,185,214,.18)}
 .niv b{display:block;font-size:.82rem;color:var(--dark)}
 .niv span{font-size:.7rem;color:var(--gray-text)}
-
 /* ── Modos ── */
 .modos{display:flex;gap:6px;margin:14px 0 18px;flex-wrap:wrap;
   background:#fff;padding:7px;border-radius:12px;border:1px solid var(--gray-light)}
@@ -43,7 +40,6 @@ body{font-family:'Poppins',sans-serif;background:var(--bg);color:var(--text);
   color:var(--gray-text);padding:9px 13px;border-radius:9px;cursor:pointer;transition:.15s}
 .modo:hover{background:var(--gray-light);color:var(--dark)}
 .modo.on{background:var(--cyan);color:#fff;box-shadow:0 3px 10px rgba(0,185,214,.3)}
-
 /* ── Tarjetas ── */
 .card{background:#fff;border-radius:14px;padding:20px;border:1px solid var(--gray-light);
   box-shadow:0 2px 10px rgba(13,33,55,.05);margin-bottom:16px}
@@ -52,7 +48,6 @@ body{font-family:'Poppins',sans-serif;background:var(--bg);color:var(--text);
 .hint{background:#FFF9E6;border-left:4px solid var(--gold);border-radius:0 8px 8px 0;
   padding:11px 14px;font-size:.8rem;color:#6b5200;line-height:1.55;margin:12px 0}
 .hint b{color:#4a3800}
-
 /* ── Frase grande ── */
 .frase{text-align:center;padding:22px 14px 8px}
 .frase .en{font-size:1.6rem;font-weight:700;color:var(--dark);line-height:1.3}
@@ -70,7 +65,6 @@ body{font-family:'Poppins',sans-serif;background:var(--bg);color:var(--text);
 .btn.rec{background:var(--bad);color:#fff;animation:lat 1s infinite}
 @keyframes lat{50%{opacity:.55}}
 .btn:disabled{opacity:.45;cursor:not-allowed}
-
 /* ── Resultado de pronunciación ── */
 .resul{margin-top:18px;border-radius:12px;padding:15px 17px;display:none;text-align:left}
 .resul.ok{background:#E8F8EE;border:1px solid #A5E0BC}
@@ -83,7 +77,6 @@ body{font-family:'Poppins',sans-serif;background:var(--bg);color:var(--text);
 .pal{display:inline-block;padding:2px 7px;margin:3px 3px 0 0;border-radius:6px;
   font-size:.78rem;font-weight:600}
 .pal.b{background:#C8ECD5;color:#0a6b34}.pal.m{background:#F8D7DA;color:#8a231a}
-
 /* ── Barra de progreso / racha ── */
 .stats{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
 .stat{flex:1;min-width:110px;background:#fff;border:1px solid var(--gray-light);
@@ -94,7 +87,6 @@ body{font-family:'Poppins',sans-serif;background:var(--bg);color:var(--text);
 .barra i{display:block;height:100%;background:linear-gradient(90deg,var(--cyan),var(--gold));
   border-radius:20px;transition:width .4s}
 .paso{font-size:.72rem;color:var(--gray-mid);text-align:center;margin-top:8px;letter-spacing:.4px}
-
 /* ── Sonidos ── */
 .sgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px}
 .son{background:#fff;border:2px solid var(--gray-light);border-radius:12px;padding:15px;
@@ -116,7 +108,6 @@ body{font-family:'Poppins',sans-serif;background:var(--bg);color:var(--text);
 .chip{background:#fff;border:1.5px solid var(--gray-light);border-radius:20px;
   padding:6px 13px;font-size:.78rem;font-weight:600;color:var(--dark);cursor:pointer;transition:.15s}
 .chip:hover{border-color:var(--cyan);background:var(--cyan-light)}
-
 /* ── Conjugador ── */
 .selv{display:flex;gap:9px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
 select,input[type=text]{font-family:inherit;font-size:.85rem;padding:10px 13px;
@@ -130,13 +121,14 @@ select:focus,input[type=text]:focus{border-color:var(--cyan)}
 .tabla tr:hover td{background:#F7FBFC}
 .tabla .eng{font-weight:600;color:var(--dark)}
 .tabla .esp{color:var(--gray-text);font-size:.79rem}
+.tabla .foncel{color:var(--cyan-dark);font-weight:600;font-size:.79rem;letter-spacing:.2px}
+.tabla .foncel em{font-style:normal;color:var(--gray-text);font-weight:500;font-size:.72rem;display:block;margin-top:2px}
 .tabla .spk{cursor:pointer;color:var(--cyan-dark);font-size:1rem;user-select:none}
 .ttitulo{font-size:.8rem;font-weight:700;color:var(--cyan-dark);
   text-transform:uppercase;letter-spacing:.6px;margin:20px 0 4px}
 .regla{background:var(--cyan-light);border-radius:10px;padding:12px 15px;font-size:.81rem;
   line-height:1.6;color:#0a4652;margin:10px 0}
 .regla b{color:#063a45}
-
 /* ── Diálogos ── */
 .dlg{background:#F7FAFC;border-radius:12px;padding:6px;margin-top:12px}
 .lin{display:flex;gap:11px;padding:11px 13px;border-radius:10px;margin-bottom:5px;align-items:flex-start}
@@ -154,7 +146,6 @@ select:focus,input[type=text]:focus{border-color:var(--cyan)}
   width:32px;height:32px;cursor:pointer;font-size:.85rem;transition:.15s}
 .mini:hover{border-color:var(--cyan);background:var(--cyan-light)}
 .mini.rec{background:var(--bad);border-color:var(--bad);color:#fff;animation:lat 1s infinite}
-
 /* ── Flashcards ── */
 .fc{perspective:1200px;margin:14px auto;max-width:430px}
 .fcin{position:relative;width:100%;height:210px;transition:transform .55s;transform-style:preserve-3d;cursor:pointer}
@@ -168,12 +159,10 @@ select:focus,input[type=text]:focus{border-color:var(--cyan)}
 .fcde{background:linear-gradient(135deg,var(--cyan),var(--cyan-dark));color:#fff;transform:rotateY(180deg)}
 .fcde .w{font-size:1.4rem;font-weight:700}
 .fcde .u{font-size:.8rem;margin-top:12px;opacity:.92;line-height:1.5;font-style:italic}
-
 /* ── Dictado / quiz de escucha ── */
 .dictado{text-align:center;padding:10px 0}
 .dictado input{width:100%;max-width:460px;text-align:center;font-size:1rem;font-weight:600;margin-top:14px}
 .vok{color:var(--ok);font-weight:700}.vno{color:var(--bad);font-weight:700}
-
 /* ── Nivel 0 · abecedario ── */
 .niv.cero{border-color:#F5D48A;background:#FFFBF0}
 .niv.cero.on{border-color:var(--gold);background:#FFF6E0;box-shadow:0 4px 14px rgba(245,184,0,.22)}
@@ -187,7 +176,6 @@ select:focus,input[type=text]:focus{border-color:var(--cyan)}
   padding-top:5px;line-height:1.35}
 .letra .lej span{color:var(--gray-mid)}
 .letra .lej:hover{color:var(--cyan-dark)}
-
 /* ── Nivel 0 · cognados ── */
 .coggrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(215px,1fr));gap:8px;margin-top:12px}
 .cog{display:flex;align-items:center;gap:8px;background:#fff;border:1.5px solid var(--gray-light);
@@ -196,7 +184,6 @@ select:focus,input[type=text]:focus{border-color:var(--cyan)}
 .cog b{font-size:.84rem;color:var(--dark);flex-shrink:0}
 .cog span{font-size:.74rem;color:var(--gray-text);flex:1;text-align:right}
 .cog i{font-style:normal;font-size:.85rem;color:var(--cyan-dark)}
-
 /* ── Nivel 0 · falsos amigos ── */
 .falsogrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(265px,1fr));gap:11px;margin-top:12px}
 .falso{background:#FDECEA;border:1px solid #F5B7B1;border-radius:12px;padding:13px 15px}
@@ -207,7 +194,6 @@ select:focus,input[type=text]:focus{border-color:var(--cyan)}
 .falso .fsi b{color:#0a7d3c}
 .falso .fojo{font-size:.74rem;color:var(--gray-text);margin-top:7px;line-height:1.5;
   border-top:1px solid #F5B7B1;padding-top:7px}
-
 /* ── Avisos ── */
 .aviso{background:#FDECEA;border:1px solid #F5B7B1;color:#8a231a;border-radius:10px;
   padding:12px 15px;font-size:.79rem;line-height:1.55;margin-bottom:14px;display:none}
@@ -226,21 +212,15 @@ select:focus,input[type=text]:focus{border-color:var(--cyan)}
 </head>
 <body>
 <div class="wrap">
-
   <div class="eltop">
     <h1>🇺🇸 English Lab <span class="elbadge">ACADEMIA CV+</span></h1>
     <p>Aprende inglés como si hubieras nacido allá: primero el <b>oído</b>, después la boca, y al final la
        gramática. Escucha la voz nativa, repite en voz alta y el laboratorio te califica la pronunciación.</p>
   </div>
-
   <div class="aviso" id="aviso"></div>
-
   <div class="niveles" id="niveles"></div>
-
   <div class="modos" id="modos"></div>
-
   <div id="panel"></div>
-
 </div>
 <script>
 /* ═══════════════════════════════════════════════════════════════
@@ -249,7 +229,6 @@ select:focus,input[type=text]:focus{border-color:var(--cyan)}
    objeto DATA: la interfaz se dibuja sola.
    ═══════════════════════════════════════════════════════════════ */
 const DATA = {
-
 /* ────────────────────── NIVEL 0 · DESDE CERO ──────────────────────
    Para quien nunca ha hablado inglés. Usa modos propios (abecedario,
    cognados, números) en vez de los de los otros niveles.
@@ -258,7 +237,6 @@ const DATA = {
  nombre:"Nivel 0 · Desde cero",
  corto:"Nunca he hablado inglés",
  modos:["abc","cognados","frases","numeros","cards","dictado"],
-
  /* ── Abecedario: cómo suena cada letra ── */
  letras:[
   {L:"A",fon:"éi",  ej:"apple",   es:"manzana"},
@@ -293,7 +271,6 @@ const DATA = {
     deletrea su nombre o su apellido */
  deletreo:["MILLER","SMITH","JONES","BROWN","DAVIS","WILSON","TAYLOR","ANDERSON",
            "GLASSES","FRAME","LENS","VISION","ORDER","PRICE","READY","STORE"],
-
  /* ── Las palabras que ya sabes (cognados) ── */
  cognados:[
   {cat:"Óptica y salud",
@@ -358,7 +335,6 @@ const DATA = {
   {en:"carpet",mal:"carpeta",bien:"alfombra",ojo:"Carpeta es <b>folder</b>."},
   {en:"discuss",mal:"discutir (pelear)",bien:"hablar de un tema",ojo:"Pelear o discutir es <b>to argue</b>. <i>Let's discuss the options</i> = hablemos de las opciones."}
  ],
-
  /* ── Kit de emergencia: qué decir cuando no sabes nada ── */
  frases:[
   {en:"Hello!",es:"¡Hola!",fon:"je-LÓU"},
@@ -377,7 +353,6 @@ const DATA = {
   {en:"How can I help you?",es:"¿Cómo puedo ayudarle?",fon:"jáu can ai JELP iu"},
   {en:"Have a nice day!",es:"¡Que tenga un buen día!",fon:"jav a náis DÉI"}
  ],
-
  /* ── Números, precios y horas ── */
  numeros:{
   basicos:[["0","zero","ZÍ-rou"],["1","one","uán"],["2","two","tu"],["3","three","zri"],["4","four","for"],
@@ -401,12 +376,30 @@ const DATA = {
            ["$150.50","one fifty fifty"]],
   horas:[["9:00","nine o'clock"],["9:15","nine fifteen"],["9:30","nine thirty"],["9:45","nine forty-five"],
          ["10:00 a.m.","ten a.m."],["3:00 p.m.","three p.m."],["12:00","twelve noon"],["6:30 p.m.","six thirty p.m."]],
-  fechas:[["Monday","lunes"],["Tuesday","martes"],["Wednesday","miércoles (UÉNS-dei)"],["Thursday","jueves"],
-          ["Friday","viernes"],["Saturday","sábado"],["Sunday","domingo"],
-          ["January","enero"],["February","febrero"],["March","marzo"],["April","abril"],["May","mayo"],
-          ["June","junio"],["July","julio"],["August","agosto"],["September","septiembre"],
-          ["October","octubre"],["November","noviembre"],["December","diciembre"],
-          ["August 10th","10 de agosto (ÓG-est TENZ)"],["the 1st / 2nd / 3rd","el 1º / 2º / 3º (ferst · SÉ-cond · zerd)"]],
+  /* [0] inglés · [1] español · [2] cómo se oye · [3] (opcional) lo que lee la voz.
+     La bocinita SIEMPRE lee inglés: antes leía la columna española y sonaba
+     "lunes" con voz gringa en vez de "Monday". */
+  fechas:[["Monday","lunes","MÁN-dei"],
+          ["Tuesday","martes","TÚS-dei"],
+          ["Wednesday","miércoles","UÉNS-dei<em>la primera d no se pronuncia</em>"],
+          ["Thursday","jueves","ZÉRS-dei<em>lengua entre los dientes, como en think</em>"],
+          ["Friday","viernes","FRÁI-dei"],
+          ["Saturday","sábado","SÁ-ter-dei"],
+          ["Sunday","domingo","SÁN-dei"],
+          ["January","enero","LLÁ-niu-e-ri"],
+          ["February","febrero","FÉB-ru-e-ri"],
+          ["March","marzo","march<em>la a es abierta, casi mar-ch</em>"],
+          ["April","abril","ÉI-prol"],
+          ["May","mayo","méi"],
+          ["June","junio","llun"],
+          ["July","julio","llu-LÁI"],
+          ["August","agosto","Ó-gost"],
+          ["September","septiembre","sep-TÉM-ber"],
+          ["October","octubre","ok-TÓU-ber"],
+          ["November","noviembre","nou-VÉM-ber"],
+          ["December","diciembre","di-SÉM-ber"],
+          ["August 10th","10 de agosto","Ó-gost TENZ"],
+          ["the 1st / 2nd / 3rd","el 1º / 2º / 3º","de FERST · de SÉ-cond · de ZERD","the first, the second, the third"]],
   frases:[["How much is it?","¿Cuánto cuesta?"],["It's twenty-five dollars.","Cuesta veinticinco dólares."],
           ["Your total is forty-two fifty.","Su total es cuarenta y dos con cincuenta."],
           ["They'll be ready on Friday at three.","Estarán listos el viernes a las tres."],
@@ -421,7 +414,6 @@ const DATA = {
         ["forty-five seventy-five","45.75"],["nine thirty","9:30"],["ten fifteen","10:15"],
         ["three forty-five","3:45"],["six o'clock","6:00"]]
  },
-
  /* ── Flashcards de supervivencia ── */
  cards:[
   {en:"yes / no",es:"sí / no",fon:"ies · nou",uso:"Yes, of course."},
@@ -441,8 +433,6 @@ const DATA = {
   {en:"write it, please",es:"escríbalo, por favor",fon:"ráit it plis",uso:"Can you write it, please?"}
  ]
 },
-
-
 /* ────────────────────────── NIVEL 1 ────────────────────────── */
 1:{
  nombre:"Nivel 1 · Survival English",
@@ -453,37 +443,31 @@ const DATA = {
    boca:"Este sonido <b>no existe en español</b> y es la marca #1 de un acento extranjero. Saca la punta de la lengua entre los dientes y sopla. En <b>think</b> y <b>thanks</b> solo sale aire (sorda). En <b>the</b>, <b>this</b>, <b>that</b> la garganta vibra (sonora). Nunca lo cambies por T ni por S: si dices <i>sink</i> en vez de <i>think</i>, dijiste 'lavamanos'.",
    palabras:["think","thanks","three","this","that","the","mother","birthday"],
    pares:[{a:"think",b:"sink",na:"pensar",nb:"lavamanos"},{a:"three",b:"tree",na:"tres",nb:"árbol"}]},
-
   {sim:"H", nom:"h aspirada /h/",
    ej:"hello · help · how",
    boca:"En español la H es muda; en inglés <b>siempre suena</b>, como un suspiro suave desde el pecho. Pon la mano frente a la boca: debes sentir el aire tibio. Ojo con el error contrario: <b>hour</b>, <b>honest</b> y <b>honor</b> son las excepciones donde sí es muda.",
    palabras:["hello","help","how","have","here","happy","hi"],
    pares:[{a:"heat",b:"eat",na:"calor",nb:"comer"},{a:"hi",b:"eye",na:"hola",nb:"ojo"}]},
-
   {sim:"V/B", nom:"v labiodental /v/",
    ej:"very · vision · have",
    boca:"En español B y V suenan igual. En inglés son distintas y confundirlas cambia palabras. Para la <b>V</b> muerde suavemente el labio inferior con los dientes de arriba y haz vibrar: <b>vvvv</b>. Para la <b>B</b> los dos labios se juntan y explotan. Practica: <i>very</i> (muy) vs <i>berry</i> (fruta).",
    palabras:["very","vision","have","glasses have","five","seven","invoice"],
    pares:[{a:"very",b:"berry",na:"muy",nb:"baya"},{a:"vest",b:"best",na:"chaleco",nb:"lo mejor"}]},
-
   {sim:"R", nom:"r americana /ɹ/",
    ej:"red · ready · here",
    boca:"La R en inglés <b>no vibra</b> como en español (nada de 'rr'). La lengua se enrolla hacia atrás <b>sin tocar</b> el paladar, y los labios se redondean un poco, como si fueras a decir 'u'. Truco: piensa en el gruñido de un perro suave, no en el motor de una moto.",
    palabras:["red","ready","right","frame","here","repair","doctor"],
    pares:[{a:"right",b:"light",na:"correcto",nb:"luz"},{a:"free",b:"flee",na:"gratis",nb:"huir"}]},
-
   {sim:"ə", nom:"schwa · la vocal perezosa",
    ej:"about · problem · doctor",
    boca:"Es el sonido <b>más común del inglés</b> y el secreto del ritmo nativo. En las sílabas sin acento, la vocal se relaja hasta convertirse en un 'e' apagada: <b>about</b> = /ə-BÁUT/, <b>problem</b> = /PRÁ-blem/, <b>doctor</b> = /DÁK-ter/. El error típico del hispanohablante es pronunciar todas las vocales claras y fuertes; en inglés solo <b>una</b> sílaba brilla y el resto se apaga.",
    palabras:["about","problem","doctor","customer","again","support","banana"],
    pares:[{a:"customer",b:"cus-to-mer",na:"KAS-te-mer (nativo)",nb:"kus-to-mer (marcado)"}]},
-
   {sim:"S-", nom:"s líquida al inicio",
    ej:"school · Spanish · store",
    boca:"En español no arrancamos palabras con S + consonante, así que agregamos una 'e': <i>escuela</i>, <i>español</i>. En inglés <b>nunca</b> pongas esa 'e'. Es <b>school</b>, no 'eschool'; <b>store</b>, no 'estore'. Empieza directamente con el silbido de la serpiente.",
    palabras:["school","Spanish","store","start","stop","special","street"],
    pares:[{a:"store",b:"e-store",na:"correcto",nb:"acento marcado"}]},
-
   {sim:"iː/ɪ", nom:"vocal larga vs corta",
    ej:"see · sit",
    boca:"El español tiene 5 vocales; el inglés tiene más de 12. La <b>i larga</b> (see, eat, feel) se estira con la sonrisa amplia. La <b>i corta</b> (sit, fit, this) es breve y relajada, casi entre 'i' y 'e'. Es la diferencia entre <i>sheet</i> y otra palabra que no querrás decirle a un cliente.",
@@ -563,7 +547,6 @@ const DATA = {
   {en:"here / there",es:"aquí / allá",fon:"jir · der",uso:"Your glasses are here."}
  ]
 },
-
 /* ────────────────────────── NIVEL 2 ────────────────────────── */
 2:{
  nombre:"Nivel 2 · Presente y rutina",
@@ -667,7 +650,6 @@ const DATA = {
   {en:"measurements",es:"medidas",fon:"MÉ-sher-ments",uso:"Let me take your measurements."}
  ]
 },
-
 /* ────────────────────────── NIVEL 3 ────────────────────────── */
 3:{
  nombre:"Nivel 3 · Pasado y futuro",
@@ -777,7 +759,6 @@ const DATA = {
   {en:"to break / broke",es:"romper / rompió",fon:"bréik · bróuk",uso:"My frame broke."}
  ]
 },
-
 /* ────────────────────────── NIVEL 4 ────────────────────────── */
 4:{
  nombre:"Nivel 4 · Conversación real",
@@ -892,7 +873,6 @@ const DATA = {
   {en:"Is there anything else?",es:"¿algo más?",fon:"is der É-ni-zing ELS",uso:"Is there anything else I can do?"}
  ]
 }
-
 };
 </script>
 <script>
@@ -907,7 +887,6 @@ var ST = {
   flip: false,
   grabando: false
 };
-
 /* ── Progreso local ── */
 var PROG = (function(){
   try { return JSON.parse(localStorage.getItem("cvp_english_lab") || "{}"); }
@@ -928,7 +907,6 @@ function registrar(pct, clave){
   if(clave) p.hechas[clave] = Math.max(p.hechas[clave]||0, pct);
   guardarProg();
 }
-
 /* ═══════════ VOZ NATIVA (text to speech) ═══════════ */
 var VOZ = null;
 function elegirVoz(){
@@ -959,7 +937,6 @@ function decir(txt, rate){
     speechSynthesis.speak(u);
   }catch(e){}
 }
-
 /* ═══════════ RECONOCIMIENTO DE VOZ (micrófono) ═══════════ */
 var REC_OK = !!(window.SpeechRecognition || window.webkitSpeechRecognition);
 var rec = null;
@@ -985,7 +962,6 @@ function escuchar(onListo, onError){
   }catch(e){ if(onError) onError("error"); }
 }
 function pararEscucha(){ try{ if(rec) rec.stop(); }catch(e){} }
-
 /* ═══════════ CALIFICACIÓN DE PRONUNCIACIÓN ═══════════ */
 function normal(s){
   return (s||"").toLowerCase()
@@ -1096,12 +1072,10 @@ function pintaError(cajaId, err){
   box.innerHTML = '<div style="font-size:.84rem;font-weight:600">🎤 '+msg+'</div>';
   box.style.display = "block";
 }
-
 /* ═══════════ UTILIDADES DE UI ═══════════ */
 function esc(s){ return (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
 function q(id){ return document.getElementById(id); }
 function nivelActual(){ return DATA[ST.nivel]; }
-
 /* Catálogo completo de modos. Cada nivel declara los suyos en DATA[n].modos;
    si no declara nada, se usan los seis de los niveles 1 a 4. */
 var MODOS = {
@@ -1126,7 +1100,6 @@ function nivelesDisponibles(){
   for(var k in DATA){ if(DATA.hasOwnProperty(k)) ns.push(parseInt(k,10)); }
   return ns.sort(function(a,b){ return a-b; });
 }
-
 function pintaNiveles(){
   var h = "", ns = nivelesDisponibles();
   for(var i=0;i<ns.length;i++){
@@ -1159,7 +1132,6 @@ function irNivel(n){
 }
 function irModo(k){ ST.modo = k; pintaModos(); pintar(); }
 function setVel(v){ ST.velocidad = parseFloat(v); var e=q("velTxt"); if(e) e.textContent = ST.velocidad.toFixed(2)+"x"; }
-
 function barraStats(){
   var p = nivProg(ST.nivel);
   var prom = p.intentos ? Math.round(p.suma/p.intentos) : 0;
@@ -1175,7 +1147,6 @@ function controlVel(){
     '<input type="range" min="0.5" max="1.1" step="0.05" value="'+ST.velocidad+'" oninput="setVel(this.value)"> '+
     '<span id="velTxt">'+ST.velocidad.toFixed(2)+'x</span> 🐇</div>';
 }
-
 /* ═══════════ MODO 1 · SONIDOS ═══════════ */
 function vistaSonidos(){
   var d = nivelActual(), s = d.sonidos[ST.iSon];
@@ -1234,7 +1205,6 @@ function micSonido(){
     pintaError("res", err);
   });
 }
-
 /* ═══════════ MODO 2 · FRASES (shadowing) ═══════════ */
 function vistaFrases(){
   var d = nivelActual(), f = d.frases[ST.iFrase];
@@ -1287,7 +1257,6 @@ function micFrase(){
     pintaError("res", err);
   });
 }
-
 /* ═══════════ MODO 3 · CONJUGADOR ═══════════ */
 function vistaConjugador(){
   var d = nivelActual(), v = d.verbos[ST.iVerbo];
@@ -1381,7 +1350,6 @@ function micDrill(){
     pintaError("resDrill", err);
   });
 }
-
 /* ═══════════ MODO 4 · DIÁLOGOS ═══════════ */
 function vistaDialogos(){
   var d = nivelActual(), dl = d.dialogos[ST.iDlg];
@@ -1453,7 +1421,6 @@ function micLinea(j){
     pintaError("resL"+j, err);
   });
 }
-
 /* ═══════════ MODO 5 · FLASHCARDS ═══════════ */
 function vistaCards(){
   var d = nivelActual(), c = d.cards[ST.iCard];
@@ -1508,7 +1475,6 @@ function micCard(){
     pintaError("res", err);
   });
 }
-
 /* ═══════════ MODO 6 · DICTADO ═══════════ */
 function vistaDictado(){
   var d = nivelActual();
@@ -1567,11 +1533,9 @@ function revisarDictado(){
   pintaNiveles();
   if(r.pct>=85) setTimeout(function(){ navDict(1); }, 2400);
 }
-
 /* ═══════════════════════════════════════════════════════════════
    MODOS EXCLUSIVOS DEL NIVEL 0 (para quien empieza de cero)
    ═══════════════════════════════════════════════════════════════ */
-
 /* ── Habla letra por letra, con pausa entre cada una ── */
 function decirDeletreado(txt, cb){
   if(!window.speechSynthesis){ return; }
@@ -1589,7 +1553,6 @@ function decirDeletreado(txt, cb){
   }
   sig();
 }
-
 /* ═══════════ MODO · ABECEDARIO Y DELETREO ═══════════ */
 function vistaAbc(){
   var d = nivelActual(), grid = "";
@@ -1615,7 +1578,6 @@ function vistaAbc(){
       '<button class="btn btn-c" onclick="decirDeletreado(\'ABCDEFGHIJKLMNOPQRSTUVWXYZ\')">▶ Escuchar el abecedario completo</button>'+
     '</div>'+
   '</div>'+
-
   '<div class="card">'+
     '<h2>✍️ Deletrea tu nombre</h2>'+
     '<div class="sub">Escribe tu nombre o tu apellido y escúchalo deletreado en inglés. '+
@@ -1627,7 +1589,6 @@ function vistaAbc(){
     '</div>'+
     '<div id="nombreChips" style="margin-top:14px"></div>'+
   '</div>'+
-
   '<div class="card">'+
     '<h2>🎧 Reto: entiende lo que te deletrean</h2>'+
     '<div class="sub">Esta es la habilidad de verdad: el cliente deletrea y <b>tú anotas</b>. '+
@@ -1702,7 +1663,6 @@ function coincideLetras(a,b){
   for(var i=0;i<m;i++){ if(a[i]===b[i]) n++; }
   return n;
 }
-
 /* ═══════════ MODO · LAS PALABRAS QUE YA SABES ═══════════ */
 var COG_CAT = 0;
 function vistaCognados(){
@@ -1773,7 +1733,6 @@ function leerCognados(){
   for(var i=0;i<g.items.length;i++) lista.push(g.items[i][0]);
   decir(lista.join(", "));
 }
-
 /* ═══════════ MODO · NÚMEROS, PRECIOS Y HORAS ═══════════ */
 function vistaNumeros(){
   var N = nivelActual().numeros;
@@ -1786,6 +1745,22 @@ function vistaNumeros(){
            '<td class="spk" onclick="decir(\''+String(arr[i][1]).replace(/'/g,"\\'")+'\')">🔊</td></tr>';
     }
     return '<table class="tabla"><tr><th>'+th[0]+'</th><th>'+th[1]+'</th><th>'+(th[2]||"")+'</th><th></th></tr>'+f+'</table>';
+  }
+  /* Días, meses y fechas. OJO: aquí la columna 0 es el inglés y la 1 el español,
+     al revés de las otras tablas. Antes se usaba tabla3 y la bocinita leía la
+     columna 1 (el español) con voz inglesa: sonaba "lunes" con acento gringo.
+     Ahora la voz lee SIEMPRE el inglés (col 0, o la col 3 si se especifica)
+     y se muestra la columna "Cómo se oye" (col 2). */
+  function tablaFechas(arr){
+    var f = "";
+    for(var i=0;i<arr.length;i++){
+      var voz = arr[i][3] || arr[i][0];
+      f += '<tr><td class="eng">'+esc(arr[i][0])+'</td>'+
+           '<td class="esp">'+esc(arr[i][1])+'</td>'+
+           '<td class="foncel">'+(arr[i][2]||"")+'</td>'+
+           '<td class="spk" title="Escuchar en inglés" onclick="decir(\''+String(voz).replace(/'/g,"\\'")+'\')">🔊</td></tr>';
+    }
+    return '<table class="tabla"><tr><th>Inglés</th><th>Español</th><th>Cómo se oye</th><th></th></tr>'+f+'</table>';
   }
   var tr = "";
   for(var i=0;i<N.trampas.length;i++){
@@ -1842,7 +1817,12 @@ function vistaNumeros(){
   '</div>'+
   '<div class="card">'+
     '<h2>📅 Días, meses y fechas</h2>'+
-    tabla3(N.fechas, ["Inglés","Español", ""])+
+    '<div class="sub">La bocinita 🔊 dice la palabra <b>en inglés</b>. La columna <b>Cómo se oye</b> es la guía '+
+      'escrita a la salvadoreña: las MAYÚSCULAS marcan la sílaba que debes golpear.</div>'+
+    tablaFechas(N.fechas)+
+    '<div class="hint"><b>Las tres que más cuestan:</b> <b>Wednesday</b> no se dice "ued-nes-dei" sino '+
+      '<i>UÉNS-dei</i> (la primera d se calla). <b>Thursday</b> lleva el sonido de <i>think</i>, con la lengua '+
+      'entre los dientes. Y <b>June</b> y <b>July</b> empiezan con el sonido de la J inglesa: <i>llun</i> y <i>llu-LÁI</i>.</div>'+
   '</div>'+
   '<div class="card">'+
     '<h2>💬 Frases de caja y de entrega</h2>'+
@@ -1910,7 +1890,6 @@ function revisarNumero(){
   pintaNiveles();
   if(ok) setTimeout(retoNumero, 1900);
 }
-
 /* ═══════════ PINTAR ═══════════ */
 function pintar(){
   var h = "";
@@ -1925,14 +1904,12 @@ function pintar(){
   else if(ST.modo==="dictado")   h = vistaDictado();
   q("panel").innerHTML = h;
 }
-
 /* ═══════════ ARRANQUE ═══════════ */
 (function(){
   /* nivel por URL: english-lab.html?nivel=2 */
   var m = (location.search||"").match(/nivel=(\d)/);
   if(m && DATA[parseInt(m[1],10)]) ST.nivel = parseInt(m[1],10);
   ST.modo = modosDe(ST.nivel)[0];
-
   var avisos = [];
   if(!window.speechSynthesis)
     avisos.push("Este navegador no tiene voz sintetizada, así que no podrás escuchar el audio nativo. Usa <b>Google Chrome</b>.");
@@ -1947,11 +1924,9 @@ function pintar(){
     a.innerHTML = "⚠️ " + avisos.join("<br><br>⚠️ ");
     a.className = "aviso show";
   }
-
   pintaNiveles();
   pintaModos();
   pintar();
-
   /* algunos navegadores solo cargan las voces después de la primera interacción */
   document.addEventListener("click", function once(){
     elegirVoz();
