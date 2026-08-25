@@ -3429,9 +3429,10 @@ function isModuleFree(id) {
 // Los módulos de estas rutas están SIEMPRE abiertos, para las dos
 // academias: el colaborador elige por dónde empezar según lo que
 // ya sabe. 'ingles' = todos los niveles del English Lab.
+// 'sistema' = Flujo de Servicio al Cliente en Odoo (id 19 asesores / id 2 opto).
 // Para liberar otra ruta completa, agrega su nombre a esta lista.
 // ═══════════════════════════════════════════════════════
-const RUTAS_LIBRES = ['ingles'];
+const RUTAS_LIBRES = ['ingles', 'sistema'];
 
 function isRutaLibre(id) {
   const m = MODULES.find(x => x.id === id);
