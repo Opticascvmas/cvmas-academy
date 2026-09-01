@@ -344,14 +344,13 @@ if(!KB){
 }
 
 /* ---------------- Tabs ---------------- */
+function activarTab(nombre){
+  $$('.tab').forEach(function(x){ x.classList.toggle('on', x.dataset.panel===nombre); });
+  $$('.panel').forEach(function(x){ x.classList.toggle('on', x.id==='p-'+nombre); });
+  window.scrollTo({top:0,behavior:'smooth'});
+}
 $$('.tab').forEach(function(t){
-  t.addEventListener('click', function(){
-    $$('.tab').forEach(function(x){ x.classList.remove('on'); });
-    $$('.panel').forEach(function(x){ x.classList.remove('on'); });
-    t.classList.add('on');
-    $('#p'+'-'+t.dataset.panel).classList.add('on');
-    window.scrollTo({top:0,behavior:'smooth'});
-  });
+  t.addEventListener('click', function(){ activarTab(t.dataset.panel); });
 });
 
 /* ============ 1. CONSULTAR ============ */
@@ -452,11 +451,7 @@ document.addEventListener('click', function(ev){
   var alt = ev.target.closest('[data-q]');
   if(alt && alt.closest('.alt')){ $('#q').value = alt.dataset.q; buscar(); return; }
   var pr = ev.target.closest('[data-practicar]');
-  if(pr){ $$('.tab').forEach(function(x){x.classList.remove('on');});
-          $$('.panel').forEach(function(x){x.classList.remove('on');});
-          $('.tab[data-panel="practicar"]').classList.add('on');
-          $('#p-practicar').classList.add('on');
-          iniciarSim([KB.porId(pr.dataset.practicar)]); return; }
+  if(pr){ activarTab('practicar'); iniciarSim([KB.porId(pr.dataset.practicar)]); return; }
   var cp = ev.target.closest('[data-copiar]');
   if(cp){
     var o = KB.porId(cp.dataset.copiar);
@@ -577,13 +572,7 @@ function pintarFinal(){
     if(a) a.addEventListener('click', function(){
       iniciarSim(mezclar(KB.lista).slice(0,5));
     });
-    if(b) b.addEventListener('click', function(){
-      $$('.tab').forEach(function(x){x.classList.remove('on');});
-      $$('.panel').forEach(function(x){x.classList.remove('on');});
-      $('.tab[data-panel="biblioteca"]').classList.add('on');
-      $('#p-biblioteca').classList.add('on');
-      window.scrollTo({top:0,behavior:'smooth'});
-    });
+    if(b) b.addEventListener('click', function(){ activarTab('biblioteca'); });
   },0);
   return h;
 }
@@ -631,6 +620,24 @@ $('#lista').addEventListener('click', function(ev){
   cab.parentElement.classList.toggle('abierto');
 });
 pintarFiltros(); pintarLista();
+
+/* ---------- Enlace profundo: ?o=<id>[&modo=practica] ----------
+   Lo usa el asistente virtual para abrir la herramienta ya posicionada
+   en la objeción que el asesor acaba de consultar. */
+(function enlaceProfundo(){
+  var cad = (location.search || '').replace(/^\?/,'') + '&' + (location.hash || '').replace(/^#/,'');
+  var par = {};
+  cad.split('&').forEach(function(kv){
+    if(!kv) return;
+    var i = kv.indexOf('=');
+    if(i > 0) par[decodeURIComponent(kv.slice(0,i))] = decodeURIComponent(kv.slice(i+1));
+  });
+  if(!par.o) return;
+  var o = KB.porId(par.o);
+  if(!o) return;
+  if(par.modo === 'practica'){ activarTab('practicar'); iniciarSim([o]); }
+  else { activarTab('consultar'); $('#q').value = o.titulo; buscar(); }
+})();
 
 /* Pie con fecha */
 var f = new Date();
