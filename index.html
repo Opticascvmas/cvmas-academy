@@ -588,6 +588,28 @@ min-height:260px;
 .cv-ametro-cta p{margin:0 0 12px;color:#404042;font-weight:600}
 .cv-btn-ametro{background:#02ABC8;color:#fff;border:none;padding:12px 24px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;transition:.18s}
 .cv-btn-ametro:hover{background:#017A8F;transform:translateY(-1px)}
+/* ===== Manejo de Objeciones (Módulo 17) ===== */
+.cv-obj-cta{
+  margin:28px 0 16px;padding:20px 22px;
+  background:linear-gradient(135deg,rgba(255,198,41,.14),rgba(2,171,200,.06));
+  border:1.5px solid rgba(255,198,41,.45);border-radius:14px;
+  display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;
+}
+.cv-obj-txt strong{display:block;font-size:15px;font-weight:700;margin-bottom:3px}
+.cv-obj-txt span{font-size:13px;opacity:.75}
+.cv-btn-obj{
+  background:var(--gold,#FFC629);color:#373a36;border:none;
+  padding:11px 22px;border-radius:10px;font-size:14px;font-weight:700;
+  cursor:pointer;font-family:inherit;white-space:nowrap;transition:.2s;
+}
+.cv-btn-obj:hover{filter:brightness(1.08);transform:translateY(-1px)}
+#modal-objeciones{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100000;display:none;align-items:center;justify-content:center;padding:20px}
+#modal-objeciones.abierto{display:flex}
+#modal-objeciones .cv-modal-box{background:#fff;border-radius:16px;width:100%;max-width:1200px;height:92vh;display:flex;flex-direction:column;overflow:hidden}
+#modal-objeciones .cv-modal-bar{display:flex;justify-content:space-between;align-items:center;padding:12px 18px;background:#373a36;color:#fff}
+#modal-objeciones .cv-modal-bar b{font-size:15px}
+#modal-objeciones iframe{flex:1;border:none;width:100%}
+@media(max-width:600px){.cv-obj-cta{flex-direction:column;align-items:stretch;text-align:center}.cv-btn-obj{width:100%}}
 #modal-ametropias{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100000;display:none;align-items:center;justify-content:center;padding:20px}
 #modal-ametropias.abierto{display:flex}
 #modal-ametropias .cv-modal-box{background:#fff;border-radius:16px;width:100%;max-width:1200px;height:90vh;display:flex;flex-direction:column;overflow:hidden}
@@ -2048,6 +2070,14 @@ const MODULES_ASESOR = [
       <li>Generar fidelización.</li>
       <li>Promover futuras compras.</li>
     </ul>
+    <div class="cv-obj-cta">
+      <div class="cv-obj-txt">
+        <strong>🛡️ Manejo de Objeciones · Herramienta de práctica</strong>
+        <span>Consulta qué responder, practica con un cliente simulado y repasa las 19 objeciones más frecuentes</span>
+      </div>
+      <button class="cv-btn-obj" type="button" onclick="abrirSimuladorObjeciones()">Abrir herramienta</button>
+    </div>
+
   `,
   quiz:[
     {q:"¿Cuál es la 'Regla clave' del momento correcto para cerrar?",opts:["Cerrar siempre al inicio de la conversación","'No se pide matrimonio en la primera cita' — espera el momento correcto","Presionar siempre para cerrar rápido","Ofrecer descuentos inmediatamente"],c:1,e:"La regla clave es 'No se pide matrimonio en la primera cita': no se debe presionar antes de tiempo. Cierra cuando el cliente muestra interés real."},
@@ -4651,6 +4681,40 @@ Cerrar
 <script type="module" src="js/admin.js"></script>
 
 <!-- ═══════════════════════════════════════════════════════
+     🛡️ MANEJO DE OBJECIONES — herramienta + base de conocimiento
+     La base (js/objeciones-kb.js) la comparten esta herramienta y el
+     asistente virtual: una sola fuente de verdad.
+     ═══════════════════════════════════════════════════════ -->
+<script src="js/objeciones-kb.js"></script>
+<div id="modal-objeciones" role="dialog" aria-modal="true" aria-label="Manejo de objeciones" aria-hidden="true">
+  <div class="cv-modal-box">
+    <div class="cv-modal-bar">
+      <b>🛡️ Manejo de Objeciones · Consulta, práctica y biblioteca</b>
+      <button class="cv-cerrar" type="button" onclick="cerrarSimuladorObjeciones()">✕ Cerrar</button>
+    </div>
+    <iframe id="objeciones-frame" title="Manejo de objeciones"></iframe>
+  </div>
+</div>
+<script>
+  window.abrirSimuladorObjeciones = function(){
+    var m = document.getElementById('modal-objeciones');
+    document.getElementById('objeciones-frame').src = 'herramientas/objeciones.html';
+    m.classList.add('abierto');
+    m.setAttribute('aria-hidden','false');
+  };
+  window.cerrarSimuladorObjeciones = function(){
+    var m = document.getElementById('modal-objeciones');
+    m.classList.remove('abierto');
+    m.setAttribute('aria-hidden','true');
+    document.getElementById('objeciones-frame').src = '';
+  };
+  document.addEventListener('keydown', function(e){
+    var m = document.getElementById('modal-objeciones');
+    if(e.key === 'Escape' && m && m.classList.contains('abierto')) window.cerrarSimuladorObjeciones();
+  });
+</script>
+
+<!-- ═══════════════════════════════════════════════════════
      🤖 ASISTENTE VIRTUAL — Chatbot de reglas (100% gratis, sin IA externa)
      No usa ninguna API de pago. Responde comparando palabras clave contra:
        1) Preguntas frecuentes de uso de la plataforma (CVPBOT_FAQ, escritas a mano)
@@ -5094,9 +5158,95 @@ function cvpBotRepasoProcesar(mensaje){
 }
 
 // ─── Motor principal: decide qué responder ───
+// ─── Manejo de objeciones: puente con js/objeciones-kb.js ───
+var CVPBOT_OBJ_PREFIJOS = [
+  "un cliente me dijo","el cliente me dijo","una clienta me dijo","me dijeron",
+  "el cliente dice","un cliente dice","la clienta dice","me dijo el cliente","me dijo",
+  "que hago si","que respondo si","como respondo si","como le respondo si",
+  "que le digo si","que contesto si","como manejo","como respondo a","que hago cuando"
+];
+function cvpBotObjLimpia(t){
+  var x = " " + cvpBotNormaliza(t) + " ";
+  CVPBOT_OBJ_PREFIJOS.forEach(function(p){
+    var np = cvpBotNormaliza(p);
+    while (x.indexOf(np) !== -1) x = x.split(np).join(" ");
+  });
+  return x.replace(/\s+/g, " ").trim();
+}
+function cvpBotObjTexto(o){
+  var K = window.CVP_OBJECIONES;
+  var t1 = K.tecnicas[o.meta.tecnica];
+  var t2 = o.meta.tecnica2 ? K.tecnicas[o.meta.tecnica2] : null;
+  var ci = K.cierres[o.meta.cierre];
+  var L = [];
+  L.push("🛡️ OBJECIÓN: " + o.titulo);
+  L.push("");
+  L.push("POR QUÉ TE LO DICE");
+  L.push(o.senal);
+  o.causas.forEach(function(c){ L.push("• " + c); });
+  L.push("");
+  L.push("TÉCNICA OFICIAL DEL MANUAL: " + t1.nombre + (t2 ? " + " + t2.nombre : ""));
+  L.push(t1.idea);
+  L.push("Frase modelo: " + t1.modelo);
+  L.push("");
+  L.push("CÓMO RESPONDER (E.R.A.R.)");
+  L.push("1. ESCUCHÁ — " + o.guion.escuchar);
+  L.push("2. RECONOCÉ — " + o.guion.valida);
+  L.push("3. ANALIZÁ — " + o.guion.pregunta);
+  L.push("4. RESPONDÉ — " + o.guion.reencuadra);
+  L.push("5. CERRÁ (cierre " + ci.nombre + ") — " + o.guion.cierra);
+  L.push("");
+  L.push("QUÉ NO DECIR");
+  o.evitar.forEach(function(e){ L.push("✕ " + e); });
+  L.push("");
+  L.push("💬 FRASE CLAVE: \u201c" + o.frase + "\u201d");
+  L.push("");
+  L.push("💡 TIP DE PISO: " + o.tip);
+  return L.join("\n");
+}
+function cvpBotDetectarObjecion(mensaje){
+  var K = window.CVP_OBJECIONES;
+  var limpio = cvpBotObjLimpia(mensaje);
+  if (limpio.length < 4) return null;
+  var d = K.detectar(limpio);
+  if (!d.objecion) {
+    d = K.detectar(mensaje);
+    if (!d.objecion) return null;
+  }
+  var o = d.objecion;
+
+  // Coincidencia dudosa: preguntar antes de soltar un guion equivocado
+  if (d.confianza === "media" && d.alternativas.length) {
+    var ops = [o].concat(d.alternativas).slice(0,4);
+    return {
+      texto: "Creo que el cliente te dijo una de estas. ¿Cuál fue?",
+      fuente: "Manejo de objeciones · Paso 5 del Modelo de Ventas",
+      chips: ops.map(function(x){ return x.titulo; })
+    };
+  }
+  if (d.confianza === "baja") return null;
+
+  return {
+    texto: cvpBotObjTexto(o),
+    fuente: "Manejo de objeciones · Paso " + o.meta.paso + " · Perfil: " + o.meta.perfil,
+    acciones: [{ label: "🛡️ Practicar este caso", objeciones: true }],
+    chips: ["Está muy caro", "Lo voy a pensar", "No me convence", "En otro lado me lo dan más barato"]
+  };
+}
+
 function cvpBotResponder(mensaje){
   var norm = cvpBotNormaliza(mensaje).trim();
   var tokens = cvpBotTokeniza(mensaje);
+
+  // ── 0.1) MANEJO DE OBJECIONES (js/objeciones-kb.js) ──────────────
+  //  Va antes que todo lo demás: si el asesor escribe lo que le dijo un
+  //  cliente, responde con el guion oficial. Si no reconoce una objeción,
+  //  no hace nada y el asistente sigue con su árbol de reglas de siempre.
+  if (window.CVP_OBJECIONES && !CVPBOT_REPASO.activo) {
+    var _obj = cvpBotDetectarObjecion(mensaje);
+    if (_obj) return _obj;
+  }
+
 
   // 0) Modo repaso activo: las respuestas a la pregunta van primero que todo
   //    (una opción del quiz podría contener palabras que parecen saludo/comando)
@@ -5291,7 +5441,7 @@ function cvpBotToggle(){
       hist.forEach(function(m){ cvpBotAgregarMsg(m.texto, m.tipo, m.fuente, m.chips, m.relacionados, m.acciones, m.relTitulo); });
       CVPBOT_REPLAY = false;
     } else {
-      cvpBotAgregarMsg("¡Hola! Soy el asistente de Academia CV+ 🤖. Pregúntame algo de tus módulos, pídeme un repaso o consulta tu progreso.", "bot", null, ["📊 ¿Cómo voy?","📝 Dame un repaso"]);
+      cvpBotAgregarMsg("¡Hola! Soy el asistente de Academia CV+ 🤖. Pregúntame algo de tus módulos, pídeme un repaso o consulta tu progreso.\n\n🛡️ También te ayudo con objeciones: escribime lo que te dijo el cliente, tal cual (\u201cel precio está muy caro\u201d, \u201clo voy a pensar\u201d) y te doy el guion oficial.", "bot", null, ["📊 ¿Cómo voy?","📝 Dame un repaso","🛡️ El precio está muy caro"]);
     }
   }
 }
@@ -5306,6 +5456,7 @@ function cvpBotCerrarPanel(){
 // en el historial: {modId} abre módulo, {glosario} abre glosario, {url} abre enlace.
 function cvpBotEjecutarAccion(a){
   try {
+    if (a.objeciones && typeof abrirSimuladorObjeciones === "function") { cvpBotCerrarPanel(); abrirSimuladorObjeciones(); return; }
     if (a.url) { window.open(a.url, "_blank"); return; }
     if (a.glosario && typeof showGlossary === "function") { cvpBotCerrarPanel(); showGlossary(); return; }
     if (a.modId !== undefined && a.modId !== null && typeof showModule === "function") { cvpBotCerrarPanel(); showModule(a.modId); return; }
