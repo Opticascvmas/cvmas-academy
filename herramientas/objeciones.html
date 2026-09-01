@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manejo de Objeciones · Academia CV+</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --cvp-cian:#00abc8; --cvp-oro:#ffc629; --cvp-carbon:#373a36;
+  --cvp-gris:#6b6e6a; --cvp-fondo:#f4f7f8; --cvp-cian-suave:#e5f6f9;
+  --cvp-oro-suave:#fff6dd;
+  --cvp-ok:#2e9e5b; --cvp-ok-bg:#e7f5ec;
+  --cvp-alerta:#e0a800; --cvp-alerta-bg:#fff6dd;
+  --cvp-critico:#d64545; --cvp-critico-bg:#fdeaea;
+  --sombra:0 2px 12px rgba(0,0,0,.06);
+  --sombra-alta:0 8px 28px rgba(0,0,0,.10);
+}
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--cvp-fondo); color:var(--cvp-carbon);
+  font-family:'Poppins','Segoe UI',Arial,sans-serif; font-size:15px; line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1080px;margin:0 auto;padding:20px 16px 56px}
+
+/* ---------- Encabezado ---------- */
+.header{
+  background:#fff;border-radius:20px;box-shadow:var(--sombra);
+  padding:20px 24px;display:flex;align-items:center;gap:20px;flex-wrap:wrap;
+}
+.header .logo{height:52px;flex:0 0 auto}
+.header .logo svg{height:52px;width:auto;display:block}
+.header .txt{flex:1 1 260px;min-width:220px}
+.header h1{margin:0;font-size:20px;font-weight:700;letter-spacing:-.2px}
+.header p{margin:2px 0 0;color:var(--cvp-gris);font-size:13px;font-weight:300}
+.badge-metodo{
+  background:var(--cvp-cian-suave);color:var(--cvp-cian);border:1px solid #bfe9f1;
+  border-radius:999px;padding:6px 14px;font-size:11.5px;font-weight:600;letter-spacing:.4px;
+  text-transform:uppercase;white-space:nowrap;
+}
+
+/* ---------- Tabs ---------- */
+.tabs{display:flex;gap:8px;margin:18px 0;flex-wrap:wrap}
+.tab{
+  flex:1 1 180px;background:#fff;border:2px solid transparent;border-radius:14px;
+  padding:13px 16px;cursor:pointer;font-family:inherit;font-size:14px;font-weight:600;
+  color:var(--cvp-gris);box-shadow:var(--sombra);transition:.18s;text-align:left;
+  display:flex;align-items:center;gap:10px;
+}
+.tab:hover{color:var(--cvp-carbon);transform:translateY(-1px)}
+.tab.on{background:var(--cvp-cian);color:#fff;border-color:var(--cvp-oro)}
+.tab .n{
+  width:24px;height:24px;border-radius:8px;background:var(--cvp-cian-suave);color:var(--cvp-cian);
+  display:grid;place-items:center;font-size:12px;font-weight:700;flex:0 0 auto;
+}
+.tab.on .n{background:rgba(255,255,255,.22);color:#fff}
+.tab small{display:block;font-weight:400;font-size:11px;opacity:.8;line-height:1.3}
+.panel{display:none}
+.panel.on{display:block;animation:fade .25s ease}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* ---------- Tarjetas ---------- */
+.card{background:#fff;border-radius:18px;box-shadow:var(--sombra);padding:22px;margin-bottom:16px}
+.card.acento{border-left:5px solid var(--cvp-cian)}
+.card.oro{border-left:5px solid var(--cvp-oro)}
+.card h2{margin:0 0 4px;font-size:17px;font-weight:600}
+.card .sub{color:var(--cvp-gris);font-size:13px;font-weight:300;margin:0 0 14px}
+
+/* ---------- Buscador ---------- */
+.buscador{display:flex;gap:10px;flex-wrap:wrap}
+.buscador input{
+  flex:1 1 320px;font-family:inherit;font-size:15px;padding:14px 16px;
+  border:2px solid #e3e9eb;border-radius:14px;outline:none;transition:.16s;background:#fff;color:inherit;
+}
+.buscador input:focus{border-color:var(--cvp-cian);box-shadow:0 0 0 4px rgba(0,171,200,.10)}
+.btn{
+  font-family:inherit;font-size:14px;font-weight:600;padding:13px 22px;border:none;border-radius:14px;
+  background:var(--cvp-cian);color:#fff;cursor:pointer;transition:.16s;box-shadow:0 2px 8px rgba(0,171,200,.25);
+}
+.btn:hover{filter:brightness(1.06);transform:translateY(-1px)}
+.btn.ghost{background:#fff;color:var(--cvp-cian);box-shadow:none;border:2px solid #d9eef3}
+.btn.oro{background:var(--cvp-oro);color:var(--cvp-carbon);box-shadow:0 2px 8px rgba(255,198,41,.35)}
+.btn.sm{padding:8px 14px;font-size:12.5px;border-radius:10px}
+.chips{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}
+.chip{
+  background:var(--cvp-cian-suave);border:1px solid #cfe9ef;color:#087f96;border-radius:999px;
+  padding:6px 13px;font-size:12.5px;cursor:pointer;font-family:inherit;transition:.14s;
+}
+.chip:hover{background:var(--cvp-cian);color:#fff;border-color:var(--cvp-cian)}
+
+/* ---------- Resultado V.P.R.C. ---------- */
+.res-head{
+  background:linear-gradient(135deg,var(--cvp-cian),#0295ae);color:#fff;
+  border-radius:18px 18px 0 0;padding:20px 24px;margin:-22px -22px 18px;
+}
+.res-head .cat{
+  display:inline-block;background:rgba(255,255,255,.2);border-radius:999px;
+  padding:4px 12px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;
+}
+.res-head h3{margin:0;font-size:20px;font-weight:700;line-height:1.25}
+.res-head .conf{font-size:11.5px;opacity:.85;margin-top:6px;font-weight:300}
+
+.bloque{margin-bottom:20px}
+.bloque-tit{
+  font-size:11.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;
+  color:var(--cvp-cian);margin:0 0 8px;display:flex;align-items:center;gap:8px;
+}
+.bloque-tit::after{content:'';flex:1;height:1px;background:#e6edef}
+.senal{
+  background:var(--cvp-oro-suave);border-left:4px solid var(--cvp-oro);border-radius:0 12px 12px 0;
+  padding:12px 16px;font-size:14px;font-weight:500;
+}
+ul.limpia{margin:10px 0 0;padding-left:0;list-style:none}
+ul.limpia li{position:relative;padding:6px 0 6px 22px;font-size:14px;border-bottom:1px solid #f1f5f6}
+ul.limpia li:last-child{border-bottom:none}
+ul.limpia li::before{content:'●';position:absolute;left:4px;top:6px;color:var(--cvp-cian);font-size:9px}
+ul.evitar li::before{content:'✕';color:var(--cvp-critico);font-size:12px;top:5px;left:2px;font-weight:700}
+
+.pasos{display:grid;gap:10px}
+.paso{
+  display:flex;gap:14px;background:#fbfdfd;border:1px solid #e9f1f3;border-radius:14px;padding:14px 16px;
+}
+.paso .num{
+  flex:0 0 auto;width:34px;height:34px;border-radius:11px;background:var(--cvp-cian);color:#fff;
+  display:grid;place-items:center;font-weight:700;font-size:14px;
+}
+.paso .cuerpo{flex:1}
+.paso .et{font-size:10.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--cvp-gris)}
+.paso .tx{font-size:14.5px;margin-top:3px}
+.paso .tx em{font-style:normal;background:var(--cvp-oro-suave);border-bottom:1px dashed var(--cvp-alerta);padding:0 3px;border-radius:3px}
+
+.frase{
+  background:var(--cvp-carbon);color:#fff;border-radius:14px;padding:18px 22px;
+  font-size:16px;font-weight:500;font-style:italic;position:relative;
+}
+.frase::before{content:'“';position:absolute;left:10px;top:-4px;font-size:44px;color:var(--cvp-oro);opacity:.55;font-family:Georgia,serif}
+.frase span{padding-left:22px;display:block}
+.tip{
+  display:flex;gap:10px;align-items:flex-start;background:var(--cvp-ok-bg);border-radius:12px;
+  padding:12px 16px;font-size:13.5px;color:#1f6b41;margin-top:12px;
+}
+.tip b{color:var(--cvp-ok)}
+.alt{margin-top:14px;font-size:13px;color:var(--cvp-gris)}
+.vacio{text-align:center;padding:34px 16px;color:var(--cvp-gris)}
+.vacio .ic{font-size:38px;opacity:.35}
+
+
+/* ---------- Meta y técnica oficial ---------- */
+.metas{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.meta-chip{
+  border-radius:999px;padding:4px 12px;font-size:11px;font-weight:600;letter-spacing:.3px;
+  background:#f1f5f6;color:var(--cvp-gris);border:1px solid #e3ebed;
+}
+.meta-chip.mc-paso{background:var(--cvp-cian-suave);color:#087f96;border-color:#cfe9ef}
+.meta-chip.mc-cierre{background:var(--cvp-oro-suave);color:#8a6a00;border-color:#f2dfa8}
+.tec{background:#fbfdfd;border:1px solid #e9f1f3;border-left:4px solid var(--cvp-cian);border-radius:0 14px 14px 0;padding:13px 16px;margin-bottom:8px}
+.tec.sec{border-left-color:var(--cvp-oro)}
+.tec-n{font-weight:700;font-size:14.5px;color:var(--cvp-cian)}
+.tec.sec .tec-n{color:#b8860b}
+.tec-i{font-size:13.5px;margin-top:3px}
+.tec-m{font-size:13px;color:var(--cvp-gris);font-style:italic;margin-top:7px;padding-top:7px;border-top:1px dashed #dfe8ea}
+.paso .num{font-size:13px}
+
+/* ---------- Simulador ---------- */
+.sim-top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.marcador{display:flex;gap:8px;flex-wrap:wrap}
+.kpi{
+  background:#fff;border-radius:12px;padding:8px 14px;box-shadow:var(--sombra);text-align:center;min-width:82px;
+}
+.kpi .v{font-size:20px;font-weight:700;color:var(--cvp-cian);line-height:1.1}
+.kpi .l{font-size:9.5px;text-transform:uppercase;letter-spacing:.7px;color:var(--cvp-gris);font-weight:600}
+.burbuja{
+  background:var(--cvp-cian-suave);border-radius:4px 18px 18px 18px;padding:16px 20px;font-size:16px;
+  position:relative;margin:6px 0 18px;border:1px solid #cfe9ef;
+}
+.burbuja .quien{
+  font-size:10.5px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--cvp-cian);margin-bottom:5px;
+}
+.opcion{
+  width:100%;text-align:left;background:#fff;border:2px solid #e6edef;border-radius:14px;padding:15px 18px;
+  font-family:inherit;font-size:14.5px;cursor:pointer;transition:.16s;margin-bottom:10px;display:block;color:inherit;
+}
+.opcion:hover:not(:disabled){border-color:var(--cvp-cian);transform:translateX(3px)}
+.opcion:disabled{cursor:default}
+.opcion.sel-ideal{border-color:var(--cvp-ok);background:var(--cvp-ok-bg)}
+.opcion.sel-regular{border-color:var(--cvp-alerta);background:var(--cvp-alerta-bg)}
+.opcion.sel-mala{border-color:var(--cvp-critico);background:var(--cvp-critico-bg)}
+.opcion.correcta{border-color:var(--cvp-ok);border-style:dashed}
+.opcion .letra{
+  display:inline-grid;place-items:center;width:22px;height:22px;border-radius:7px;background:var(--cvp-cian-suave);
+  color:var(--cvp-cian);font-size:11.5px;font-weight:700;margin-right:9px;vertical-align:1px;
+}
+.fb{border-radius:12px;padding:13px 16px;font-size:13.5px;margin:6px 0 16px;display:flex;gap:10px}
+.fb.ideal{background:var(--cvp-ok-bg);color:#1f6b41}
+.fb.regular{background:var(--cvp-alerta-bg);color:#8a6a00}
+.fb.mala{background:var(--cvp-critico-bg);color:#9c2d2d}
+.fb .ic{font-size:17px;line-height:1}
+.pill{
+  display:inline-block;border-radius:999px;padding:3px 11px;font-size:10.5px;font-weight:700;
+  text-transform:uppercase;letter-spacing:.6px;
+}
+.pill.ideal{background:var(--cvp-ok);color:#fff}
+.pill.regular{background:var(--cvp-alerta);color:#fff}
+.pill.mala{background:var(--cvp-critico);color:#fff}
+.barra{height:7px;background:#e9eff1;border-radius:999px;overflow:hidden;margin:12px 0}
+.barra i{display:block;height:100%;background:linear-gradient(90deg,var(--cvp-cian),var(--cvp-oro));border-radius:999px;transition:width .4s}
+.resultado-final{text-align:center;padding:12px 0}
+.resultado-final .puntaje{font-size:52px;font-weight:700;line-height:1;color:var(--cvp-cian)}
+.resultado-final .de{font-size:14px;color:var(--cvp-gris)}
+.nivel{font-size:20px;font-weight:700;margin:10px 0 4px}
+
+/* ---------- Biblioteca ---------- */
+.filtros{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:14px}
+.item{background:#fff;border-radius:16px;box-shadow:var(--sombra);margin-bottom:10px;overflow:hidden}
+.item .cab{
+  display:flex;align-items:center;gap:12px;padding:15px 18px;cursor:pointer;transition:.14s;
+}
+.item .cab:hover{background:#fafdfd}
+.item .cab .ic{
+  width:34px;height:34px;border-radius:11px;display:grid;place-items:center;font-size:14px;font-weight:700;flex:0 0 auto;
+}
+.item .cab .t{flex:1;font-weight:600;font-size:14.5px}
+.item .cab .t small{display:block;font-weight:400;font-size:11.5px;color:var(--cvp-gris);text-transform:uppercase;letter-spacing:.5px}
+.item .cab .fl{color:var(--cvp-gris);transition:.2s;font-size:13px}
+.item.abierto .cab .fl{transform:rotate(180deg)}
+.item .cuerpo{display:none;padding:4px 18px 20px;border-top:1px solid #f0f5f6}
+.item.abierto .cuerpo{display:block}
+
+.footer{text-align:center;color:var(--cvp-gris);font-size:11.5px;margin-top:26px;font-weight:300}
+.nota-ajuste{
+  background:var(--cvp-oro-suave);border:1px dashed var(--cvp-alerta);border-radius:12px;
+  padding:11px 15px;font-size:12.5px;color:#7a5c00;margin-top:14px;
+}
+@media(max-width:640px){
+  .wrap{padding:14px 12px 40px}
+  .header{padding:16px;gap:14px}
+  .header .logo,.header .logo svg{height:40px}
+  .header h1{font-size:17px}
+  .card{padding:17px}
+  .res-head{margin:-17px -17px 16px;padding:17px}
+  .tab{flex:1 1 100%}
+  .resultado-final .puntaje{font-size:44px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ENCABEZADO -->
+  <div class="header">
+    <div class="logo">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 612 253" role="img" aria-label="Ópticas CV+">
+        <polygon fill="#ffc629" fill-rule="evenodd" points="528.53 120.07 528.68 119.93 548.56 119.77 548.56 100.05 548.7 99.9 556.57 99.9 556.72 119.82 576.6 119.93 576.6 127.79 576.45 127.95 556.57 128.1 556.57 147.82 556.42 147.97 548.56 147.97 548.4 128.1 528.53 127.95 528.53 120.07"/>
+        <path fill="#00abc8" fill-rule="evenodd" d="M451.12,82.89h14.44l26.34,52.3h.38l26.26-52.3h15.21c.64,0,.88.25.69.77l-41.86,84.02c-.18.38-.9.37-1.08,0l-41.47-83.32c-.4-.93,0-1.46,1.07-1.46"/>
+        <path fill="#00abc8" fill-rule="evenodd" d="M387.65,125.45c0,15.03,12.18,27.22,27.22,27.22,12.33,0,22.74-8.2,26.08-19.43.2-.65.56-.64.78-.63h14.22c.61-.02.77.12.71.45-3.58,19.83-20.94,34.88-41.8,34.88-23.46,0-42.48-19.01-42.48-42.47s19.02-42.48,42.48-42.48c20.93,0,38.32,15.14,41.83,35.07.07.36-.2.41-.43.42h-14.61c-.41.02-.54-.23-.7-.74-3.33-11.27-13.76-19.48-26.1-19.48-15.04,0-27.22,12.18-27.22,27.22"/>
+        <path fill="#373a36" fill-rule="evenodd" d="M63.16,94.74c9.25,0,16.79,4.27,22.62,12.82,2.75,4.65,4.12,9.38,4.12,14.17,0,8.42-3.73,15.57-11.21,21.46-4.85,3.37-9.88,5.04-15.1,5.04h-1.11c-7.8,0-14.58-3.35-20.34-10.04-3.82-5.21-5.73-10.32-5.73-15.34v-2.28c0-8.48,4.12-15.71,12.33-21.7,4.92-2.75,9.73-4.12,14.42-4.12M45.78,121.49v.24c0,7.8,4.19,13.29,12.57,16.46,1.65.45,3.33.68,5.05.68,7.6,0,13.09-4.27,16.45-12.81l.43-3.65v-1.16c0-7.73-4.11-13.14-12.33-16.22-1-.45-2.22-.67-3.64-.68h-2.33c-6.18,0-11.13,3.43-14.86,10.29-.91,2.33-1.36,4.61-1.36,6.85"/>
+        <path fill="#373a36" fill-rule="evenodd" d="M96.65,104.69h7.82l.44.43v3.45c3.85-2.59,7.46-3.88,10.82-3.88h2.39c6.7,0,12.34,3.32,16.94,9.94,2,3.47,3.01,7.24,3.01,11.32,0,7.77-4.05,13.98-12.14,18.64-3.08,1.16-5.75,1.75-8.02,1.75h-1.55c-3.88,0-7.71-1.32-11.45-3.94v24.08l-.44.44h-7.82l-.43-.44v-61.36l.43-.43ZM104.91,126.15c0,5.47,3.25,9.3,9.76,11.5l2.57.19c5.6,0,9.58-3.02,11.94-9.08l.44-3.25c0-5.6-3.05-9.58-9.13-11.94l-3.01-.44h-.68c-6.02,0-9.99,3.54-11.89,10.63v2.38Z"/>
+        <path fill="#373a36" fill-rule="evenodd" d="M144.81,83.62h8.11l.43.44v21.06h26.46l.49.49v7.81l-.49.48h-26.46v13.21c0,5.82,3.37,9.87,10.1,12.13l2.67.25c5.57,0,9.7-3,12.38-8.98h8.74v.2c0,3.4-2.32,7.52-6.94,12.38-4.34,3.43-8.84,5.14-13.5,5.14h-1.55c-5.66,0-10.82-2.47-15.49-7.42-3.59-3.59-5.38-9.65-5.38-18.15v-38.59l.44-.44Z"/>
+        <path fill="#373a36" fill-rule="evenodd" d="M198.06,91.1c2.89.59,4.32,1.86,4.32,3.83v.97c-.48,2.85-1.93,4.27-4.32,4.27-3-.64-4.51-2.17-4.51-4.56.41-3.01,1.93-4.52,4.51-4.52M193.98,104.45h7.96l.43.44v42.91l-.43.43h-7.96l-.43-.43v-42.91l.43-.44Z"/>
+        <path fill="#373a36" fill-rule="evenodd" d="M279.47,104.84c4.2,0,8.33,1.34,12.39,4.03h.23v-3.59l.44-.44h7.87l.43.44v42.53l-.43.43h-7.87l-.44-.43v-3.6h-.23c-3.99,2.69-8.34,4.03-13.07,4.03-7.18,0-13.17-3.44-17.96-10.34-2.09-3.59-3.15-6.89-3.15-9.9v-2.23c0-7.89,4.13-14.19,12.37-18.89,3.22-1.36,6.35-2.04,9.42-2.04M265.4,126.73c0,6.18,3.46,10.5,10.38,12.96.72.36,1.75.54,3.11.54h.48c6.28,0,10.62-3.36,13.01-10.09.33-.75.48-1.8.48-3.16v-.97c0-6.03-3.37-10.28-10.1-12.77l-3.4-.48h-.48c-6.41,0-10.83,3.7-13.26,11.11l-.23,2.86Z"/>
+        <path fill="#373a36" fill-rule="evenodd" d="M328.5,102.89h2.04c10.74,0,18.21,4.32,22.37,12.97-.87.52-3.48,1.48-7.81,2.91-2.5-5.8-7.18-8.69-14.08-8.69h-3.01c-7.67.65-11.51,2.7-11.51,6.16,0,2.33,3.53,3.89,10.59,4.66,9.9,2.08,15.91,3.43,18.01,4.08,4.43,2.56,6.64,5.79,6.65,9.71,0,5.47-4.53,9.72-13.59,12.77-2.07.51-4.14.77-6.21.77h-4.86c-9.32,0-16.24-4.07-20.73-12.19l-.25-.77c4.57-1.81,7.62-2.72,7.62-2.72,0,0,.08.2.45.97,3.16,5.02,7.25,7.52,12.23,7.52h5.77c4.01,0,7.31-1.42,9.91-4.27l.43-1.5c0-2.56-3.08-4.11-9.23-4.66l-19.12-4.27c-4.6-2.33-6.89-5.7-6.89-10.1,0-5.6,4.92-9.85,14.75-12.77,1.94-.39,4.09-.58,6.46-.58"/>
+        <path fill="#373a36" fill-rule="evenodd" d="M216.45,126.55c0,7.62,6.17,13.79,13.78,13.79,6.24,0,11.53-4.15,13.22-9.84.1-.33.29-.32.39-.32h7.21c.31,0,.38.07.36.23-1.81,10.05-10.61,17.67-21.19,17.67-11.89,0-21.52-9.64-21.52-21.53s9.64-21.53,21.52-21.53c10.61,0,19.43,7.67,21.21,17.77.03.19-.1.21-.22.21h-7.41c-.2,0-.27-.12-.34-.37-1.69-5.71-6.98-9.87-13.23-9.87-7.62,0-13.78,6.17-13.78,13.79"/>
+        <polygon fill="#373a36" fill-rule="evenodd" points="60.95 89.77 66.94 89.77 71.99 80.94 63.47 80.94 60.95 89.77"/>
+      </svg>
+    </div>
+    <div class="txt">
+      <h1>Manejo de Objeciones</h1>
+      <p>Academia CV+ · Paso 5 del Modelo de Ventas · Apoyo para el asesor en piso</p>
+    </div>
+    <span class="badge-metodo">Método oficial CV+ · E.R.A.R.</span>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs" role="tablist">
+    <button class="tab on" data-panel="consultar" role="tab"><span class="n">1</span><span>Consultar<small>Un cliente me dijo…</small></span></button>
+    <button class="tab" data-panel="practicar" role="tab"><span class="n">2</span><span>Practicar<small>Simulador de cliente</small></span></button>
+    <button class="tab" data-panel="biblioteca" role="tab"><span class="n">3</span><span>Biblioteca<small>Las 19 objeciones</small></span></button>
+  </div>
+
+  <!-- ================= 1. CONSULTAR ================= -->
+  <section class="panel on" id="p-consultar">
+    <div class="card acento">
+      <h2>¿Qué te dijo el cliente?</h2>
+      <p class="sub">Escribilo con las palabras exactas que él usó. Mientras más literal, mejor la respuesta.</p>
+      <form class="buscador" id="frm">
+        <input id="q" type="text" autocomplete="off" placeholder="Ej.: el precio está muy caro / no me convence / lo voy a pensar">
+        <button class="btn" type="submit">Buscar respuesta</button>
+      </form>
+      <div class="chips" id="chips"></div>
+    </div>
+    <div id="resultado"></div>
+  </section>
+
+  <!-- ================= 2. PRACTICAR ================= -->
+  <section class="panel" id="p-practicar">
+    <div class="card acento" id="sim-intro">
+      <h2>Simulador de cliente difícil</h2>
+      <p class="sub">El sistema hace de cliente. Vos elegís cómo responderías. Al final te dice qué tan bien manejaste la objeción y por qué.</p>
+      <div class="chips" id="sim-cats"></div>
+      <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn oro" id="btn-sim-random">Empezar ronda aleatoria (5 casos)</button>
+        <button class="btn ghost" id="btn-sim-todos">Practicar los 19 casos</button>
+      </div>
+      <div class="nota-ajuste">Cada caso tiene 2 rondas: la objeción inicial y la réplica del cliente. Elegí la respuesta que darías de verdad, no la que suena bonita.</div>
+    </div>
+    <div id="sim"></div>
+  </section>
+
+  <!-- ================= 3. BIBLIOTECA ================= -->
+  <section class="panel" id="p-biblioteca">
+    <div class="card acento">
+      <h2>Biblioteca de objeciones CV+</h2>
+      <p class="sub">Las 19 objeciones más frecuentes en piso, mapeadas a los 6 pasos del Modelo VISUAL y a las 5 técnicas oficiales del manual. Tocá una para abrirla.</p>
+      <div class="filtros" id="filtros"></div>
+    </div>
+    <div id="lista"></div>
+  </section>
+
+  <div class="footer" id="pie">Ópticas CV+ · Manejo de Objeciones · Academia CV+</div>
+</div>
+
+<script src="../js/objeciones-kb.js"></script>
+<script>
+(function(){
+'use strict';
+var KB = window.CVP_OBJECIONES;
+var $  = function(s,c){ return (c||document).querySelector(s); };
+var $$ = function(s,c){ return Array.prototype.slice.call((c||document).querySelectorAll(s)); };
+var esc = function(t){ var d=document.createElement('div'); d.textContent=t==null?'':t; return d.innerHTML; };
+// resalta los «datos a ajustar» del guion
+var marca = function(t){ return esc(t).replace(/«([^»]+)»/g,'<em>$1</em>'); };
+var mezclar = function(arr){
+  var a = arr.slice();
+  for(var i=a.length-1;i>0;i--){ var j=Math.floor(Math.random()*(i+1)); var t=a[i]; a[i]=a[j]; a[j]=t; }
+  return a;
+};
+
+if(!KB){
+  $('#resultado').innerHTML='<div class="card"><div class="vacio"><div class="ic">⚠</div><p><b>No se cargó la base de conocimiento.</b><br>Verificá que exista <code>js/objeciones-kb.js</code> y que la ruta <code>../js/objeciones-kb.js</code> sea correcta desde esta carpeta.</p></div></div>';
+  return;
+}
+
+/* ---------------- Tabs ---------------- */
+$$('.tab').forEach(function(t){
+  t.addEventListener('click', function(){
+    $$('.tab').forEach(function(x){ x.classList.remove('on'); });
+    $$('.panel').forEach(function(x){ x.classList.remove('on'); });
+    t.classList.add('on');
+    $('#p'+'-'+t.dataset.panel).classList.add('on');
+    window.scrollTo({top:0,behavior:'smooth'});
+  });
+});
+
+/* ============ 1. CONSULTAR ============ */
+var EJEMPLOS = [
+  'El precio está muy caro',
+  'No me convence',
+  'Lo voy a pensar',
+  'En otro lado me lo dan más barato',
+  'Tengo que consultarlo con mi esposa',
+  'Ya usé progresivos y no me adapté',
+  'Mis lentes todavía me sirven',
+  'Solo vine por el examen'
+];
+$('#chips').innerHTML = EJEMPLOS.map(function(e){
+  return '<button type="button" class="chip" data-q="'+esc(e)+'">'+esc(e)+'</button>';
+}).join('');
+$('#chips').addEventListener('click', function(ev){
+  var b = ev.target.closest('.chip'); if(!b) return;
+  $('#q').value = b.dataset.q; buscar();
+});
+$('#frm').addEventListener('submit', function(ev){ ev.preventDefault(); buscar(); });
+
+function buscar(){
+  var q = $('#q').value.trim();
+  var box = $('#resultado');
+  if(!q){ box.innerHTML=''; return; }
+  var d = KB.detectar(q);
+  if(!d.objecion){
+    box.innerHTML = '<div class="card"><div class="vacio"><div class="ic">🔍</div>'+
+      '<p><b>No identifiqué esa objeción.</b><br>Probá escribiendo la frase textual del cliente, o revisá la pestaña <b>Biblioteca</b> para ver las 15 que sí están cargadas.</p></div></div>';
+    return;
+  }
+  box.innerHTML = tarjetaRespuesta(d.objecion, d.confianza, d.alternativas);
+  box.scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+function tarjetaRespuesta(o, conf, alts){
+  var cat = KB.categorias[o.cat];
+  var confTxt = conf==='alta' ? 'Coincidencia exacta' : (conf==='media' ? 'Coincidencia probable — revisá si es esta' : 'Coincidencia aproximada — puede ser otra');
+  var h = '<div class="card">';
+  h += '<div class="res-head"><span class="cat">'+esc(cat.nombre)+'</span>'+
+       '<h3>'+esc(o.titulo)+'</h3><div class="conf">'+confTxt+'</div></div>';
+
+  h += '<div class="bloque"><p class="bloque-tit">Por qué te lo dice</p>'+
+       '<div class="senal">'+esc(o.senal)+'</div>'+
+       '<ul class="limpia">'+o.causas.map(function(c){return '<li>'+esc(c)+'</li>';}).join('')+'</ul></div>';
+
+  h += tecnicaBox(o);
+
+  h += '<div class="bloque"><p class="bloque-tit">Cómo responder · E.R.A.R.</p><div class="pasos">'+erar(o)+'</div></div>';
+
+  h += '<div class="bloque"><p class="bloque-tit">Qué NO decir</p>'+
+       '<ul class="limpia evitar">'+o.evitar.map(function(e){return '<li>'+esc(e)+'</li>';}).join('')+'</ul></div>';
+
+  h += '<div class="bloque"><p class="bloque-tit">Frase clave</p>'+
+       '<div class="frase"><span>'+esc(o.frase)+'</span></div>'+
+       '<div class="tip"><span>💡</span><div><b>Tip de piso:</b> '+esc(o.tip)+'</div></div></div>';
+
+  h += '<div style="display:flex;gap:8px;flex-wrap:wrap">'+
+       '<button class="btn sm" data-practicar="'+o.id+'">Practicar este caso</button>'+
+       '<button class="btn sm ghost" data-copiar="'+o.id+'">Copiar guion</button></div>';
+
+  if(alts && alts.length){
+    h += '<div class="alt">¿No era esa? También manejo: '+
+      alts.map(function(a){ return '<button class="chip" data-q="'+esc(a.titulo)+'">'+esc(a.titulo)+'</button>'; }).join(' ')+'</div>';
+  }
+  h += '<div class="nota-ajuste">Los textos <em>resaltados</em> son datos que debés ajustar al caso real: graduación, precios, plazos y garantía vigente de CV+.</div>';
+  return h + '</div>';
+}
+function paso(n, et, tx){
+  return '<div class="paso"><div class="num">'+n+'</div><div class="cuerpo">'+
+         '<div class="et">'+et+'</div><div class="tx">'+marca(tx)+'</div></div></div>';
+}
+function erar(o){
+  var c = KB.cierres[o.meta.cierre];
+  return paso('E','Escuchá',o.guion.escuchar)+
+         paso('R','Reconocé',o.guion.valida)+
+         paso('A','Analizá',o.guion.pregunta)+
+         paso('R','Respondé',o.guion.reencuadra)+
+         paso('✓','Cerrá · cierre '+c.nombre,o.guion.cierra);
+}
+function tecnicaBox(o){
+  var t1 = KB.tecnicas[o.meta.tecnica];
+  var t2 = o.meta.tecnica2 ? KB.tecnicas[o.meta.tecnica2] : null;
+  var c  = KB.cierres[o.meta.cierre];
+  var h = '<div class="bloque"><p class="bloque-tit">Técnica oficial del manual CV+</p>';
+  h += '<div class="metas">'+
+       '<span class="meta-chip mc-paso">Paso '+esc(o.meta.paso)+'</span>'+
+       '<span class="meta-chip mc-perfil">Perfil: '+esc(o.meta.perfil)+'</span>'+
+       '<span class="meta-chip mc-cierre">Cierre '+esc(c.nombre)+'</span></div>';
+  h += '<div class="tec"><div class="tec-n">'+esc(t1.nombre)+'</div><div class="tec-i">'+esc(t1.idea)+
+       '</div><div class="tec-m">'+esc(t1.modelo)+'</div></div>';
+  if(t2) h += '<div class="tec sec"><div class="tec-n">+ '+esc(t2.nombre)+'</div><div class="tec-i">'+esc(t2.idea)+'</div></div>';
+  return h+'</div>';
+}
+
+document.addEventListener('click', function(ev){
+  var alt = ev.target.closest('[data-q]');
+  if(alt && alt.closest('.alt')){ $('#q').value = alt.dataset.q; buscar(); return; }
+  var pr = ev.target.closest('[data-practicar]');
+  if(pr){ $$('.tab').forEach(function(x){x.classList.remove('on');});
+          $$('.panel').forEach(function(x){x.classList.remove('on');});
+          $('.tab[data-panel="practicar"]').classList.add('on');
+          $('#p-practicar').classList.add('on');
+          iniciarSim([KB.porId(pr.dataset.practicar)]); return; }
+  var cp = ev.target.closest('[data-copiar]');
+  if(cp){
+    var o = KB.porId(cp.dataset.copiar);
+    var txt = KB.respuestaChat(o.titulo);
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(txt).then(function(){
+        cp.textContent='✓ Copiado'; setTimeout(function(){ cp.textContent='Copiar guion'; },1800);
+      });
+    }
+  }
+});
+
+/* ============ 2. PRACTICAR ============ */
+var S = null;
+
+$('#sim-cats').innerHTML = Object.keys(KB.categorias).map(function(k){
+  return '<button class="chip" data-cat="'+k+'">'+esc(KB.categorias[k].nombre)+'</button>';
+}).join('');
+$('#sim-cats').addEventListener('click', function(ev){
+  var b = ev.target.closest('[data-cat]'); if(!b) return;
+  iniciarSim(KB.lista.filter(function(o){ return o.cat===b.dataset.cat; }));
+});
+$('#btn-sim-random').addEventListener('click', function(){
+  iniciarSim(mezclar(KB.lista).slice(0,5));
+});
+$('#btn-sim-todos').addEventListener('click', function(){ iniciarSim(KB.lista.slice()); });
+
+function iniciarSim(casos){
+  S = { casos: casos, i: 0, ronda: 1, pts: 0, max: casos.length*2*10, log: [] };
+  pintarSim();
+  $('#sim').scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+function pintarSim(){
+  if(!S) return;
+  var box = $('#sim');
+  if(S.i >= S.casos.length){ box.innerHTML = pintarFinal(); return; }
+  var o = S.casos[S.i];
+  var p = o.practica;
+  var texto = S.ronda===1 ? p.apertura : p.replica;
+  var ops   = mezclar(S.ronda===1 ? p.opciones : p.opciones2);
+  var avance = ((S.i*2 + (S.ronda-1)) / (S.casos.length*2)) * 100;
+
+  var h = '<div class="card">';
+  h += '<div class="sim-top"><div><div style="font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--cvp-gris);font-weight:700">Caso '+(S.i+1)+' de '+S.casos.length+' · Ronda '+S.ronda+' de 2</div>'+
+       '<div style="font-weight:600;font-size:15px">'+esc(o.titulo)+'</div></div>'+
+       '<div class="marcador"><div class="kpi"><div class="v">'+S.pts+'</div><div class="l">Puntos</div></div>'+
+       '<div class="kpi"><div class="v">'+S.max+'</div><div class="l">Máximo</div></div></div></div>';
+  h += '<div class="barra"><i style="width:'+avance.toFixed(0)+'%"></i></div>';
+  h += '<div class="burbuja"><div class="quien">Cliente</div>'+esc(texto)+'</div>';
+  h += '<div id="ops">'+ ops.map(function(op,idx){
+        return '<button class="opcion" data-op="'+idx+'"><span class="letra">'+'ABC'[idx]+'</span>'+esc(op.t)+'</button>';
+      }).join('') +'</div>';
+  h += '<div id="fb"></div>';
+  h += '</div>';
+  box.innerHTML = h;
+
+  $('#ops').addEventListener('click', function(ev){
+    var b = ev.target.closest('[data-op]'); if(!b || b.disabled) return;
+    responder(parseInt(b.dataset.op,10), ops);
+  });
+}
+
+function responder(idx, ops){
+  var op = ops[idx];
+  var puntos = op.tipo==='ideal' ? 10 : (op.tipo==='regular' ? 5 : 0);
+  S.pts += puntos;
+  S.log.push({ caso:S.casos[S.i].titulo, ronda:S.ronda, tipo:op.tipo, fb:op.fb });
+
+  $$('#ops .opcion').forEach(function(b,i){
+    b.disabled = true;
+    if(i===idx) b.classList.add('sel-'+op.tipo);
+    else if(ops[i].tipo==='ideal') b.classList.add('correcta');
+  });
+
+  var etq = op.tipo==='ideal' ? 'Respuesta ideal' : (op.tipo==='regular' ? 'Se puede mejorar' : 'Evitá esta');
+  var ico = op.tipo==='ideal' ? '✓' : (op.tipo==='regular' ? '!' : '✕');
+  $('#fb').innerHTML =
+    '<div class="fb '+op.tipo+'"><span class="ic">'+ico+'</span><div>'+
+    '<span class="pill '+op.tipo+'">'+etq+' · +'+puntos+'</span><div style="margin-top:7px">'+esc(op.fb)+'</div></div></div>'+
+    '<button class="btn" id="btn-next">'+ (S.ronda===1 ? 'Ver la réplica del cliente →' : (S.i+1 < S.casos.length ? 'Siguiente caso →' : 'Ver mi resultado →')) +'</button>';
+
+  $('#btn-next').addEventListener('click', function(){
+    if(S.ronda===1){ S.ronda=2; } else { S.ronda=1; S.i++; }
+    pintarSim();
+  });
+  $('#fb').scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+
+function pintarFinal(){
+  var pct = S.max ? Math.round(S.pts/S.max*100) : 0;
+  var nivel, color, msj;
+  if(pct>=90){ nivel='Asesor experto'; color='var(--cvp-ok)'; msj='Dominás el método. Ya podés acompañar a un compañero nuevo en piso.'; }
+  else if(pct>=75){ nivel='Asesor sólido'; color='var(--cvp-cian)'; msj='Buen manejo. Revisá los casos donde no elegiste la ideal y volvé a practicarlos.'; }
+  else if(pct>=60){ nivel='En desarrollo'; color='var(--cvp-alerta)'; msj='Vas por buen camino, pero todavía se te escapan objeciones clave. Repetí la ronda.'; }
+  else { nivel='Requiere refuerzo'; color='var(--cvp-critico)'; msj='Repasá la Biblioteca antes de volver a practicar: el método V.P.R.C. es la base.'; }
+
+  var fallos = S.log.filter(function(l){ return l.tipo!=='ideal'; });
+  var h = '<div class="card oro"><div class="resultado-final">'+
+    '<div class="puntaje">'+pct+'%</div><div class="de">'+S.pts+' de '+S.max+' puntos</div>'+
+    '<div class="nivel" style="color:'+color+'">'+nivel+'</div>'+
+    '<p class="sub" style="max-width:460px;margin:0 auto">'+msj+'</p></div>';
+
+  if(fallos.length){
+    h += '<div class="bloque" style="margin-top:20px"><p class="bloque-tit">Qué repasar</p><ul class="limpia">'+
+      fallos.map(function(l){
+        return '<li><b>'+esc(l.caso)+'</b> (ronda '+l.ronda+'): '+esc(l.fb)+'</li>';
+      }).join('')+'</ul></div>';
+  } else {
+    h += '<div class="tip" style="margin-top:18px"><span>🏆</span><div><b>Perfecto.</b> Elegiste la respuesta ideal en todas las rondas.</div></div>';
+  }
+  h += '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:16px">'+
+       '<button class="btn" id="btn-otra">Otra ronda</button>'+
+       '<button class="btn ghost" id="btn-repasar">Ir a la Biblioteca</button></div></div>';
+
+  setTimeout(function(){
+    var a=$('#btn-otra'), b=$('#btn-repasar');
+    if(a) a.addEventListener('click', function(){
+      iniciarSim(mezclar(KB.lista).slice(0,5));
+    });
+    if(b) b.addEventListener('click', function(){
+      $$('.tab').forEach(function(x){x.classList.remove('on');});
+      $$('.panel').forEach(function(x){x.classList.remove('on');});
+      $('.tab[data-panel="biblioteca"]').classList.add('on');
+      $('#p-biblioteca').classList.add('on');
+      window.scrollTo({top:0,behavior:'smooth'});
+    });
+  },0);
+  return h;
+}
+
+/* ============ 3. BIBLIOTECA ============ */
+var filtroActivo = 'todas';
+function pintarFiltros(){
+  var f = ['<button class="chip'+(filtroActivo==='todas'?' on':'')+'" data-f="todas" style="'+(filtroActivo==='todas'?'background:var(--cvp-cian);color:#fff':'')+'">Todas ('+KB.lista.length+')</button>'];
+  Object.keys(KB.categorias).forEach(function(k){
+    var n = KB.lista.filter(function(o){return o.cat===k;}).length;
+    var act = filtroActivo===k;
+    f.push('<button class="chip" data-f="'+k+'" style="'+(act?'background:var(--cvp-cian);color:#fff':'')+'">'+esc(KB.categorias[k].nombre)+' ('+n+')</button>');
+  });
+  $('#filtros').innerHTML = f.join('');
+}
+function pintarLista(){
+  var items = KB.lista.filter(function(o){ return filtroActivo==='todas' || o.cat===filtroActivo; });
+  $('#lista').innerHTML = items.map(function(o){
+    var cat = KB.categorias[o.cat];
+    return '<div class="item" data-id="'+o.id+'">'+
+      '<div class="cab"><div class="ic" style="background:'+cat.color+'22;color:'+cat.color+'">'+cat.icono+'</div>'+
+      '<div class="t">'+esc(o.titulo)+'<small>'+esc(cat.nombre)+'</small></div><div class="fl">▾</div></div>'+
+      '<div class="cuerpo">'+detalle(o)+'</div></div>';
+  }).join('');
+}
+function detalle(o){
+  var h = '<div class="bloque"><p class="bloque-tit">Por qué te lo dice</p><div class="senal">'+esc(o.senal)+'</div>'+
+          '<ul class="limpia">'+o.causas.map(function(c){return '<li>'+esc(c)+'</li>';}).join('')+'</ul></div>';
+  h += tecnicaBox(o);
+  h += '<div class="bloque"><p class="bloque-tit">Cómo responder · E.R.A.R.</p><div class="pasos">'+erar(o)+'</div></div>';
+  h += '<div class="bloque"><p class="bloque-tit">Qué NO decir</p><ul class="limpia evitar">'+
+       o.evitar.map(function(e){return '<li>'+esc(e)+'</li>';}).join('')+'</ul></div>';
+  h += '<div class="frase"><span>'+esc(o.frase)+'</span></div>'+
+       '<div class="tip"><span>💡</span><div><b>Tip de piso:</b> '+esc(o.tip)+'</div></div>'+
+       '<div style="margin-top:14px"><button class="btn sm" data-practicar="'+o.id+'">Practicar este caso</button></div>';
+  return h;
+}
+$('#filtros').addEventListener('click', function(ev){
+  var b = ev.target.closest('[data-f]'); if(!b) return;
+  filtroActivo = b.dataset.f; pintarFiltros(); pintarLista();
+});
+$('#lista').addEventListener('click', function(ev){
+  if(ev.target.closest('[data-practicar]')) return;
+  var cab = ev.target.closest('.cab'); if(!cab) return;
+  cab.parentElement.classList.toggle('abierto');
+});
+pintarFiltros(); pintarLista();
+
+/* Pie con fecha */
+var f = new Date();
+var meses=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+$('#pie').textContent = 'Ópticas CV+ · Manejo de Objeciones · Actualizado el '+f.getDate()+' de '+meses[f.getMonth()]+' de '+f.getFullYear();
+})();
+</script>
+</body>
+</html>
