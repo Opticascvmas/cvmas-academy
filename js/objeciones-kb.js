@@ -65,6 +65,8 @@
   /* ---------------------------------------------------------- 1 */
   {
     id: 'precio-alto',
+    flash: { porque: 'No es falta de dinero: todavía no ve por qué cuesta lo que cuesta.',
+             preguntar: '¿Caro comparado con qué: con unos lentes que usó antes o con otra cotización?' },
     cat: 'precio',
     meta: { paso: 'A · Agrega', perfil: 'Busca precios', tecnica: 'sipero', tecnica2: 'balanza', cierre: 'beneficio' },
     titulo: 'El precio está muy caro / muy alto',
@@ -115,6 +117,8 @@
   /* ---------------------------------------------------------- 2 */
   {
     id: 'competencia-barato',
+    flash: { porque: 'Te está pidiendo permiso para quedarse. Si de verdad quisiera el otro precio, ya se habría ido.',
+             preguntar: '¿Me permite ver la cotización? Quiero asegurarme de que sea el mismo lente.' },
     cat: 'precio',
     meta: { paso: 'A · Agrega', perfil: 'Busca precios', tecnica: 'balanza', tecnica2: 'boomerang', cierre: 'consultivo' },
     titulo: 'En otro lado me lo dan más barato',
@@ -164,6 +168,8 @@
   /* ---------------------------------------------------------- 3 */
   {
     id: 'solo-lo-economico',
+    flash: { porque: 'No pide lo barato: pide no equivocarse.',
+             preguntar: '¿En qué los va a usar más: computadora, manejar o leer?' },
     cat: 'precio',
     meta: { paso: 'U · Un aro para ti', perfil: 'Busca precios', tecnica: 'porque', tecnica2: 'balanza', cierre: 'eleccion' },
     titulo: 'Deme lo más barato / lo más sencillo',
@@ -213,6 +219,8 @@
   /* ---------------------------------------------------------- 4 */
   {
     id: 'quitar-tratamiento',
+    flash: { porque: 'Ve el tratamiento como un extra, y es justo lo que más va a notar todos los días.',
+             preguntar: '¿Usted maneja de noche o pasa varias horas frente a una pantalla?' },
     cat: 'precio',
     meta: { paso: 'A · Agrega', perfil: 'Busca precios', tecnica: 'boomerang', tecnica2: null, cierre: 'beneficio' },
     titulo: '¿Y sin el antirreflejo cuánto sale?',
@@ -262,6 +270,9 @@
   /* ---------------------------------------------------------- 5 */
   {
     id: 'no-me-convence',
+    flash: { porque: 'No te está diciendo qué. Tu única jugada es preguntar y callarte.',
+             preguntar: '¿Qué es lo que no le convence: cómo se ve, la inversión, o algo que le expliqué?' ,
+             decir: 'Prefiero mil veces que me lo diga a que se lleve algo con dudas.' },
     cat: 'duda',
     meta: { paso: 'L · ¡Listo!', perfil: 'Todos los perfiles', tecnica: 'aplazamiento', tecnica2: null, cierre: 'consultivo' },
     titulo: 'No me convence',
@@ -312,6 +323,8 @@
   /* ---------------------------------------------------------- 6 */
   {
     id: 'no-necesito-progresivos',
+    flash: { porque: 'Mitad negación por la edad, mitad sospecha de que le quieren vender de más.',
+             preguntar: '¿Le ha pasado que tiene que alejar el celular para leer un mensaje?' },
     cat: 'duda',
     meta: { paso: 'S · Salud Visual', perfil: 'Sabelotodo', tecnica: 'porque', tecnica2: 'boomerang', cierre: 'consultivo' },
     titulo: 'No creo que necesite progresivos / ¿de verdad los necesito?',
@@ -361,6 +374,8 @@
   /* ---------------------------------------------------------- 7 */
   {
     id: 'no-me-adapte',
+    flash: { porque: 'Es miedo al riesgo, no al precio: ya pagó una vez por algo que no le funcionó.',
+             preguntar: '¿El aro era pequeñito? ¿Le tomaron las medidas con el aro puesto en su cara?' },
     cat: 'duda',
     meta: { paso: 'S · Salud Visual', perfil: 'Tercera edad', tecnica: 'porque', tecnica2: 'balanza', cierre: 'consultivo' },
     titulo: 'Ya usé progresivos y no me adapté',
@@ -410,6 +425,8 @@
   /* ---------------------------------------------------------- 8 */
   {
     id: 'y-si-no-sirven',
+    flash: { porque: 'Es señal de compra: ya se imagina usándolos, solo quiere saber que tiene salida.',
+             preguntar: '¿Le explicaron ya cómo funciona nuestra garantía de adaptación?' },
     cat: 'duda',
     meta: { paso: 'L · ¡Listo!', perfil: 'Primerizo', tecnica: 'sipero', tecnica2: null, cierre: 'iniciativa' },
     titulo: '¿Y si no me sirven? ¿Y si no me quedan bien?',
@@ -459,6 +476,9 @@
   /* ---------------------------------------------------------- 9 */
   {
     id: 'lo-voy-a-pensar',
+    flash: { porque: 'Nueve de cada diez no van a pensar nada: hay una duda que no se atrevió a decir.',
+             preguntar: '¿Qué es exactamente lo que quiere pensar: la inversión o algo que le expliqué?' ,
+             decir: 'Me quedaría con la duda de si algo no le expliqué bien. Dígamelo y lo resolvemos ahorita mismo.' },
     cat: 'demora',
     meta: { paso: 'L · ¡Listo!', perfil: 'Todos los perfiles', tecnica: 'aplazamiento', tecnica2: null, cierre: 'eleccion' },
     titulo: 'Lo voy a pensar',
@@ -508,6 +528,8 @@
   /* ---------------------------------------------------------- 10 */
   {
     id: 'cuando-me-paguen',
+    flash: { porque: 'Puede ser cierto, pero un "regreso" sin fecha es una venta que se enfría y muere.',
+             preguntar: '¿Cuándo sería eso? Se lo pregunto para dejarle todo listo desde hoy.' },
     cat: 'demora',
     meta: { paso: 'L · ¡Listo!', perfil: 'Busca precios', tecnica: 'aplazamiento', tecnica2: 'balanza', cierre: 'eleccion' },
     titulo: 'Regreso cuando me paguen / la próxima quincena',
@@ -557,6 +579,8 @@
   /* ---------------------------------------------------------- 11 */
   {
     id: 'lentes-todavia-sirven',
+    flash: { porque: 'Se acostumbró de a poco a ver peor y ya no nota la diferencia.',
+             preguntar: 'Mire ese letrero con los suyos… y ahora con su graduación nueva. ¿Nota la diferencia?' },
     cat: 'demora',
     meta: { paso: 'I · Indaga', perfil: 'Tercera edad', tecnica: 'boomerang', tecnica2: 'porque', cierre: 'consultivo' },
     titulo: 'Mis lentes actuales todavía me sirven',
@@ -606,6 +630,8 @@
   /* ---------------------------------------------------------- 12 */
   {
     id: 'consultar-pareja',
+    flash: { porque: 'O no decide el gasto, o quiere una segunda opinión de cómo se ve.',
+             preguntar: '¿Qué cree que le va a preguntar: por la inversión o por cómo se ve?' },
     cat: 'tercero',
     meta: { paso: 'L · ¡Listo!', perfil: 'A la moda', tecnica: 'aplazamiento', tecnica2: null, cierre: 'eleccion' },
     titulo: 'Tengo que consultarlo con mi esposo/a / con mi familia',
@@ -656,6 +682,8 @@
   /* ---------------------------------------------------------- 13 */
   {
     id: 'seguro-empresa',
+    flash: { porque: 'No es objeción de valor, es de trámite: teme que aquí se lo compliquen.',
+             preguntar: '¿Sabe cuánto le cubren y qué documento le piden?' },
     cat: 'tercero',
     meta: { paso: 'L · ¡Listo!', perfil: 'Tecnológico', tecnica: 'porque', tecnica2: 'balanza', cierre: 'iniciativa' },
     titulo: 'Me lo cubre el seguro / la empresa',
@@ -705,6 +733,8 @@
   /* ---------------------------------------------------------- 14 */
   {
     id: 'tiempo-entrega',
+    flash: { porque: 'Tiene una fecha concreta en la cabeza y nadie se la ha preguntado.',
+             preguntar: '¿Para cuándo los necesita exactamente? ¿Tiene algún viaje o compromiso?' },
     cat: 'proceso',
     meta: { paso: 'L · ¡Listo!', perfil: 'Tecnológico', tecnica: 'balanza', tecnica2: null, cierre: 'iniciativa' },
     titulo: 'Es mucho tiempo de espera / los necesito ya',
@@ -754,6 +784,8 @@
   /* ---------------------------------------------------------- 15 */
   {
     id: 'solo-vine-al-examen',
+    flash: { porque: 'No es un no: todavía no le diste ninguna razón para comprar aquí.',
+             preguntar: '¿Me permite dos minutos para mostrarle qué es lo que su receta necesita?' },
     cat: 'apertura',
     meta: { paso: 'S · Salud Visual', perfil: 'Busca precios', tecnica: 'aplazamiento', tecnica2: 'boomerang', cierre: 'consultivo' },
     titulo: 'Solo vine por el examen / solo quiero la receta',
@@ -804,6 +836,8 @@
   /* ---------------------------------------------------------- 16 */
   {
     id: 'solo-estoy-viendo',
+    flash: { porque: 'Es un escudo automático que trae de todas las tiendas, no un rechazo a vos.',
+             preguntar: '¿Anda buscando algo para el sol, para la computadora, o quiere el examen de cortesía?' },
     cat: 'apertura',
     meta: { paso: 'V · Vincula', perfil: 'Primerizo', tecnica: 'aplazamiento', tecnica2: null, cierre: 'consultivo' },
     titulo: 'Solo estoy viendo / cliente llega distante',
@@ -852,6 +886,8 @@
   /* ---------------------------------------------------------- 17 */
   {
     id: 'ya-se-mi-graduacion',
+    flash: { porque: 'Quiere ahorrar tiempo, no discutir con vos.',
+             preguntar: '¿Hace cuánto fue ese examen? ¿Ha notado vista cansada al final del día?' },
     cat: 'apertura',
     meta: { paso: 'I · Indaga', perfil: 'Sabelotodo', tecnica: 'sipero', tecnica2: 'porque', cierre: 'consultivo' },
     titulo: 'Ya sé mi graduación, no necesito examen',
@@ -900,6 +936,8 @@
   /* ---------------------------------------------------------- 18 */
   {
     id: 'no-tengo-tiempo-examen',
+    flash: { porque: 'Es real y legítima: no hay que vencerla, hay que dimensionarla.',
+             preguntar: '¿Cuánto tiempo tiene ahorita? Para decirle si alcanza o si mejor le agendo.' },
     cat: 'proceso',
     meta: { paso: 'S · Salud Visual', perfil: 'Tecnológico', tecnica: 'balanza', tecnica2: null, cierre: 'iniciativa' },
     titulo: 'No tengo tiempo para el examen',
@@ -948,6 +986,8 @@
   /* ---------------------------------------------------------- 19 */
   {
     id: 'no-me-gusta-ninguna',
+    flash: { porque: 'Le mostraste demasiado, o le mostraste lo que a vos te gusta.',
+             preguntar: '¿Qué le cambiaría a estas opciones: el estilo, el color o el tamaño?' },
     cat: 'duda',
     meta: { paso: 'U · Un aro para ti', perfil: 'A la moda', tecnica: 'porque', tecnica2: null, cierre: 'eleccion' },
     titulo: 'No me gusta ninguno de los aros',
@@ -1107,8 +1147,44 @@
     return L.join('\n');
   }
 
+  /**
+   * Versión CORTA para el chat: lo mínimo que el asesor necesita con el
+   * cliente enfrente. El guion completo vive en la herramienta.
+   * Devuelve { texto, voz, fuente } — 'voz' es el mismo contenido pero
+   * escrito para que suene natural al leerse en voz alta.
+   */
+  function flashChat(o) {
+    var t1 = TECNICAS[o.meta.tecnica];
+    var ci = CIERRES[o.meta.cierre];
+    var evitar = o.evitar[0].replace(/\s*—.*$/, '');
+    var dosPuntos = evitar.indexOf(': ');
+    if (dosPuntos >= 30) evitar = evitar.slice(0, dosPuntos) + '.';
+    var titulo = o.titulo.split(' / ')[0];
+    var decir  = o.flash.decir || o.frase;
+
+    var texto =
+      '🛡️ ' + titulo + '\n\n' +
+      o.flash.porque + '\n\n' +
+      '👉 PREGUNTÁ\n' + o.flash.preguntar + '\n\n' +
+      '💬 DECÍ\n' + decir + '\n\n' +
+      '✕ EVITÁ\n' + evitar;
+
+    var voz =
+      titulo + '. ' +
+      o.flash.porque + ' ' +
+      'Preguntale. ' + o.flash.preguntar + ' ' +
+      'Y decile. ' + decir + ' ' +
+      'Evitá esto. ' + evitar;
+
+    return {
+      texto: texto,
+      voz: voz,
+      fuente: 'Técnica ' + t1.nombre + ' · Cierre ' + ci.nombre + ' · Paso ' + o.meta.paso
+    };
+  }
+
   global.CVP_OBJECIONES = {
-    version: '2.0',
+    version: '2.1',
     categorias: CATEGORIAS,
     tecnicas: TECNICAS,
     cierres: CIERRES,
@@ -1117,6 +1193,7 @@
     evaluar: evaluar,
     detectar: detectar,
     respuestaChat: respuestaChat,
+    flashChat: flashChat,
     porId: function (id) {
       return OBJECIONES.filter(function (o) { return o.id === id; })[0] || null;
     }
