@@ -255,9 +255,15 @@ function readFile(f){
   const rd = new FileReader();
   rd.onload = ev => {
     const wb = XLSX.read(new Uint8Array(ev.target.result), { type: "array" });
-    const ws = wb.Sheets[wb.SheetNames[0]];
-    const aoa = XLSX.utils.sheet_to_json(ws, { header: 1, defval: "", raw: false });
-    parseAoa(aoa);
+    // Busca la hoja que tenga la columna Usuario/Correo (prioriza la llamada "Usuarios")
+    const orden = [...wb.SheetNames].sort((a,b) => (norm(b)==="usuarios") - (norm(a)==="usuarios"));
+    const tieneUsuario = aoa => aoa.slice(0,10).some(r => r.some(c => ["usuario","correo","email","e-mail","correo electronico"].includes(norm(c))));
+    let aoa = null;
+    for (const sn of orden) {
+      const a = XLSX.utils.sheet_to_json(wb.Sheets[sn], { header: 1, defval: "", raw: false });
+      if (tieneUsuario(a)) { aoa = a; break; }
+    }
+    parseAoa(aoa || XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], { header: 1, defval: "", raw: false }));
     $("fileName").textContent = "📎 " + f.name;
   };
   rd.readAsArrayBuffer(f);
