@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Alta masiva de usuarios · Academia CV+</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{
+  --cyan:#00abc8; --cyan-d:#008aa3; --gold:#ffc629; --carbon:#373a36;
+  --bg:#f4f7f9; --card:#fff; --line:#dde5ea; --muted:#6b7780;
+  --ok:#1e9e5a; --warn:#d98a00; --err:#d0392b; --info:#2a7fd4;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Poppins,system-ui,sans-serif;background:var(--bg);color:var(--carbon);font-size:14px}
+header{background:var(--carbon);color:#fff;padding:14px 20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;border-bottom:4px solid var(--gold)}
+header img{height:34px;background:#fff;border-radius:6px;padding:3px 6px}
+header h1{font-size:18px;margin:0;font-weight:600}
+header .sp{flex:1}
+header .who{font-size:12px;opacity:.85}
+main{max-width:1200px;margin:0 auto;padding:20px 16px 60px}
+.card{background:var(--card);border-radius:14px;box-shadow:0 2px 10px rgba(0,0,0,.05);padding:20px;margin-bottom:18px}
+.card h2{margin:0 0 4px;font-size:16px;font-weight:600;display:flex;align-items:center;gap:8px}
+.card h2 .n{background:var(--cyan);color:#fff;border-radius:50%;width:24px;height:24px;display:inline-flex;align-items:center;justify-content:center;font-size:13px}
+.card p.sub{margin:0 0 14px;color:var(--muted);font-size:13px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+input,select{font-family:inherit;font-size:13px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--carbon);min-width:0}
+input:focus,select:focus{outline:2px solid var(--cyan);border-color:transparent}
+button{font-family:inherit;font-size:13px;font-weight:600;border:0;border-radius:8px;padding:9px 16px;cursor:pointer;background:var(--cyan);color:#fff;transition:.15s}
+button:hover{background:var(--cyan-d)}
+button.sec{background:#fff;color:var(--carbon);border:1px solid var(--line)}
+button.sec:hover{border-color:var(--cyan);color:var(--cyan)}
+button.gold{background:var(--gold);color:var(--carbon)}
+button.gold:hover{filter:brightness(.95)}
+button.danger{background:#fff;color:var(--err);border:1px solid #f0c9c4}
+button:disabled{opacity:.45;cursor:not-allowed}
+.drop{border:2px dashed var(--line);border-radius:12px;padding:26px;text-align:center;color:var(--muted);cursor:pointer;transition:.15s}
+.drop.over,.drop:hover{border-color:var(--cyan);background:#effafc;color:var(--cyan-d)}
+.drop b{color:var(--carbon)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin:14px 0}
+.kpi{border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+.kpi .v{font-size:22px;font-weight:700}
+.kpi .l{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.kpi.ok .v{color:var(--ok)} .kpi.err .v{color:var(--err)} .kpi.warn .v{color:var(--warn)} .kpi.info .v{color:var(--cyan-d)}
+.tablewrap{overflow:auto;max-height:60vh;border:1px solid var(--line);border-radius:10px}
+table{border-collapse:collapse;width:100%;min-width:980px}
+th{position:sticky;top:0;background:#f0f4f6;font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);text-align:left;padding:8px;z-index:1}
+td{border-top:1px solid var(--line);padding:5px 6px;vertical-align:middle}
+td input,td select{width:100%;padding:6px 7px;font-size:12.5px}
+td.uid{font-family:ui-monospace,monospace;font-size:11px;color:var(--muted);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+tr.locked td input,tr.locked td select{background:#f7f9fa;color:var(--muted)}
+.badge{display:inline-block;font-size:11px;font-weight:600;padding:3px 8px;border-radius:20px;white-space:nowrap}
+.b-pend{background:#eef3f6;color:var(--muted)} .b-ok{background:#e3f5eb;color:var(--ok)}
+.b-err{background:#fbe7e5;color:var(--err)} .b-warn{background:#fff3d6;color:#9a6500}
+.b-skip{background:#e8f0fb;color:var(--info)} .b-run{background:#dff6fa;color:var(--cyan-d)}
+.msg{font-size:11px;color:var(--err);margin-top:2px}
+.progress{height:10px;background:#eef3f6;border-radius:6px;overflow:hidden;margin:12px 0 6px}
+.progress div{height:100%;width:0;background:linear-gradient(90deg,var(--cyan),var(--gold));transition:width .3s}
+.log{font-family:ui-monospace,monospace;font-size:12px;background:#1f2321;color:#d7e3e0;border-radius:10px;padding:10px 12px;max-height:200px;overflow:auto;white-space:pre-wrap}
+.note{background:#fffaf0;border-left:4px solid var(--gold);padding:10px 12px;border-radius:6px;font-size:12.5px;color:#5a4a1c}
+label.chk{display:flex;gap:6px;align-items:center;font-size:13px;cursor:pointer}
+.login{max-width:380px;margin:40px auto}
+.login input{width:100%;margin-bottom:10px}
+.hide{display:none!important}
+.x{background:none;color:var(--muted);padding:4px 6px;font-size:15px}
+.x:hover{background:#fbe7e5;color:var(--err)}
+@media (max-width:640px){header h1{font-size:15px}.card{padding:14px}}
+</style>
+</head>
+<body>
+<header>
+  <img src="../logo-cvplus.svg" alt="CV+" onerror="this.style.display='none'">
+  <h1>Academia CV+ · Alta masiva de usuarios</h1>
+  <span class="sp"></span>
+  <span class="who" id="who"></span>
+  <button class="sec hide" id="btnLogout" style="padding:6px 12px">Salir</button>
+</header>
+
+<main>
+  <!-- LOGIN -->
+  <section class="card login hide" id="secLogin">
+    <h2>🔐 Acceso de administrador</h2>
+    <p class="sub">Solo los administradores de la Academia pueden crear usuarios.</p>
+    <input type="email" id="lgEmail" placeholder="Correo de administrador" autocomplete="username">
+    <input type="password" id="lgPass" placeholder="Contraseña" autocomplete="current-password">
+    <button id="btnLogin" style="width:100%">Entrar</button>
+    <div class="msg" id="lgMsg"></div>
+  </section>
+
+  <div id="app" class="hide">
+    <!-- 1. CARGAR -->
+    <section class="card">
+      <h2><span class="n">1</span> Cargar listado</h2>
+      <p class="sub">Sube el Excel con las columnas <b>UID · Nombre · Usuario · Sucursal · Cargo · Rol · Contraseña</b> (el mismo formato de tu listado maestro). Las filas que ya tienen UID se marcan como creadas y no se tocan.</p>
+      <div class="drop" id="drop">
+        <div style="font-size:28px">📄</div>
+        <div><b>Arrastra el Excel aquí</b> o haz clic para seleccionarlo (.xlsx, .xls, .csv)</div>
+        <input type="file" id="file" accept=".xlsx,.xls,.csv" class="hide">
+      </div>
+      <div class="row" style="margin-top:12px">
+        <button class="sec" id="btnAdd">＋ Agregar fila manual</button>
+        <button class="sec" id="btnTemplate">⬇ Descargar plantilla</button>
+        <button class="danger" id="btnClear">Vaciar lista</button>
+        <span class="sp" style="flex:1"></span>
+        <span id="fileName" style="color:var(--muted);font-size:12px"></span>
+      </div>
+    </section>
+
+    <!-- 2. REVISAR -->
+    <section class="card">
+      <h2><span class="n">2</span> Revisar y completar</h2>
+      <p class="sub">Puedes editar cualquier celda de las filas pendientes. Las filas con errores no se crearán.</p>
+      <div class="row">
+        <label class="chk"><input type="checkbox" id="autoPass" checked> Generar contraseñas vacías con el patrón</label>
+        <input id="passPrefix" value="Acceso" style="width:100px" title="Prefijo">
+        <span>desde el número</span>
+        <input id="passStart" type="number" min="1" value="1" style="width:80px">
+        <button class="sec" id="btnGen">Aplicar</button>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <span>Rellenar vacíos →</span>
+        <span>Rol:</span>
+        <select id="defRole"></select>
+        <span>Cargo:</span>
+        <input id="defPos" placeholder="Ej. Asesor visual" style="width:150px">
+        <span>Sucursal:</span>
+        <input id="defBranch" list="branches" placeholder="Ej. Plaza Mundo" style="width:160px">
+        <button class="sec" id="btnFill">Aplicar a vacíos</button>
+      </div>
+      <div class="kpis" id="kpis"></div>
+      <div class="tablewrap">
+        <table>
+          <thead><tr>
+            <th>#</th><th>Nombre</th><th>Usuario (correo)</th><th>Sucursal</th><th>Cargo</th><th>Rol</th><th>Contraseña</th><th>UID</th><th>Estado</th><th></th>
+          </tr></thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+      <datalist id="branches"></datalist>
+    </section>
+
+    <!-- 3. CREAR -->
+    <section class="card">
+      <h2><span class="n">3</span> Crear en Firebase</h2>
+      <p class="sub">Crea la cuenta en Authentication y su perfil en Firestore (<code>users/{uid}</code>) con nombre, sucursal, cargo y rol, para que al primer ingreso ya vea la academia correcta.</p>
+      <div class="row">
+        <label class="chk"><input type="checkbox" id="updExisting"> Si el correo ya existe, actualizar su sucursal / cargo / rol / nombre</label>
+      </div>
+      <div class="row" style="margin-top:12px">
+        <button class="gold" id="btnRun">🚀 Crear usuarios pendientes</button>
+        <button class="sec" id="btnStop" disabled>Detener</button>
+        <span class="sp" style="flex:1"></span>
+        <button id="btnExport">⬇ Descargar listado actualizado (con UID)</button>
+      </div>
+      <div class="progress"><div id="bar"></div></div>
+      <div id="progTxt" style="font-size:12px;color:var(--muted);margin-bottom:8px">Listo para empezar.</div>
+      <div class="log" id="log">—</div>
+      <p class="note" style="margin-top:14px">
+        <b>Importante:</b> al terminar, descarga el listado actualizado: trae el UID de cada usuario creado y sirve como tu nuevo listado maestro.
+        Firebase limita la creación de cuentas desde un mismo equipo (aprox. 100 por hora); si se alcanza el límite, la herramienta pausa y reintenta sola.
+      </p>
+    </section>
+  </div>
+</main>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
+import { getAuth, initializeAuth, inMemoryPersistence, onAuthStateChanged, signInWithEmailAndPassword,
+         createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js";
+import { getFirestore, doc, setDoc, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js";
+
+/* ───── Configuración (la misma de index.html) ───── */
+const firebaseConfig = {
+  apiKey: "AIzaSyBoZ1CcQVNhqCNIfn2k4y6YA9Dt3cm4a0o",
+  authDomain: "cvmas-academia.firebaseapp.com",
+  projectId: "cvmas-academia",
+  storageBucket: "cvmas-academia.firebasestorage.app",
+  messagingSenderId: "187622570860",
+  appId: "1:187622570860:web:2d1b6410db3838e1fc1149"
+};
+const ADMIN_EMAILS = ["oskarmchdo@gmail.com","alevargas93@hotmail.com","adal.velasquez@index-7.com"];
+const ROLES = [
+  ["participant","participant (asesor)"],
+  ["optometra","optometra (academia óptica)"],
+  ["viewer","viewer (solo ver)"],
+  ["admin_opto","admin_opto"],
+  ["admin","admin"]
+];
+const KNOWN_BRANCHES = ["Acajutla","Aguilares","Alta Vista","Apopa","Armenia","Coberturas","El Paseo","Empresarial",
+  "Encuentro Lourdes","Encuentro Santa Ana","Encuentro Zacatecoluca","Galerias","Las Ramblas","Metrocentro 1",
+  "Metrocentro 2","Metrocentro Lourdes","Metrocentro Santa Ana","Multiplaza","Plaza Mundo","Puerto de La Libertad",
+  "San Francisco Gotera","San Gabriel","San Marcos","San Martin","San Miguel","Santa Rosa","Sonsonate",
+  "Unicentro Soyapango","Usulutan","Valle Dulce","Zacatecoluca Centro"];
+const DELAY_MS = 700;
+
+/* App principal (sesión del admin, comparte sesión con la Academia)
+   + app secundaria en memoria para crear cuentas sin cerrar la sesión del admin */
+const app  = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db   = getFirestore(app);
+const app2  = initializeApp(firebaseConfig, "creador-masivo");
+const auth2 = initializeAuth(app2, { persistence: inMemoryPersistence });
+const db2   = getFirestore(app2);
+
+/* ───── Estado ───── */
+let rows = [];      // {name,email,branch,position,role,password,uid,status,msg,locked}
+let running = false, stopFlag = false;
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const norm = s => String(s ?? "").normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().trim();
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+function normRole(v){
+  const n = norm(v);
+  if (!n) return "";
+  if (n.startsWith("optomet")) return "optometra";
+  if (n.startsWith("asesor") || n.startsWith("particip")) return "participant";
+  if (n === "admin_opto" || n === "admin opto") return "admin_opto";
+  if (n === "admin" || n === "administrador") return "admin";
+  if (n === "viewer" || n.startsWith("visor") || n.startsWith("solo")) return "viewer";
+  return ROLES.some(r => r[0] === n) ? n : n;
+}
+
+/* ───── Login ───── */
+onAuthStateChanged(auth, user => {
+  if (user && ADMIN_EMAILS.includes((user.email||"").toLowerCase())) {
+    $("secLogin").classList.add("hide"); $("app").classList.remove("hide");
+    $("who").textContent = "👤 " + user.email; $("btnLogout").classList.remove("hide");
+  } else {
+    $("app").classList.add("hide"); $("secLogin").classList.remove("hide");
+    $("btnLogout").classList.add("hide"); $("who").textContent = "";
+    if (user) $("lgMsg").textContent = "Esta cuenta no tiene permisos de administrador para esta herramienta.";
+  }
+});
+$("btnLogin").onclick = async () => {
+  $("lgMsg").textContent = "";
+  try { await signInWithEmailAndPassword(auth, $("lgEmail").value.trim(), $("lgPass").value); }
+  catch(e){ $("lgMsg").textContent = "No se pudo entrar: " + friendly(e); }
+};
+$("lgPass").addEventListener("keydown", e => { if (e.key === "Enter") $("btnLogin").click(); });
+$("btnLogout").onclick = () => signOut(auth);
+
+/* ───── Carga de Excel ───── */
+const drop = $("drop");
+drop.onclick = () => $("file").click();
+drop.ondragover = e => { e.preventDefault(); drop.classList.add("over"); };
+drop.ondragleave = () => drop.classList.remove("over");
+drop.ondrop = e => { e.preventDefault(); drop.classList.remove("over"); if (e.dataTransfer.files[0]) readFile(e.dataTransfer.files[0]); };
+$("file").onchange = e => { if (e.target.files[0]) readFile(e.target.files[0]); e.target.value = ""; };
+
+function readFile(f){
+  const rd = new FileReader();
+  rd.onload = ev => {
+    const wb = XLSX.read(new Uint8Array(ev.target.result), { type: "array" });
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    const aoa = XLSX.utils.sheet_to_json(ws, { header: 1, defval: "", raw: false });
+    parseAoa(aoa);
+    $("fileName").textContent = "📎 " + f.name;
+  };
+  rd.readAsArrayBuffer(f);
+}
+
+function parseAoa(aoa){
+  if (!aoa.length) return alert("El archivo está vacío.");
+  // Busca la fila de encabezados en las primeras 10 filas
+  let hIdx = aoa.slice(0,10).findIndex(r => r.some(c => ["usuario","correo","email","e-mail","correo electronico"].includes(norm(c))));
+  if (hIdx < 0) return alert("No encontré la columna 'Usuario' (o 'Correo'). Revisa los encabezados o usa la plantilla.");
+  const H = aoa[hIdx].map(norm);
+  const find = (...names) => H.findIndex(h => names.includes(h));
+  const col = {
+    uid: find("uid","id"),
+    name: find("nombre","nombre completo","name"),
+    email: find("usuario","correo","email","e-mail","correo electronico"),
+    branch: find("sucursal","branch","tienda"),
+    position: find("cargo","puesto","position"),
+    role: find("rol","role"),
+    password: find("contrasena","contraseña","password","clave","pass")
+  };
+  // En el listado maestro la contraseña está en una columna sin encabezado
+  if (col.password < 0) {
+    const used = new Set(Object.values(col).filter(i => i >= 0));
+    const maxLen = Math.max(...aoa.slice(hIdx+1).map(r => r.length), H.length);
+    for (let i = 0; i < maxLen; i++) if (!used.has(i) && !H[i]) { col.password = i; break; }
+  }
+  const get = (r,k) => col[k] >= 0 ? String(r[col[k]] ?? "").trim() : "";
+  const seen = new Set(rows.map(r => r.email.toLowerCase()));
+  let added = 0, dup = 0;
+  for (const r of aoa.slice(hIdx+1)) {
+    const email = get(r,"email");
+    if (!email && !get(r,"name")) continue;
+    if (email && seen.has(email.toLowerCase())) { dup++; continue; }
+    seen.add(email.toLowerCase());
+    const uid = get(r,"uid");
+    rows.push({
+      name: get(r,"name"), email, branch: get(r,"branch"), position: get(r,"position"),
+      role: normRole(get(r,"role")), password: get(r,"password"), uid,
+      status: uid ? "skip" : "pend", msg: uid ? "Ya creado" : "", locked: !!uid
+    });
+    added++;
+  }
+  suggestPassStart();
+  render();
+  log(`Archivo cargado: ${added} filas (${rows.filter(r=>r.locked).length} ya tenían UID)` + (dup ? `, ${dup} correos repetidos omitidos.` : "."));
+}
+
+/* ───── Contraseñas automáticas ───── */
+function suggestPassStart(){
+  const pre = norm($("passPrefix").value);
+  let max = 0;
+  for (const r of rows) {
+    const m = norm(r.password).match(new RegExp("^" + pre.replace(/[.*+?^${}()|[\]\\]/g,"\\$&") + "(\\d+)$"));
+    if (m) max = Math.max(max, parseInt(m[1],10));
+  }
+  $("passStart").value = max + 1;
+}
+function genPasswords(){
+  if (!$("autoPass").checked) return;
+  const pre = $("passPrefix").value.trim() || "Acceso";
+  let n = parseInt($("passStart").value,10) || 1;
+  for (const r of rows) if (!r.locked && !r.password) r.password = pre + String(n++).padStart(2,"0");
+  $("passStart").value = n;
+  render();
+}
+$("btnGen").onclick = genPasswords;
+
+$("btnFill").onclick = () => {
+  const ro = $("defRole").value, po = $("defPos").value.trim(), br = $("defBranch").value.trim();
+  for (const r of rows) if (!r.locked) {
+    if (!r.role && ro) r.role = ro;
+    if (!r.position && po) r.position = po;
+    if (!r.branch && br) r.branch = br;
+  }
+  render();
+};
+
+$("btnAdd").onclick = () => {
+  rows.push({ name:"", email:"", branch:"", position:"", role:"", password:"", uid:"", status:"pend", msg:"", locked:false });
+  render();
+  const inputs = $("tbody").querySelectorAll("tr:last-child input");
+  if (inputs[0]) inputs[0].focus();
+};
+$("btnClear").onclick = () => { if (!running && confirmClear()) { rows = []; $("fileName").textContent=""; render(); } };
+function confirmClear(){ return rows.length === 0 || window.confirm("¿Vaciar toda la lista cargada?"); }
+
+$("btnTemplate").onclick = () => {
+  const ws = XLSX.utils.aoa_to_sheet([
+    ["UID","Nombre","Usuario","Sucursal","Cargo","Rol","Contraseña"],
+    ["","Nombre Apellido","correo@ejemplo.com","Plaza Mundo","Asesor visual","participant",""],
+    ["","Nombre Apellido","otro@ejemplo.com","Coberturas","Optometra","optometra",""]
+  ]);
+  ws["!cols"] = [{wch:30},{wch:24},{wch:32},{wch:22},{wch:16},{wch:12},{wch:14}];
+  const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Usuarios");
+  XLSX.writeFile(wb, "Plantilla_alta_usuarios_AcademiaCV.xlsx");
+};
+
+/* ───── Validación ───── */
+function validate(r, i){
+  if (r.locked) return "";
+  const errs = [];
+  if (!r.name) errs.push("Falta nombre");
+  if (!EMAIL_RE.test(r.email)) errs.push("Correo inválido");
+  else if (rows.some((o,j) => j !== i && o.email.toLowerCase() === r.email.toLowerCase())) errs.push("Correo repetido");
+  if (!r.password || r.password.length < 6) errs.push("Contraseña mín. 6 caracteres");
+  if (r.role && !ROLES.some(x => x[0] === r.role)) errs.push("Rol no válido");
+  return errs.join(" · ");
+}
+
+/* ───── Render ───── */
+const BADGE = { pend:["b-pend","Pendiente"], ok:["b-ok","Creado"], err:["b-err","Error"], warn:["b-warn","Ya existía"],
+                skip:["b-skip","Ya creado"], run:["b-run","Creando…"], upd:["b-ok","Actualizado"] };
+function render(){
+  const roleOpts = sel => `<option value="">— vacío (participant) —</option>` +
+    ROLES.map(([v,l]) => `<option value="${v}" ${v===sel?"selected":""}>${l}</option>`).join("") +
+    (sel && !ROLES.some(x=>x[0]===sel) ? `<option value="${esc(sel)}" selected>${esc(sel)} (?)</option>` : "");
+  $("tbody").innerHTML = rows.map((r,i) => {
+    const err = validate(r,i);
+    const dis = (r.locked || running) ? "disabled" : "";
+    const [cls,txt] = BADGE[r.status] || BADGE.pend;
+    return `<tr class="${r.locked?"locked":""}" data-i="${i}">
+      <td>${i+1}</td>
+      <td><input data-k="name" value="${esc(r.name)}" ${dis}></td>
+      <td><input data-k="email" value="${esc(r.email)}" ${dis}>${err?`<div class="msg">${esc(err)}</div>`:""}</td>
+      <td><input data-k="branch" list="branches" value="${esc(r.branch)}" ${dis}></td>
+      <td><input data-k="position" value="${esc(r.position)}" ${dis}></td>
+      <td><select data-k="role" ${dis}>${roleOpts(r.role)}</select></td>
+      <td><input data-k="password" value="${esc(r.password)}" ${dis}></td>
+      <td class="uid" title="${esc(r.uid)}">${esc(r.uid) || "—"}</td>
+      <td><span class="badge ${cls}">${txt}</span>${r.msg && r.status!=="skip" ? `<div class="msg" style="color:var(--muted)">${esc(r.msg)}</div>`:""}</td>
+      <td>${r.locked||running?"":`<button class="x" data-del="${i}" title="Quitar fila">✕</button>`}</td>
+    </tr>`;
+  }).join("") || `<tr><td colspan="10" style="text-align:center;color:var(--muted);padding:30px">Carga un Excel o agrega filas manualmente.</td></tr>`;
+
+  const brs = new Set(KNOWN_BRANCHES); rows.forEach(r => r.branch && brs.add(r.branch));
+  $("branches").innerHTML = [...brs].sort().map(b => `<option value="${esc(b)}">`).join("");
+
+  const pend = rows.filter((r,i) => !r.locked && r.status!=="ok" && r.status!=="upd" && r.status!=="warn");
+  const ready = pend.filter(r => !validate(r, rows.indexOf(r))).length;
+  const k = [
+    ["info", rows.length, "Filas"],
+    ["", rows.filter(r=>r.locked).length, "Ya tenían UID"],
+    ["info", ready, "Listas para crear"],
+    ["err", pend.length - ready, "Con errores"],
+    ["ok", rows.filter(r=>r.status==="ok").length, "Creadas hoy"],
+    ["warn", rows.filter(r=>r.status==="warn"||r.status==="upd").length, "Ya existían"]
+  ];
+  $("kpis").innerHTML = k.map(([c,v,l]) => `<div class="kpi ${c}"><div class="v">${v}</div><div class="l">${l}</div></div>`).join("");
+  $("btnRun").disabled = running || ready === 0;
+}
+$("tbody").addEventListener("change", e => {
+  const tr = e.target.closest("tr"); const k = e.target.dataset.k; if (!tr || !k) return;
+  const r = rows[+tr.dataset.i]; r[k] = e.target.value.trim();
+  if (k === "email") r.email = r.email.toLowerCase();
+  if (r.status === "err") { r.status = "pend"; r.msg = ""; }
+  render();
+});
+$("tbody").addEventListener("click", e => {
+  const d = e.target.dataset.del; if (d === undefined) return;
+  rows.splice(+d,1); render();
+});
+
+/* ───── Creación ───── */
+function log(t){
+  const el = $("log"); const ts = new Date().toLocaleTimeString("es-SV",{timeZone:"America/El_Salvador"});
+  el.textContent = (el.textContent === "—" ? "" : el.textContent + "\n") + `[${ts}] ${t}`;
+  el.scrollTop = el.scrollHeight;
+}
+function friendly(e){
+  const c = e?.code || "";
+  return ({
+    "auth/email-already-in-use":"El correo ya tiene cuenta",
+    "auth/invalid-email":"Correo inválido",
+    "auth/weak-password":"Contraseña débil (mín. 6)",
+    "auth/too-many-requests":"Demasiadas solicitudes (límite de Firebase)",
+    "auth/operation-not-allowed":"El acceso con correo/contraseña está desactivado en Firebase",
+    "auth/network-request-failed":"Sin conexión",
+    "auth/invalid-credential":"Correo o contraseña incorrectos",
+    "permission-denied":"Firestore rechazó la escritura (reglas de seguridad)"
+  })[c] || (e?.message || String(e));
+}
+function profile(r){
+  return { email: r.email.toLowerCase(), name: r.name, branch: r.branch || "Pendiente",
+           position: r.position || "Pendiente", role: r.role || "participant" };
+}
+async function writeProfile(uid, data, asNewUser){
+  try {
+    await setDoc(doc(db, "users", uid), data, { merge: true });
+    return "";
+  } catch(e) {
+    if (!asNewUser) throw e;
+    // Respaldo: si las reglas no dejan al admin crear el doc, lo crea el propio usuario
+    await setDoc(doc(db2, "users", uid), data, { merge: true });
+    return " (perfil guardado como el propio usuario)";
+  }
+}
+
+$("btnStop").onclick = () => { stopFlag = true; log("⏸ Deteniendo después de la fila actual…"); };
+
+$("btnRun").onclick = async () => {
+  const queue = rows.map((r,i)=>[r,i]).filter(([r,i]) => !r.locked && !["ok","upd","warn"].includes(r.status) && !validate(r,i));
+  if (!queue.length) return;
+  if (!window.confirm(`Se crearán ${queue.length} usuario(s) en Firebase. ¿Continuar?`)) return;
+  running = true; stopFlag = false; $("btnStop").disabled = false; render();
+  const admin = auth.currentUser?.email || "";
+  let done = 0, ok = 0, ex = 0, fail = 0;
+  log(`▶ Inicio: ${queue.length} usuarios por crear.`);
+
+  for (const [r] of queue) {
+    if (stopFlag) break;
+    r.status = "run"; r.msg = ""; render();
+    let attempts = 0;
+    while (true) {
+      try {
+        const cred = await createUserWithEmailAndPassword(auth2, r.email, r.password);
+        r.uid = cred.user.uid;
+        const extra = await writeProfile(r.uid, { ...profile(r), createdAt: new Date().toISOString(), createdBy: admin }, true);
+        await signOut(auth2);
+        r.status = "ok"; r.locked = true; r.msg = extra.trim(); ok++;
+        log(`✅ ${r.email} → ${r.uid}${extra}`);
+        break;
+      } catch(e) {
+        await signOut(auth2).catch(()=>{});
+        if (e.code === "auth/too-many-requests" && attempts < 3) {
+          attempts++;
+          for (let s = 60; s > 0 && !stopFlag; s--) { $("progTxt").textContent = `Límite de Firebase alcanzado. Reintentando en ${s}s… (intento ${attempts}/3)`; await sleep(1000); }
+          if (stopFlag) { r.status = "pend"; break; }
+          continue;
+        }
+        if (e.code === "auth/email-already-in-use") {
+          try {
+            const snap = await getDocs(query(collection(db, "users"), where("email", "==", r.email.toLowerCase())));
+            if (!snap.empty) {
+              r.uid = snap.docs[0].id;
+              if ($("updExisting").checked) {
+                await writeProfile(r.uid, { ...profile(r), updatedAt: new Date().toISOString(), updatedBy: admin }, false);
+                r.status = "upd"; r.msg = "Ya existía · perfil actualizado";
+              } else { r.status = "warn"; r.msg = "Ya existía · UID recuperado"; }
+            } else {
+              r.status = "warn"; r.msg = "Ya tiene cuenta, pero aún no ha ingresado (sin perfil). Su sucursal/cargo se asignan desde el panel cuando entre.";
+            }
+            r.locked = true;
+          } catch(e2) { r.status = "warn"; r.msg = "Ya tiene cuenta (no se pudo leer su perfil: " + friendly(e2) + ")"; }
+          ex++; log(`⚠️ ${r.email}: ${r.msg}`);
+          break;
+        }
+        r.status = "err"; r.msg = friendly(e); fail++;
+        log(`❌ ${r.email}: ${r.msg}`);
+        break;
+      }
+    }
+    done++;
+    $("bar").style.width = Math.round(done / queue.length * 100) + "%";
+    $("progTxt").textContent = `${done} de ${queue.length} procesados · ${ok} creados · ${ex} ya existían · ${fail} con error`;
+    render();
+    await sleep(DELAY_MS);
+  }
+
+  running = false; $("btnStop").disabled = true; render();
+  log(`■ Fin: ${ok} creados, ${ex} ya existían, ${fail} con error${stopFlag ? " (detenido manualmente)" : ""}.`);
+  if (ok + ex > 0) log("👉 Descarga el listado actualizado para guardar los UID.");
+};
+
+/* ───── Exportar ───── */
+$("btnExport").onclick = () => {
+  if (!rows.length) return alert("No hay filas para exportar.");
+  const label = { pend:"Pendiente", ok:"Creado", err:"Error", warn:"Ya existía", skip:"Ya creado", upd:"Actualizado", run:"Pendiente" };
+  const aoa = [["UID","Nombre","Usuario","Sucursal","Cargo","Rol","Contraseña","Estado","Detalle"]];
+  for (const r of rows) aoa.push([r.uid, r.name, r.email, r.branch, r.position, r.role, r.password, label[r.status]||"", r.status==="skip"?"":r.msg]);
+  const ws = XLSX.utils.aoa_to_sheet(aoa);
+  ws["!cols"] = [{wch:30},{wch:26},{wch:34},{wch:22},{wch:16},{wch:12},{wch:14},{wch:12},{wch:40}];
+  ws["!autofilter"] = { ref: `A1:I${aoa.length}` };
+  const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, "Usuarios");
+  const d = new Date().toLocaleDateString("sv-SE",{timeZone:"America/El_Salvador"});
+  XLSX.writeFile(wb, `Listado_usuarios_AcademiaCV_${d}.xlsx`);
+};
+
+/* ───── Inicio ───── */
+$("defRole").innerHTML = `<option value="">— no cambiar —</option>` + ROLES.map(([v,l]) => `<option value="${v}">${l}</option>`).join("");
+window.addEventListener("beforeunload", e => { if (running) { e.preventDefault(); e.returnValue = ""; } });
+render();
+</script>
+</body>
+</html>
