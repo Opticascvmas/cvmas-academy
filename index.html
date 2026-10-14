@@ -235,6 +235,7 @@ min-height:260px;
     .cat-fabricacion { background:#F3E5F5; color:#6A1B9A; }
     .cat-akkurat { background:#E8F5E9; color:#2E7D32; }
     .cat-ventas { background:#FFF8E1; color:#E65100; }
+    .cat-credito { background:#E0F7FA; color:#00838F; }
 
     /* ─── MODULE VIEW ─── */
     #module-view { display:none; }
@@ -3186,6 +3187,253 @@ const MODULO_INGLES_0 = {
 // Nivel 0 se inyecta con id propio y va PRIMERO en la lista de la categoría
 MODULES_ASESOR.push((function(){ var c={}; for(var k in MODULO_INGLES_0) c[k]=MODULO_INGLES_0[k]; c.id=24; return c; })());
 MODULES_OPTO.push((function(){ var c={}; for(var k in MODULO_INGLES_0) c[k]=MODULO_INGLES_0[k]; c.id=7;  return c; })());
+// ═══════════════════════════════════════════════════════════════════════
+// 💳 MÓDULO FLEXI-CUOTAS (Proceso de crédito con Grupo Monge · GMG)
+// Fuente: Manual «Proceso Flexi-Cuotas paso a paso» · versión octubre 2026
+// y capacitación virtual Flexi-Cuotas · octubre 2026.
+// - Va en las DOS academias (asesores id 25 · optometristas id 8).
+// - Siempre desbloqueado: su categoría 'credito' está en RUTAS_LIBRES.
+// - chain:'credito' → ruta propia, no bloquea ni depende de otros módulos.
+// - passingScore:85 → este módulo se aprueba con 85% (los demás siguen en 80%).
+// ═══════════════════════════════════════════════════════════════════════
+const MODULO_FLEXI = {
+  title:"Flexi-Cuotas: Proceso de Crédito", icon:"💳",
+  category:"credito", chain:"credito", quizCount:20, passingScore:85,
+  content:`
+    <h2>Flexi-Cuotas: ofrécelo sin miedo</h2>
+    <p>Flexi-Cuotas es el convenio de crédito de Ópticas CV+ con <strong>Grupo Monge (GMG)</strong>: el cliente se lleva hoy sus anteojos y los paga en cuotas. Este módulo resume el <strong>proceso oficial actualizado (octubre 2026)</strong>, que ahora es <strong>un solo flujo de 9 pasos (del 0 al 8)</strong>, y lo que cambió respecto al proceso anterior.</p>
+    <div class="info-box">🎯 <strong>Para aprobar este módulo necesitas 85%</strong> en el quiz. Es un proceso con dinero y documentos legales de por medio: un error cuesta la venta o deja una factura abierta.</div>
+
+    <h2>1. Lo que cambió en esta versión</h2>
+    <table class="comparison-table">
+      <tr><th>Cambio</th><th>Qué significa</th></tr>
+      <tr><td><strong>Promociones del mes</strong></td><td>Ahora SÍ se pueden ofrecer con Flexi-Cuotas. Lista de precios: <strong>Tarifa Flexicuotas</strong>.</td></tr>
+      <tr><td><strong>WAFI antes de pre-calificar</strong></td><td>Verifica si el cliente está activo, su plan y cuánto tiene disponible.</td></tr>
+      <tr><td><strong>Nuevo cuadro precalificador</strong></td><td>Nuevas rutas en el chat center: opción 2 › 1 (pre-calificación) y 2 › 2 (evaluación final).</td></tr>
+      <tr><td><strong>Cabina obligatoria</strong></td><td>Llamada al <strong>2523-1556</strong> en todos los créditos nuevos.</td></tr>
+      <tr><td><strong>Planes actualizados</strong></td><td>Del 1 al 6 + Plan Empleado Monge. Primas según plan; el Plan WF no se ofrece.</td></tr>
+      <tr><td><strong>Doble aprobación</strong></td><td>Validación de Flexi + aprobación física de Créditos y Cobros CV+ <strong>antes de fabricar</strong>.</td></tr>
+    </table>
+
+    <h2>2. Pierde el miedo: lo que dicen los datos</h2>
+    <table class="comparison-table">
+      <tr><th>El miedo</th><th>El dato que lo desarma</th></tr>
+      <tr><td>«Me lo van a rechazar»</td><td><strong>6 de cada 10</strong> solicitudes se aprueban. Y con WAFI sabes desde el inicio si el cliente puede aplicar.</td></tr>
+      <tr><td>«El trámite es muy largo»</td><td>La evaluación toma <strong>alrededor de 60 minutos</strong>. Mientras tanto, sigues atendiendo.</td></tr>
+      <tr><td>«Si no lo aprueban, pierdo la venta»</td><td>Por eso decimos <strong>«pre-aprobación»</strong>. Si no pasa, la venta sigue: ofrécele la promoción del mes.</td></tr>
+      <tr><td>«Me da pena hablar de crédito»</td><td>No ofreces una deuda: ofreces que se lleve hoy lo que necesita. <strong>Desde $50.00</strong> y con plazo de <strong>hasta 36 meses</strong>.</td></tr>
+    </table>
+    <div class="tip-box">🏆 <strong>Reto del mes: ofrécelo a TODOS.</strong> Cada cliente que llega al precio escucha la opción Flexi-Cuotas, sin excepciones y sin adivinar quién califica. Ante un «está muy caro», responde con La Balanza: la cuota convierte un «está caro» en un «sí puedo». Promoción del mes + cuotas = dos razones para decir que sí.</div>
+
+    <h2>3. El proceso en un vistazo</h2>
+    <ol>
+      <li><strong>Paso 0 · Verificación en WAFI</strong> (WAFI) — NUEVO</li>
+      <li><strong>Paso 1 · Cliente y pedido</strong> (Odoo)</li>
+      <li><strong>Paso 2 · Pre-calificación</strong> (chat center WhatsApp)</li>
+      <li><strong>Paso 3 · Evaluación final y Cabina</strong> (chat center / correo)</li>
+      <li><strong>Paso 4 · Desembolso y documentos</strong> (Plataforma Flexi)</li>
+      <li><strong>Paso 5 · Validación y aprobación de documentos</strong> (correo · Odoo · envío físico) — NUEVO</li>
+      <li><strong>Paso 6 · Envío a fabricación</strong> (Odoo)</li>
+      <li><strong>Paso 7 · Entrega, factura y foto</strong> (Odoo)</li>
+      <li><strong>Paso 8 · Documentos a Créditos y Cobros CV+</strong> (correo)</li>
+    </ol>
+    <table class="comparison-table">
+      <tr><th>Tipo de cliente</th><th>Ruta</th></tr>
+      <tr><td>YA tiene o ha tenido crédito con GMG (WAFI › General muestra cuenta activa y disponible)</td><td>0 › 1 › 2 › 4 › 5 › 6 › 7 › 8</td></tr>
+      <tr><td>NO ha tenido crédito con GMG (se evalúa desde cero)</td><td>0 › 1 › 2 (opcional) › 3 › 4 › 5 › 6 › 7 › 8</td></tr>
+    </table>
+    <div class="info-box">💡 <strong>¿Flexi-Cuotas te envía un cliente que ya está aprobado?</strong> No repitas trámites: crea el pedido (Paso 1) y ve directo a descargar los documentos (Paso 4).</div>
+
+    <h2>Paso 0 · Verificación previa en WAFI</h2>
+    <p>Antes de pre-calificar, consulta al cliente en WAFI, apenas muestre interés. Todo se hace desde la pestaña <strong>Gestiones</strong>, que tiene cuatro pestañas:</p>
+    <table class="comparison-table">
+      <tr><th>Pestaña</th><th>Para qué sirve</th></tr>
+      <tr><td><strong>General</strong></td><td>Ver si la cuenta está activa, qué plan tiene y cuánto tiene disponible.</td></tr>
+      <tr><td><strong>Cambio de PF</strong></td><td>Cambiar el plan financiero cuando el cliente tiene un plan de moto.</td></tr>
+      <tr><td><strong>Bloqueo</strong></td><td>Retener a un cliente nuevo: la cuenta se bloquea <strong>60 minutos</strong> para que otra óptica no se lo lleve.</td></tr>
+      <tr><td><strong>Cambio de status</strong></td><td>Desbloquear una cuenta bloqueada para poder facturar.</td></tr>
+    </table>
+    <div class="tip-box">⏱️ Tiempo máximo de espera para una respuesta en WAFI: <strong>20 minutos</strong>. WAFI es para <strong>consultar y gestionar</strong>: la facturación y los documentos finales del crédito se hacen <strong>solo en la Plataforma Flexi</strong> (Paso 4), nunca en WAFI.</div>
+
+    <h3>A. Revisa el plan antes de ofrecer (pestaña General)</h3>
+    <table class="comparison-table">
+      <tr><th>Si WAFI muestra…</th><th>Prima</th><th>Qué haces</th></tr>
+      <tr><td>Plan 1 y Plan 2</td><td>Sin prima</td><td>Si el cliente quiere dar prima, puede mejorar la tasa y bajar su cuota.</td></tr>
+      <tr><td>Plan 3 al Plan 5</td><td>Piden prima</td><td>Plan 5 informal (menor de 22 años con récord crediticio): prima del 10%.</td></tr>
+      <tr><td>Plan 6</td><td>15%</td><td>Siempre, diga o no la palabra «prima».</td></tr>
+      <tr><td>Plan «Moto» (ej. Plan #2 Moto)</td><td>Cámbialo</td><td>Haz Cambio de PF para pasarlo a su plan normal (ej. Plan #2).</td></tr>
+      <tr><td>Plan WF</td><td>No se ofrece</td><td>No se puede facturar aunque diga «cuenta activa».</td></tr>
+    </table>
+    <p>Los cambios de plan del 1 al 6 por buen comportamiento de pago se evalúan caso a caso con el ejecutivo de Flexi-Cuotas.</p>
+
+    <h3>B. Cambio de PF: de plan moto a plan normal</h3>
+    <p>Documentos para el cambio: <strong>DUI, Adenda, cuadro de evaluación, foto del cliente, recibo de agua o luz, comprobante de ingresos y solicitud de referencias</strong>. Plan financiero nuevo y comentario: <em>«CAMBIO DE PLAN // ÓPTICA CV+ [tu sucursal]»</em>.</p>
+
+    <h3>C. Bloqueo: retén a tu cliente nuevo</h3>
+    <ul>
+      <li><strong>¿Cuándo?</strong> Cliente nuevo que no cierra hoy y dice que va a regresar (por ejemplo, con la prima).</li>
+      <li><strong>¿Qué logra?</strong> La cuenta queda bloqueada 60 minutos: no se puede desembolsar en otra óptica.</li>
+      <li><strong>¿Cómo?</strong> Tipo de inicio de gestión: <strong>«A solicitud del cliente»</strong>, escribe el comentario y da clic en <strong>Inicio Bloqueo</strong>. Comentario: <em>«Su apoyo con bloqueo // motivo // CV+ [tu sucursal]»</em>.</li>
+    </ul>
+
+    <h3>D. Cambio de status: desbloquea para facturar</h3>
+    <ul>
+      <li>Status nuevo: <strong>CUENTA ACTIVA</strong> · Razón nuevo: <strong>Consumos recientes</strong>.</li>
+      <li>Comentario: <em>«Su apoyo con desbloqueo para facturar // CV+ [tu sucursal]»</em>. Luego, <strong>Iniciar Cambio Status</strong>.</li>
+      <li>Espera máximo 20 minutos. Si sigue bloqueada, revisa el histórico de la solicitud en <strong>Solicitudes de crédito</strong> para ver el motivo.</li>
+    </ul>
+
+    <h2>Paso 1 · Cliente y pedido en Odoo</h2>
+    <ol>
+      <li><strong>Crea al cliente</strong> (si no existe): Contactos › Nuevo. Nombre completo, dirección completa, puesto de trabajo, teléfono, móvil, correo, DUI, fecha de nacimiento, cómo nos conoció, pasatiempo, hijos, estado civil y <strong>todos los campos de RX</strong>. Si la venta se concreta, asocia la empresa <strong>GMG COMERCIAL EL SALVADOR, S.A. DE C.V.</strong></li>
+      <li><strong>Elige aro y lente con el cliente</strong> hasta la decisión final. Lista de precios: <strong>TARIFA FLEXICUOTAS</strong>, y ahora sí puedes aplicar las promociones vigentes del mes.</li>
+      <li><strong>Crea el pedido por el monto TOTAL</strong>, aunque GMG financie solo una parte, <strong>a nombre del titular del crédito</strong>. Si los lentes son para otra persona, el paciente va en <strong>Dependiente</strong>. Condiciones de pago: <strong>30 días</strong>.</li>
+      <li><strong>Registra pagos solo si</strong> el cliente da prima o si GMG no aprueba el monto total y el cliente paga la diferencia. Después, confirma el pedido.</li>
+    </ol>
+
+    <h2>Paso 2 · Pre-calificación por WhatsApp</h2>
+    <p>Consulta rápida para saber si el cliente tiene posibilidades de crédito. Envía <strong>DUI (foto de ambas caras), ADENDA llena y firmada y el NUEVO cuadro precalificador</strong>.</p>
+    <ul>
+      <li>Chat center <strong>7840-8674 › Opción 2 › Opción 1</strong> › mensaje: <em>«Ayuda con precalificación»</em>.</li>
+      <li>Todo documento al chat center va en <strong>formato de imagen</strong>. Espera la confirmación de Flexi antes de seguir.</li>
+      <li>Con el cliente usa la palabra <strong>PRE-APROBACIÓN</strong>, nunca «aprobado»: pasar la pre-calificación no garantiza pasar la evaluación final.</li>
+      <li><strong>¿Qué sigue?</strong> Cliente con crédito GMG (cuenta activa en WAFI) → Paso 4. Cliente nuevo → Paso 3. Si ya tienes toda la documentación del cliente nuevo, puedes saltarte este paso.</li>
+    </ul>
+
+    <h2>Paso 3 · Evaluación final y Cabina (clientes sin crédito GMG)</h2>
+    <h3>Documentos</h3>
+    <ul>
+      <li>DUI · ADENDA llena y firmada · Nuevo cuadro precalificador / de evaluación</li>
+      <li>Foto del cliente tipo DUI · Comprobante de ingresos</li>
+      <li>Recibo de agua o luz vigente, <strong>no mayor a 60 días</strong> y del lugar donde reside</li>
+      <li>Solicitud electrónica llena</li>
+    </ul>
+    <div class="info-box">📌 Ya no se pide NIT: el <strong>DUI funciona como NIT</strong>.</div>
+    <h3>Cuadro de evaluación (plantilla de Excel de Flexi)</h3>
+    <ul>
+      <li><strong>Sucursal:</strong> nombre de tu sucursal + tu usuario de Flexi (ej.: OPTICAS CV+ SUCURSAL METRO LOURDES – 00000219).</li>
+      <li><strong>Contacto / correo asesor:</strong> revisa que el correo esté bien escrito: ahí llegan las notificaciones de Flexi.</li>
+      <li><strong>Precio:</strong> monto total de la compra · <strong>Prima:</strong> solo si el cliente paga una parte.</li>
+      <li>Guarda el archivo así: <em>«Cuadro de precalificación cliente [nombre del cliente]»</em>.</li>
+    </ul>
+    <h3>Solicitud electrónica</h3>
+    <p>Datos del vendedor y sucursal, datos del cliente según el DUI, teléfonos, empresa (si es informal, detalla su actividad) y <strong>4 referencias: 2 familiares y 2 personales</strong>, con parentesco y teléfono, más el teléfono de llamada del cliente. Marca si confirmas que la persona presente es la dueña del DUI.</p>
+    <h3>Envío, Cabina y correcciones</h3>
+    <ul>
+      <li>Chat center <strong>7840-8674 › Opción 2 › Opción 2</strong>, documentos en imagen (o por correo, cuando Flexi lo indique). El chat center tarda unos 20 minutos en ingresar la solicitud y la evaluación completa puede tomar hasta 60 minutos.</li>
+      <li><strong>Cabina (obligatoria):</strong> espera el correo <em>«listos para cabina»</em> y llama al <strong>2523-1556</strong>. Mantente en línea hasta que el analista confirme al cliente.</li>
+      <li>Si Flexi pide correcciones: vuelve al chat center, opción <strong>«Comercio»</strong>, e ingresa la corrección. No respondas correos genéricos ni llames. No reinicies la solicitud salvo que Flexi lo indique.</li>
+      <li>Flexi responde con el <strong>monto y el plan aprobados</strong> → Paso 4.</li>
+    </ul>
+
+    <h2>Paso 4 · Desembolso y documentos en la Plataforma Flexi</h2>
+    <ol>
+      <li>Entra a <strong>saq.flexipagos.com</strong> con la terminal y contraseña de tu sucursal. Al <strong>tercer intento fallido</strong> el usuario se bloquea: avisa para solicitar el desbloqueo.</li>
+      <li>Busca al cliente: Tipo de identificación DUI › N.º de DUI › Buscar. Se envía un <strong>código de verificación al teléfono del cliente</strong>; ingrésalo y acepta.</li>
+      <li>Registra el desembolso: en <strong>Promociones</strong> selecciona el plan que aprobó Flexi; Transacción: Desembolso. Con prima, el monto es <strong>total – prima</strong> (ej.: $400.00 – $125.00 = <strong>$275.00</strong>). Revisa con el cliente plazo, cuotas y fechas de pago y luego <strong>Autorizar</strong>.</li>
+      <li>Descarga, imprime y haz firmar: <strong>baucher de desembolso o facturación, conozca a su cliente, pagaré, declaración jurada, contrato mutuo y adenda digital</strong> (con la fecha del desembolso).</li>
+    </ol>
+    <p>Al realizar el desembolso, ahora sí informa al cliente que su crédito fue aprobado.</p>
+
+    <h2>Paso 5 · Validación y aprobación de documentos</h2>
+    <p>No requiere al cliente presente. Flexi-Cuotas <strong>valida</strong> y Créditos y Cobros CV+ <strong>aprueba</strong>, en este orden:</p>
+    <ol>
+      <li>Revisa: la Adenda lleva la <strong>fecha del desembolso</strong> y los documentos legales están completos, firmados y correctos.</li>
+      <li>Escanea todo en <strong>PDF</strong> y envíalo a <strong>validacionesflexi@grupomonge.com</strong>, adjuntando el pedido de Odoo (indica el pago si hubo prima).</li>
+      <li>Con la respuesta de Flexi, en el pedido de Odoo usa <strong>Registrar una nota</strong> y adjunta la captura del correo de aprobación y la documentación firmada.</li>
+      <li>Envía <strong>físicamente</strong> a Créditos y Cobros CV+ la captura impresa de la solicitud junto con los documentos originales.</li>
+      <li>Espera la aprobación de Créditos y Cobros CV+.</li>
+    </ol>
+    <div class="tip-box">⛔ <strong>Sin la aprobación de Créditos y Cobros CV+ el proceso no continúa: no se envía a fabricar.</strong></div>
+
+    <h2>Paso 6 · Envío de lentes a fabricación</h2>
+    <p>Confirma las <strong>dos aprobaciones</strong> (validación de Flexi comentada en el pedido + aprobación de Créditos y Cobros CV+), envía a fabricación como cualquier pedido y <strong>escanea y sube los originales a Odoo</strong>: es nuestro respaldo.</p>
+
+    <h2>Paso 7 · Entrega, factura y foto</h2>
+    <ul>
+      <li><strong>Entrega:</strong> Pedido › Entrega › Comprobar disponibilidad › Validar.</li>
+      <li><strong>Factura:</strong> Diario = tu sucursal · Tipo de documento = <strong>Consumidor final</strong> · verifica cuenta analítica y monto › Guardar y validar. Imprímela, el cliente la firma y le entregas copia.</li>
+      <li><strong>No liquides la factura:</strong> queda abierta; contabilidad la liquida cuando recibe el pago de Flexi-Cuotas.</li>
+      <li><strong>Foto de entrega</strong> con los lentes en las manos del cliente. Es la última oportunidad para pedir firmas pendientes.</li>
+    </ul>
+
+    <h2>Paso 8 · Documentos a Créditos y Cobros CV+</h2>
+    <p>Apenas factures, envía un correo a <strong>Créditos y Cobros CV+</strong>, con copia a tu supervisor de ventas y a Adalberto Velásquez, indicando el nombre del cliente y que se le realizó un proceso de crédito Flexi-Cuotas. Envía la documentación pendiente y conserva tu copia. Mientras Cobros no tenga los documentos, la factura sigue abierta.</p>
+
+    <h2>Ten a la mano</h2>
+    <table class="comparison-table">
+      <tr><th>Contacto</th><th>Dato</th><th>Para qué</th></tr>
+      <tr><td>Chat center (WhatsApp)</td><td>7840-8674</td><td>2 › 1 pre-calificación · 2 › 2 evaluación final · «Comercio» correcciones</td></tr>
+      <tr><td>Cabina (obligatoria)</td><td>2523-1556</td><td>Al recibir el correo «listos para cabina»</td></tr>
+      <tr><td>Validación de documentos</td><td>validacionesflexi@grupomonge.com</td><td>Documentos firmados, en PDF</td></tr>
+      <tr><td>Información Flexi</td><td>infoflexi@grupomonge.com</td><td>Consultas generales</td></tr>
+      <tr><td>Plataforma Flexi</td><td>saq.flexipagos.com</td><td>Desembolso, documentos finales y facturación</td></tr>
+    </table>
+    <table class="comparison-table">
+      <tr><th>Dónde</th><th>Formato</th></tr>
+      <tr><td>Chat center</td><td>Todo documento en <strong>imagen</strong></td></tr>
+      <tr><td>Correo de validación</td><td>Todo documento en <strong>PDF</strong></td></tr>
+      <tr><td>Comentarios en WAFI</td><td>«Solicitud // motivo // CV+ [sucursal]»</td></tr>
+    </table>
+
+    <h2>Errores que cuestan ventas</h2>
+    <ul>
+      <li>Decir «aprobado» después de la pre-calificación.</li>
+      <li>No consultar WAFI y ofrecer un Plan WF.</li>
+      <li>Olvidar la Cabina o no quedarse en línea.</li>
+      <li>Correo mal escrito en el cuadro de evaluación.</li>
+      <li>Adenda sin fecha del desembolso.</li>
+      <li>Fabricar sin la aprobación de Créditos y Cobros CV+.</li>
+      <li>Liquidar la factura.</li>
+      <li>Dejar ir al cliente nuevo sin bloquear su cuenta.</li>
+    </ul>
+  `,
+  quizBank:[
+    {q:"¿Puedes aplicar la promoción del mes en una venta con Flexi-Cuotas?",opts:["No, solo Tarifa Pública","Sí, las promociones vigentes del mes","Solo si el cliente paga prima","Solo con autorización de Flexi"],c:1,e:"Es uno de los cambios: ahora sí se pueden ofrecer las promociones vigentes del mes. Promoción del mes + cuotas = dos razones para decir que sí."},
+    {q:"¿Qué lista de precios se usa en el pedido de Odoo para una venta Flexi-Cuotas?",opts:["Tarifa Pública","Tarifa Flexicuotas","Tarifa Empleados","Tarifa Mayoreo"],c:1,e:"La lista de precios es TARIFA FLEXICUOTAS, y sobre ella se pueden aplicar las promociones vigentes del mes."},
+    {q:"¿Cuándo consultas WAFI?",opts:["Antes de pre-calificar","Después del desembolso","Solo si Flexi lo pide","Al momento de facturar"],c:0,e:"WAFI va antes de pre-calificar (Paso 0): confirma si el cliente está activo, su plan y cuánto tiene disponible."},
+    {q:"En WAFI, ¿en qué pestaña de Gestiones revisas si la cuenta está activa, el plan y el disponible?",opts:["Cambio de PF","Bloqueo","General","Cambio de status"],c:2,e:"La pestaña General muestra si la cuenta está activa, qué plan tiene el cliente y cuánto tiene disponible."},
+    {q:"¿Qué plan NO puedes ofrecer ni facturar, aunque diga «cuenta activa»?",opts:["Plan 2","Plan 6","Plan WF","Plan Empleado Monge"],c:2,e:"El Plan WF no se ofrece: no se puede facturar aunque WAFI muestre cuenta activa. Revisa siempre el plan en la pestaña General."},
+    {q:"¿Qué prima pide el Plan 6?",opts:["Sin prima","10%","15%","20%"],c:2,e:"El Plan 6 lleva prima del 15%, diga o no la palabra «prima»."},
+    {q:"Un cliente con Plan 1 o Plan 2 quiere dar prima. ¿Qué pasa?",opts:["No se le permite: esos planes son sin prima","Puede mejorar la tasa y bajar su cuota","Debe cambiarse a Plan 6","Se le niega el crédito"],c:1,e:"Plan 1 y 2 son sin prima, pero si el cliente quiere dar prima puede mejorar la tasa y bajar su cuota."},
+    {q:"¿Qué prima lleva el Plan 5 informal (menor de 22 años con récord crediticio)?",opts:["Sin prima","10%","15%","25%"],c:1,e:"Del Plan 3 al 5 piden prima; el Plan 5 informal para menores de 22 años con récord crediticio lleva prima del 10%."},
+    {q:"WAFI muestra «Plan #2 Moto». ¿Qué haces?",opts:["Lo facturas así","Haces Cambio de PF para pasarlo a «Plan #2»","Lo rechazas","Haces Cambio de status"],c:1,e:"Si el cliente aparece con plan de moto, se usa la pestaña Cambio de PF para pasarlo a su plan normal (ej. Plan #2)."},
+    {q:"Un cliente nuevo no cierra hoy y dice que regresa con la prima. ¿Qué haces en WAFI?",opts:["Nada, esperas a que vuelva","Bloqueo de su cuenta por 60 minutos","Cambio de status a CUENTA ACTIVA","Cambio de PF"],c:1,e:"La pestaña Bloqueo retiene al cliente nuevo: la cuenta queda bloqueada 60 minutos y no se puede desembolsar en otra óptica."},
+    {q:"Para desbloquear una cuenta y poder facturar (Cambio de status), ¿qué status y razón colocas?",opts:["CUENTA ACTIVA / Consumos recientes","CUENTA NUEVA / A solicitud del cliente","CUENTA LIBRE / Pago al día","CUENTA ACTIVA / Cambio de plan"],c:0,e:"Status nuevo: CUENTA ACTIVA; Razón nuevo: Consumos recientes; comentario con la solicitud y la sucursal y luego Iniciar Cambio Status."},
+    {q:"¿Cuál es el tiempo máximo de espera de una respuesta en WAFI?",opts:["5 minutos","20 minutos","60 minutos","24 horas"],c:1,e:"El tiempo máximo de espera para una respuesta es de 20 minutos. Si sigue bloqueada, revisa el histórico en Solicitudes de crédito."},
+    {q:"¿Dónde se hacen la facturación y los documentos finales del crédito?",opts:["En WAFI","En el chat center","Solo en la Plataforma Flexi","En el correo de validación"],c:2,e:"WAFI es para consultar y gestionar. La facturación y los documentos finales del crédito se hacen solo en la Plataforma Flexi (saq.flexipagos.com)."},
+    {q:"¿Por qué monto y a nombre de quién se crea el pedido en Odoo?",opts:["Por el monto financiado, a nombre del paciente","Por el monto total, a nombre del titular del crédito en GMG","Por la prima, a nombre del asesor","Por el monto total, a nombre de GMG"],c:1,e:"El pedido va por el monto total aunque GMG financie solo una parte, a nombre del titular del crédito. Si los lentes son para otra persona, el paciente va en Dependiente."},
+    {q:"Los lentes son para la hija del titular del crédito. ¿Dónde va la paciente en el pedido?",opts:["Como cliente principal","En el campo Dependiente","En una nota interna","En otro pedido aparte"],c:1,e:"El pedido va a nombre del titular del crédito y el paciente se coloca en el campo Dependiente."},
+    {q:"¿Qué condición de pago se coloca en el pedido Flexi-Cuotas?",opts:["Contado","15 días","30 días","36 meses"],c:2,e:"En Condiciones de pago se coloca 30 días."},
+    {q:"¿En qué casos se registran pagos en el pedido de Odoo?",opts:["Siempre, por el monto total","Solo si el cliente da prima o paga la diferencia que GMG no aprobó","Nunca","Solo al facturar"],c:1,e:"Se ingresan pagos únicamente si el cliente da prima o si GMG no aprueba el monto total y el cliente paga la diferencia. Luego se confirma el pedido."},
+    {q:"Si la venta se concreta, ¿qué empresa se asocia al perfil del cliente en Odoo?",opts:["Grupo Monge Internacional","GMG COMERCIAL EL SALVADOR, S.A. DE C.V.","Flexipagos S.A.","Ópticas CV+ Créditos"],c:1,e:"Se asocia la empresa GMG COMERCIAL EL SALVADOR, S.A. DE C.V. al perfil del cliente."},
+    {q:"Para pre-calificar, ¿qué ruta usas en el chat center 7840-8674?",opts:["Opción 1 › Opción 1","Opción 2 › Opción 1","Opción 2 › Opción 2","Opción «Comercio»"],c:1,e:"Pre-calificación: chat center 7840-8674 › Opción 2 › Opción 1, con el mensaje «Ayuda con precalificación». La 2 › 2 es para la evaluación final."},
+    {q:"El cliente pasó la pre-calificación. ¿Qué palabra usas con él?",opts:["Aprobado","Pre-aprobación","Crédito listo","Desembolsado"],c:1,e:"Con el cliente se dice PRE-APROBACIÓN, nunca «aprobado»: pasar la pre-calificación no garantiza pasar la evaluación final."},
+    {q:"¿En qué formato se envían los documentos al chat center?",opts:["PDF","Imagen","Word","Excel"],c:1,e:"Todo documento se envía al chat center en formato de imagen. Al correo de validación, en PDF."},
+    {q:"Para la evaluación final de un cliente nuevo, ¿qué antigüedad máxima puede tener el recibo de agua o luz?",opts:["30 días","60 días","90 días","6 meses"],c:1,e:"El recibo de agua o luz debe estar vigente, no mayor a 60 días y ser del lugar donde reside el cliente."},
+    {q:"¿Todavía se pide el NIT en la evaluación final?",opts:["Sí, siempre","No: el DUI funciona como NIT","Solo a empleados formales","Solo si el monto supera $500"],c:1,e:"Ya no se pide NIT: el DUI funciona como NIT."},
+    {q:"¿Cuántas referencias lleva la solicitud electrónica?",opts:["2 personales","2 familiares y 2 personales","3 familiares","1 familiar y 1 laboral"],c:1,e:"La solicitud electrónica lleva 4 referencias: 2 familiares y 2 personales, con parentesco y teléfono, más el teléfono de llamada del cliente."},
+    {q:"Enviaste los documentos para la evaluación final. ¿Qué es obligatorio después?",opts:["Enviar a fabricar","Llamar a Cabina al 2523-1556 al recibir «listos para cabina»","Facturar en Odoo","Liquidar la factura"],c:1,e:"La Cabina es obligatoria: al recibir el correo «listos para cabina» llamas al 2523-1556 y te mantienes en línea hasta que el analista confirme al cliente."},
+    {q:"Flexi pide una corrección (ej. si una referencia vive o no con el cliente). ¿Qué haces?",opts:["Llamas al ejecutivo de Flexi","Respondes el correo genérico","Ingresas la corrección en el chat center, opción «Comercio»","Reinicias la solicitud desde cero"],c:2,e:"Las correcciones se ingresan por el chat center en la opción «Comercio». No respondas correos genéricos ni llames, y no reinicies la solicitud salvo que Flexi lo indique."},
+    {q:"¿Por qué es importante revisar que el correo esté bien escrito en el cuadro de evaluación?",opts:["Porque ahí llegan las notificaciones de Flexi","Porque es el usuario de la plataforma","Porque lo pide Hacienda","No es importante"],c:0,e:"En el correo de contacto llegan las notificaciones de Flexi; un correo mal escrito es uno de los errores que cuestan ventas."},
+    {q:"¿Qué pasa al tercer intento fallido de contraseña en la Plataforma Flexi?",opts:["Nada","El usuario se bloquea","Se reinicia la contraseña automáticamente","Se cancela el crédito"],c:1,e:"Al tercer intento fallido el usuario se bloquea; hay que avisar para solicitar el desbloqueo."},
+    {q:"Total de la compra $400.00 y el cliente da $125.00 de prima. ¿Cuánto desembolsas en la Plataforma Flexi?",opts:["$400.00","$525.00","$275.00","$125.00"],c:2,e:"Con prima, el monto a desembolsar es el total menos la prima: $400.00 – $125.00 = $275.00."},
+    {q:"¿Qué fecha debe llevar la Adenda?",opts:["La fecha de la pre-calificación","La fecha del desembolso","La fecha de entrega","La fecha de la factura"],c:1,e:"La Adenda debe llevar la fecha del desembolso; una Adenda sin esa fecha es uno de los errores que cuestan ventas."},
+    {q:"¿A dónde envías los documentos firmados para validación y en qué formato?",opts:["infoflexi@grupomonge.com en imagen","validacionesflexi@grupomonge.com en PDF","Al chat center en PDF","A Créditos y Cobros CV+ en imagen"],c:1,e:"Los documentos firmados se escanean en PDF y se envían a validacionesflexi@grupomonge.com, adjuntando el pedido de Odoo."},
+    {q:"¿Qué se necesita para enviar los lentes a fabricación?",opts:["Solo la pre-aprobación","Solo el desembolso","La validación de Flexi y la aprobación de Créditos y Cobros CV+","La firma de la factura"],c:2,e:"Doble aprobación: validación de Flexi (comentada en el pedido de Odoo) y aprobación de Créditos y Cobros CV+. Sin esta última no se envía a fabricar."},
+    {q:"Al facturar una venta Flexi-Cuotas en Odoo, ¿qué haces con la factura?",opts:["La liquidas de inmediato","La dejas abierta: contabilidad la liquida cuando Flexi paga","La anulas","La envías a Flexi para que la liquide"],c:1,e:"No se liquida la factura: queda abierta y contabilidad la liquida cuando recibe el pago de Flexi-Cuotas."},
+    {q:"¿Qué tipo de documento se selecciona al facturar en Odoo?",opts:["Crédito fiscal","Consumidor final","Nota de crédito","Factura de exportación"],c:1,e:"Diario = tu sucursal, Tipo de documento = Consumidor final; verifica cuenta analítica y monto, guarda y valida."},
+    {q:"Después de facturar, ¿a quién envías el correo del Paso 8?",opts:["Solo al cliente","A Créditos y Cobros CV+, con copia a tu supervisor de ventas y a Adalberto Velásquez","A validacionesflexi@grupomonge.com","Al chat center"],c:1,e:"El correo va a Créditos y Cobros CV+, con copia a tu supervisor de ventas y a Adalberto Velásquez, indicando el nombre del cliente y que fue crédito Flexi-Cuotas."},
+    {q:"Flexi-Cuotas te envía un cliente que ya está aprobado. ¿Qué haces?",opts:["Repites la pre-calificación","Creas el pedido (Paso 1) y vas directo a descargar documentos (Paso 4)","Lo mandas a Cabina","Lo envías a otra sucursal"],c:1,e:"No se repiten trámites: se crea el pedido y se va directo al Paso 4 a descargar los documentos."},
+    {q:"Tu cliente dice «está muy caro». ¿Qué haces?",opts:["Ofreces un descuento adicional","Presentas Flexi-Cuotas","Lo invitas a volver otro día","Le ofreces un lente más barato sin preguntar"],c:1,e:"Responde con La Balanza: la cuota convierte un «está caro» en un «sí puedo». Además, puedes sumar la promoción del mes."},
+    {q:"Según los datos de Flexi, ¿cuántas solicitudes se aprueban?",opts:["2 de cada 10","4 de cada 10","6 de cada 10","9 de cada 10"],c:2,e:"6 de cada 10 solicitudes se aprueban, y con WAFI sabes desde el inicio si el cliente puede aplicar."},
+    {q:"¿Desde qué monto y hasta qué plazo se puede financiar con Flexi-Cuotas?",opts:["Desde $100 y hasta 12 meses","Desde $50 y hasta 36 meses","Desde $25 y hasta 24 meses","Desde $200 y hasta 48 meses"],c:1,e:"Se puede financiar desde $50.00 y con plazo de hasta 36 meses."},
+    {q:"¿Cuál es el reto del mes con Flexi-Cuotas?",opts:["Ofrecerlo solo a clientes con buen perfil","Ofrecerlo a TODOS los clientes que llegan al precio","Ofrecerlo solo si el cliente pregunta","Ofrecerlo solo en compras mayores a $300"],c:1,e:"Ofrécelo a todos: cada cliente que llega al precio escucha la opción Flexi-Cuotas, sin excepciones y sin adivinar quién califica."}
+  ]
+};
+// Se inyecta con id propio en cada academia (asesores 25 · optometristas 8)
+MODULES_ASESOR.push((function(){ var c={}; for(var k in MODULO_FLEXI) c[k]=MODULO_FLEXI[k]; c.id=25; return c; })());
+MODULES_OPTO.push((function(){ var c={}; for(var k in MODULO_FLEXI) c[k]=MODULO_FLEXI[k]; c.id=8;  return c; })());
 // MODULES es la lista "activa"; por defecto la de asesores
 let MODULES = MODULES_ASESOR;
 
@@ -3458,16 +3706,18 @@ const CAT_INFO_ASESOR = {
   sistema: { label:'Sistema', dashTitle:'🔄 Sistema', ids:[19] },
   akkurat: { label:'Portafolio Akkurat', dashTitle:'✨ Portafolio Akkurat', ids:[9,10,11,12,13,14] },
   ventas: { label:'Ventas y Productos', dashTitle:'💼 Ventas y Productos', ids:[15,16,17,18] },
+  credito: { label:'Crédito Flexi-Cuotas', dashTitle:'💳 Crédito · Flexi-Cuotas', ids:[25] },
   ingles: { label:'Inglés CV+', dashTitle:'🇺🇸 Inglés CV+ · English Lab', ids:[24,20,21,22,23] },
 };
 // Categorías de Optometristas
 const CAT_INFO_OPTO = {
   fundamentos: { label:'Control de Miopía', dashTitle:'👁️ Control de Miopía', ids:[1] },
   sistema: { label:'Sistema', dashTitle:'🔄 Sistema', ids:[2] },
+  credito: { label:'Crédito Flexi-Cuotas', dashTitle:'💳 Crédito · Flexi-Cuotas', ids:[8] },
   ingles: { label:'Inglés CV+', dashTitle:'🇺🇸 Inglés CV+ · English Lab', ids:[7,3,4,5,6] },
 };
 let CAT_INFO = CAT_INFO_ASESOR;
-const CAT_ICONS = { fundamentos:'🔬', fabricacion:'⚙️', akkurat:'✨', ventas:'💼', sistema:'🔄', ingles:'🇺🇸' };
+const CAT_ICONS = { fundamentos:'🔬', fabricacion:'⚙️', akkurat:'✨', ventas:'💼', sistema:'🔄', credito:'💳', ingles:'🇺🇸' };
 
 // Cambia el contenido (módulos + categorías) según el rol leído en Firebase
 window.aplicarRolContenido = function(role){
@@ -3497,6 +3747,12 @@ window.toggleAcademiaAdmin = function(){
 // Para cambiar la nota mínima, edita PASSING_SCORE.
 // ═══════════════════════════════════════════════════════
 const PASSING_SCORE = 80;
+// Nota mínima propia de un módulo: si el módulo trae passingScore (ej. Flexi-Cuotas = 85)
+// se usa esa; si no, la general PASSING_SCORE.
+function getPassingScore(id) {
+  const m = MODULES.find(x => x.id === id);
+  return (m && m.passingScore) ? m.passingScore : PASSING_SCORE;
+}
 
 // Orden global de los módulos (tal como aparecen en el dashboard)
 function getModuleOrder() {
@@ -3560,7 +3816,7 @@ function isModuleFree(id) {
 // 'sistema' = Flujo de Servicio al Cliente en Odoo (id 19 asesores / id 2 opto).
 // Para liberar otra ruta completa, agrega su nombre a esta lista.
 // ═══════════════════════════════════════════════════════
-const RUTAS_LIBRES = ['ingles', 'sistema'];
+const RUTAS_LIBRES = ['ingles', 'sistema', 'credito'];   // 'credito' = Flexi-Cuotas (id 25 asesores / id 8 opto)
 
 function isRutaLibre(id) {
   const m = MODULES.find(x => x.id === id);
@@ -3581,7 +3837,7 @@ function isModuleUnlocked(id) {
   const pos = order.indexOf(id);
   if (pos <= 0) return true;            // el primero de la ruta siempre abierto
   const prevId = order[pos - 1];        // módulo anterior de la MISMA ruta
-  return getLastScore(prevId) >= PASSING_SCORE;
+  return getLastScore(prevId) >= getPassingScore(prevId);
 }
 
 function buildNav() {
@@ -3830,7 +4086,7 @@ function showModule(id) {
 }
 
 function getCatLabel(cat) {
-  const labels = { fundamentos:'Fundamentos', fabricacion:'Fabricación y Materiales', akkurat:'Portafolio Akkurat', ventas:'Ventas y Productos', sistema:'Sistema' };
+  const labels = { fundamentos:'Fundamentos', fabricacion:'Fabricación y Materiales', akkurat:'Portafolio Akkurat', ventas:'Ventas y Productos', sistema:'Sistema', credito:'Crédito Flexi-Cuotas' };
   return labels[cat] || cat;
 }
 
@@ -3859,7 +4115,7 @@ function startQuiz() {
   const shuffledQuiz = [...bank].sort(() => Math.random() - 0.5);
   mod.quiz = shuffledQuiz.slice(0, quizCount);
   document.getElementById('quiz-module-title').textContent = `Quiz: ${mod.title}`;
-  document.getElementById('quiz-subtitle').textContent = `${mod.quiz.length} preguntas sobre este módulo`;
+  document.getElementById('quiz-subtitle').textContent = `${mod.quiz.length} preguntas sobre este módulo` + (mod.passingScore ? ` · mínimo para aprobar: ${mod.passingScore}%` : '');
   document.getElementById('topbar-title').textContent = `Quiz — ${mod.title}`;
   document.getElementById('topbar-breadcrumb').textContent = getCatLabel(mod.category);
   document.getElementById('topbar-actions').innerHTML = `
@@ -4046,7 +4302,7 @@ try {
 try {
   renderGrids(STATE.search || '');
   // Avisar si este aprobado desbloqueó el siguiente módulo
-  if (pct >= PASSING_SCORE) {
+  if (pct >= getPassingScore(qs.module)) {
     const order = getModuleOrder();
     const pos = order.indexOf(qs.module);
     const nextId = order[pos + 1];
@@ -4059,13 +4315,14 @@ try {
   console.error(e);
 }
 
-  let scoreClass = pct>=80?'great':(pct>=60?'ok':'poor');
-  let msg = pct>=80?'¡Excelente! Dominas este tema 🎉':pct>=60?'¡Bien! Sigue repasando 💪':'Necesitas repasar este módulo 📚';
-  let sub = pct>=80?'Has completado el módulo exitosamente.':pct>=60?'Estás en buen camino, sigue practicando.':'Te recomendamos releer el módulo antes de continuar.';
+  const passMin = getPassingScore(qs.module);   // 80 general · 85 Flexi-Cuotas
+  let scoreClass = pct>=passMin?'great':(pct>=60?'ok':'poor');
+  let msg = pct>=passMin?'¡Excelente! Dominas este tema 🎉':pct>=60?'¡Bien! Sigue repasando 💪':'Necesitas repasar este módulo 📚';
+  let sub = pct>=passMin?'Has completado el módulo exitosamente.':pct>=60?`Estás en buen camino: necesitas ${passMin}% para aprobar.`:'Te recomendamos releer el módulo antes de continuar.';
 
   document.getElementById('quiz-content').innerHTML = `
     <div class="quiz-results">
-      <div style="font-size:40px;margin-bottom:12px;">${pct>=80?'🏆':pct>=60?'👍':'📖'}</div>
+      <div style="font-size:40px;margin-bottom:12px;">${pct>=passMin?'🏆':pct>=60?'👍':'📖'}</div>
       <div class="result-score ${scoreClass}">${pct}%</div>
       <div class="result-msg">${msg}</div>
       
@@ -5182,7 +5439,7 @@ function cvpBotProgresoDatos(){
     var aprobados = [];
     var siguiente = null;
     order.forEach(function(id){
-      if (getLastScore(id) >= PASSING_SCORE) aprobados.push(id);
+      if (getLastScore(id) >= getPassingScore(id)) aprobados.push(id);
       else if (siguiente === null) siguiente = id;
     });
     return { total: order.length, aprobados: aprobados, siguiente: siguiente };
@@ -5363,7 +5620,7 @@ function cvpBotResponder(mensaje){
         cvpBotModulosActivos().forEach(function(m){
           try {
             var sc = getLastScore(m.id);
-            if (sc > 0) cards.push({ term: m.title, def: "Última nota: " + sc + "%" + (sc >= PASSING_SCORE ? " ✅ Aprobado" : " — aún no alcanza el mínimo (" + PASSING_SCORE + "%)") });
+            if (sc > 0) cards.push({ term: m.title, def: "Última nota: " + sc + "%" + (sc >= getPassingScore(m.id) ? " ✅ Aprobado" : " — aún no alcanza el mínimo (" + getPassingScore(m.id) + "%)") });
           } catch(e){}
         });
         if (!cards.length) return { texto:"Aún no has realizado ningún quiz. ¡Anímate con el primero!", acciones: sigMod ? [{label:"📚 Ir a mi primer módulo", modId: sigMod.id}] : null };
