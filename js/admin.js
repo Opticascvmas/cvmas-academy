@@ -45,7 +45,8 @@ const MODULE_NAMES = {
   "21": "Ingles Nivel 2 - Presente y rutina",
   "22": "Ingles Nivel 3 - Pasado y futuro",
   "23": "Ingles Nivel 4 - Conversacion real",
-  "24": "Ingles Nivel 0 - Desde cero"
+  "24": "Ingles Nivel 0 - Desde cero",
+  "25": "Flexi-Cuotas - Proceso de credito"
   // ...agrega o corrige los que necesites
 };
 
@@ -64,6 +65,7 @@ const MODULE_NAMES_OPTO = {
   "5": "Ingles Nivel 3 - Pasado y futuro",
   "6": "Ingles Nivel 4 - Conversacion real",
   "7": "Ingles Nivel 0 - Desde cero",
+  "8": "Flexi-Cuotas - Proceso de credito",
 };
 const TOTAL_MODULES_OPTO = Object.keys(MODULE_NAMES_OPTO).length;
 
