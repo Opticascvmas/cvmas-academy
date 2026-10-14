@@ -583,6 +583,7 @@ function renderShell(d) {
         </div>
       </div>
       <div class="cvp-head-actions">
+        ${currentCanEdit() ? `<button class="cvp-btn gold" onclick="window.open('herramientas/crear-usuarios.html','_blank')" title="Crear usuarios en Firebase desde un Excel">➕ Alta masiva de usuarios</button>` : ''}
         <button class="cvp-btn ghost" onclick="cvpExportXLSX()">⬇️ Excel</button>
         <button class="cvp-btn ghost" onclick="cvpExportPDF()">🖨️ PDF</button>
         <button class="cvp-btn close" onclick="closeAdminPanel()">✕ Cerrar</button>
@@ -1589,6 +1590,8 @@ function injectStyles() {
 .cvp-btn.ghost{background:rgba(255,255,255,.15);color:#fff}
 .cvp-btn.ghost:hover{background:rgba(255,255,255,.28)}
 .cvp-btn.close{background:#dc3545;color:#fff}
+.cvp-btn.gold{background:#FFC629;color:#373A36}
+.cvp-btn.gold:hover{filter:brightness(.95)}
 .cvp-btn.save{background:#14A9C4;color:#fff;width:100%;margin-top:4px;padding:12px}
 .cvp-btn.save:hover{background:#0FA0BA}
 .cvp-btn.ghost.dark{background:#eef2f7;color:#0B2137}
