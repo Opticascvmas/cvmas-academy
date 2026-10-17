@@ -46,7 +46,8 @@ const MODULE_NAMES = {
   "22": "Ingles Nivel 3 - Pasado y futuro",
   "23": "Ingles Nivel 4 - Conversacion real",
   "24": "Ingles Nivel 0 - Desde cero",
-  "25": "Flexi-Cuotas - Proceso de credito"
+  "25": "Flexi-Cuotas - Proceso de credito",
+  "26": "SUMAS - Programa de Lealtad y Reactivacion"
   // ...agrega o corrige los que necesites
 };
 
@@ -66,6 +67,7 @@ const MODULE_NAMES_OPTO = {
   "6": "Ingles Nivel 4 - Conversacion real",
   "7": "Ingles Nivel 0 - Desde cero",
   "8": "Flexi-Cuotas - Proceso de credito",
+  "9": "SUMAS - Programa de Lealtad y Reactivacion",
 };
 const TOTAL_MODULES_OPTO = Object.keys(MODULE_NAMES_OPTO).length;
 
