@@ -93,7 +93,7 @@ label.chk{display:flex;gap:6px;align-items:center;font-size:13px;cursor:pointer}
     <!-- 1. CARGAR -->
     <section class="card">
       <h2><span class="n">1</span> Cargar listado</h2>
-      <p class="sub">Sube el Excel con las columnas <b>UID · Nombre · Usuario · Sucursal · Cargo · Rol · Contraseña</b> (el mismo formato de tu listado maestro). Las filas que ya tienen UID se marcan como creadas y no se tocan.</p>
+      <p class="sub">Sube el Excel tal como lo descargas de las respuestas del formulario de Google (o tu listado maestro / la plantilla). Reconoce solas las columnas <b>Nombre · Correo · Sucursal · Cargo</b>; a todos les asigna rol <b>participant</b> y les genera su contraseña. Los correos que ya tienen cuenta en la Academia se detectan y no se vuelven a crear.</p>
       <div class="drop" id="drop">
         <div style="font-size:28px">📄</div>
         <div><b>Arrastra el Excel aquí</b> o haz clic para seleccionarlo (.xlsx, .xls, .csv)</div>
@@ -120,11 +120,14 @@ label.chk{display:flex;gap:6px;align-items:center;font-size:13px;cursor:pointer}
         <button class="sec" id="btnGen">Aplicar</button>
       </div>
       <div class="row" style="margin-top:10px">
+        <label class="chk"><input type="checkbox" id="optoRole"> Si el cargo es <b>&nbsp;Optometra</b>, darle rol <b>&nbsp;optometra</b> (academia óptica) en lugar de participant</label>
+      </div>
+      <div class="row" style="margin-top:10px">
         <span>Rellenar vacíos →</span>
         <span>Rol:</span>
         <select id="defRole"></select>
         <span>Cargo:</span>
-        <input id="defPos" placeholder="Ej. Asesor visual" style="width:150px">
+        <input id="defPos" list="positions" placeholder="Ej. Asesor Visual" style="width:150px">
         <span>Sucursal:</span>
         <input id="defBranch" list="branches" placeholder="Ej. Plaza Mundo" style="width:160px">
         <button class="sec" id="btnFill">Aplicar a vacíos</button>
@@ -139,6 +142,7 @@ label.chk{display:flex;gap:6px;align-items:center;font-size:13px;cursor:pointer}
         </table>
       </div>
       <datalist id="branches"></datalist>
+      <datalist id="positions"></datalist>
     </section>
 
     <!-- 3. CREAR -->
@@ -188,11 +192,11 @@ const ROLES = [
   ["admin_opto","admin_opto"],
   ["admin","admin"]
 ];
-const KNOWN_BRANCHES = ["Acajutla","Aguilares","Alta Vista","Apopa","Armenia","Coberturas","El Paseo","Empresarial",
-  "Encuentro Lourdes","Encuentro Santa Ana","Encuentro Zacatecoluca","Galerias","Las Ramblas","Metrocentro 1",
-  "Metrocentro 2","Metrocentro Lourdes","Metrocentro Santa Ana","Multiplaza","Plaza Mundo","Puerto de La Libertad",
-  "San Francisco Gotera","San Gabriel","San Marcos","San Martin","San Miguel","Santa Rosa","Sonsonate",
-  "Unicentro Soyapango","Usulutan","Valle Dulce","Zacatecoluca Centro"];
+// Mismas listas que usa el panel de administrador (js/admin.js)
+const KNOWN_BRANCHES = ["Metrocentro 1","Metrocentro 2","Plaza Mundo","Metrocentro Santa Ana","Sonsonate","San Miguel","Aguilares","Apopa","Valle Dulce","San Gabriel","Metropolis","Galerias","El Paseo","Zona Rosa","El Casco","Multiplaza","Santa Rosa","Encuentro Zacatecoluca","Zacatecoluca Centro","Usulutan","San Francisco Gotera","San Martin","Unicentro Soyapango","Alta Vista","Encuentro Lourdes","Metrocentro Lourdes","Acajutla","Las Ramblas","Encuentro Santa Ana","Empresarial","SAC","Zaragoza","Puerto de La Libertad","Armenia","San Marcos","Recursos Humanos","Ventas","Mercadeo","Coberturas","Compras"];
+const KNOWN_POSITIONS = ["Asesor Visual","Optometra","Capacitador","Supervisor","RRHH","Asesor de Coberturas","Auxiliar"];
+const MIN_NEXT_PASS = 76;   // tu serie AccesoNN ya llegó a Acceso75
+const PASS_KEY = "cvp_alta_siguiente_clave";
 const DELAY_MS = 700;
 
 /* App principal (sesión del admin, comparte sesión con la Academia)
@@ -257,7 +261,7 @@ function readFile(f){
     const wb = XLSX.read(new Uint8Array(ev.target.result), { type: "array" });
     // Busca la hoja que tenga la columna Usuario/Correo (prioriza la llamada "Usuarios")
     const orden = [...wb.SheetNames].sort((a,b) => (norm(b)==="usuarios") - (norm(a)==="usuarios"));
-    const tieneUsuario = aoa => aoa.slice(0,10).some(r => r.some(c => ["usuario","correo","email","e-mail","correo electronico"].includes(norm(c))));
+    const tieneUsuario = aoa => aoa.slice(0,10).some(r => r.some(c => isEmailHeader(norm(c))));
     let aoa = null;
     for (const sn of orden) {
       const a = XLSX.utils.sheet_to_json(wb.Sheets[sn], { header: 1, defval: "", raw: false });
@@ -269,47 +273,87 @@ function readFile(f){
   rd.readAsArrayBuffer(f);
 }
 
-function parseAoa(aoa){
+// Encabezados aceptados (plantilla, listado maestro o descarga del formulario de Google)
+// "ana pérez" o "ANA PÉREZ" → "Ana Pérez" (si ya viene bien escrito, se respeta)
+function nombrePropio(v){
+  const t = String(v || "").replace(/\s+/g, " ").trim();
+  if (t !== t.toLowerCase() && t !== t.toUpperCase()) return t;
+  return t.toLowerCase().replace(/(^|\s)(\S)/g, (m, sp, l) => sp + l.toUpperCase());
+}
+function isEmailHeader(h){ return h === "usuario" || h.includes("correo") || h.includes("email") || h === "e-mail"; }
+// Ajusta mayúsculas/acentos al valor oficial de la lista (ej. "asesor visual" → "Asesor Visual")
+function matchList(v, list){
+  const n = norm(v); if (!n) return "";
+  return list.find(x => norm(x) === n) || String(v).trim();
+}
+
+async function parseAoa(aoa){
   if (!aoa.length) return alert("El archivo está vacío.");
   // Busca la fila de encabezados en las primeras 10 filas
-  let hIdx = aoa.slice(0,10).findIndex(r => r.some(c => ["usuario","correo","email","e-mail","correo electronico"].includes(norm(c))));
+  let hIdx = aoa.slice(0,10).findIndex(r => r.some(c => isEmailHeader(norm(c))));
   if (hIdx < 0) return alert("No encontré la columna 'Usuario' (o 'Correo'). Revisa los encabezados o usa la plantilla.");
   const H = aoa[hIdx].map(norm);
-  const find = (...names) => H.findIndex(h => names.includes(h));
+  // Si una pregunta se reemplazó en el formulario, Google deja dos columnas con el mismo nombre:
+  // se guardan todas y se toma el primer valor que no esté vacío.
+  const findBy = pred => { const out = []; H.forEach((h,i) => { if (h && pred(h)) out.push(i); }); return out.length ? out : -1; };
   const col = {
-    uid: find("uid","id"),
-    name: find("nombre","nombre completo","name"),
-    email: find("usuario","correo","email","e-mail","correo electronico"),
-    branch: find("sucursal","branch","tienda"),
-    position: find("cargo","puesto","position"),
-    role: find("rol","role"),
-    password: find("contrasena","contraseña","password","clave","pass")
+    uid: findBy(h => h === "uid" || h === "id"),
+    name: findBy(h => h.startsWith("nombre") || h === "name"),
+    email: findBy(isEmailHeader),
+    branch: findBy(h => h.startsWith("sucursal") || h === "branch" || h === "tienda"),
+    position: findBy(h => h.startsWith("cargo") || h.startsWith("puesto") || h.startsWith("perfil") || h === "position"),
+    role: findBy(h => h === "rol" || h === "role"),
+    password: findBy(h => h.startsWith("contrasena") || h === "password" || h === "clave" || h === "pass")
   };
   // En el listado maestro la contraseña está en una columna sin encabezado
   if (col.password < 0) {
-    const used = new Set(Object.values(col).filter(i => i >= 0));
+    const used = new Set(Object.values(col).filter(Array.isArray).flat());
     const maxLen = Math.max(...aoa.slice(hIdx+1).map(r => r.length), H.length);
-    for (let i = 0; i < maxLen; i++) if (!used.has(i) && !H[i]) { col.password = i; break; }
+    for (let i = 0; i < maxLen; i++) if (!used.has(i) && !H[i]) { col.password = [i]; break; }
   }
-  const get = (r,k) => col[k] >= 0 ? String(r[col[k]] ?? "").trim() : "";
+  const get = (r,k) => {
+    if (!Array.isArray(col[k])) return "";
+    for (const i of col[k]) { const v = String(r[i] ?? "").trim(); if (v) return v; }
+    return "";
+  };
   const seen = new Set(rows.map(r => r.email.toLowerCase()));
+  const opto = $("optoRole").checked;
   let added = 0, dup = 0;
   for (const r of aoa.slice(hIdx+1)) {
-    const email = get(r,"email");
+    const email = get(r,"email").toLowerCase().replace(/\s+/g, "");
     if (!email && !get(r,"name")) continue;
     if (email && seen.has(email.toLowerCase())) { dup++; continue; }
     seen.add(email.toLowerCase());
     const uid = get(r,"uid");
+    const position = matchList(get(r,"position"), KNOWN_POSITIONS);
+    let role = normRole(get(r,"role"));
+    if (!role) role = (opto && norm(position) === "optometra") ? "optometra" : "participant";
     rows.push({
-      name: get(r,"name"), email, branch: get(r,"branch"), position: get(r,"position"),
-      role: normRole(get(r,"role")), password: get(r,"password"), uid,
+      name: nombrePropio(get(r,"name")), email, branch: matchList(get(r,"branch"), KNOWN_BRANCHES), position,
+      role, password: get(r,"password"), uid,
       status: uid ? "skip" : "pend", msg: uid ? "Ya creado" : "", locked: !!uid
     });
     added++;
   }
-  suggestPassStart();
-  render();
   log(`Archivo cargado: ${added} filas (${rows.filter(r=>r.locked).length} ya tenían UID)` + (dup ? `, ${dup} correos repetidos omitidos.` : "."));
+  render();
+  await markExisting();
+  suggestPassStart();
+  genPasswords();
+}
+
+/* Marca los correos que ya tienen perfil en la Academia (para no gastarles contraseña ni recrearlos) */
+async function markExisting(){
+  try {
+    const snap = await getDocs(collection(db, "users"));
+    const map = {};
+    snap.forEach(d => { const e = String(d.data().email || "").toLowerCase().trim(); if (e) map[e] = d.id; });
+    let n = 0;
+    for (const r of rows) if (!r.locked && map[r.email]) {
+      r.uid = map[r.email]; r.status = "warn"; r.msg = "Ya tiene cuenta en la Academia"; r.locked = true; n++;
+    }
+    if (n) log(`🔎 ${n} correo(s) ya tenían cuenta en la Academia: se marcan y no se vuelven a crear.`);
+  } catch(e) { log("No se pudo revisar quién ya existe (" + friendly(e) + "). Se revisará al crear."); }
 }
 
 /* ───── Contraseñas automáticas ───── */
@@ -320,7 +364,8 @@ function suggestPassStart(){
     const m = norm(r.password).match(new RegExp("^" + pre.replace(/[.*+?^${}()|[\]\\]/g,"\\$&") + "(\\d+)$"));
     if (m) max = Math.max(max, parseInt(m[1],10));
   }
-  $("passStart").value = max + 1;
+  let saved = 0; try { saved = parseInt(localStorage.getItem(PASS_KEY), 10) || 0; } catch(e) {}
+  $("passStart").value = Math.max(max + 1, saved, MIN_NEXT_PASS);
 }
 function genPasswords(){
   if (!$("autoPass").checked) return;
@@ -328,6 +373,7 @@ function genPasswords(){
   let n = parseInt($("passStart").value,10) || 1;
   for (const r of rows) if (!r.locked && !r.password) r.password = pre + String(n++).padStart(2,"0");
   $("passStart").value = n;
+  try { localStorage.setItem(PASS_KEY, String(n)); } catch(e) {}
   render();
 }
 $("btnGen").onclick = genPasswords;
@@ -390,7 +436,7 @@ function render(){
       <td><input data-k="name" value="${esc(r.name)}" ${dis}></td>
       <td><input data-k="email" value="${esc(r.email)}" ${dis}>${err?`<div class="msg">${esc(err)}</div>`:""}</td>
       <td><input data-k="branch" list="branches" value="${esc(r.branch)}" ${dis}></td>
-      <td><input data-k="position" value="${esc(r.position)}" ${dis}></td>
+      <td><input data-k="position" list="positions" value="${esc(r.position)}" ${dis}></td>
       <td><select data-k="role" ${dis}>${roleOpts(r.role)}</select></td>
       <td><input data-k="password" value="${esc(r.password)}" ${dis}></td>
       <td class="uid" title="${esc(r.uid)}">${esc(r.uid) || "—"}</td>
@@ -401,12 +447,13 @@ function render(){
 
   const brs = new Set(KNOWN_BRANCHES); rows.forEach(r => r.branch && brs.add(r.branch));
   $("branches").innerHTML = [...brs].sort().map(b => `<option value="${esc(b)}">`).join("");
+  $("positions").innerHTML = KNOWN_POSITIONS.map(p => `<option value="${esc(p)}">`).join("");
 
   const pend = rows.filter((r,i) => !r.locked && r.status!=="ok" && r.status!=="upd" && r.status!=="warn");
   const ready = pend.filter(r => !validate(r, rows.indexOf(r))).length;
   const k = [
     ["info", rows.length, "Filas"],
-    ["", rows.filter(r=>r.locked).length, "Ya tenían UID"],
+    ["", rows.filter(r=>r.status==="skip").length, "Ya tenían UID"],
     ["info", ready, "Listas para crear"],
     ["err", pend.length - ready, "Con errores"],
     ["ok", rows.filter(r=>r.status==="ok").length, "Creadas hoy"],
