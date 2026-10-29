@@ -4078,21 +4078,87 @@ function isRutaLibre(id) {
   return RUTAS_LIBRES.indexOf(m.chain) !== -1 || RUTAS_LIBRES.indexOf(m.category) !== -1;
 }
 
-// ¿Está desbloqueado este módulo?
+// ═══════════════════════════════════════════════════════
+// 🔓 DESBLOQUEO PROGRESIVO DESACTIVADO (oct 2026)
+// Todos los módulos están abiertos para todos los roles.
+// El quiz sigue calificando y guardando la nota; solo ya no bloquea.
+// (Para reactivar el candado, restaura la versión anterior de esta función.)
+// ═══════════════════════════════════════════════════════
 function isModuleUnlocked(id) {
- // Admin y visores ven TODO desbloqueado, sin aprobar quizzes
-  try {
-    const u = JSON.parse(localStorage.getItem('cvplus_user') || '{}');
-    if (u.role === 'admin' || u.role === 'viewer' || u.role === 'admin_opto') return true;
-  } catch(e) {}
-  if (isRutaLibre(id)) return true;            // 🇺🇸 ruta libre (inglés): siempre abierta
-  if (isModuleFree(id)) return true;           // 🔓 módulo libre: siempre abierto
-  const order = getChainOrder(id);      // solo los módulos de su misma ruta
-  const pos = order.indexOf(id);
-  if (pos <= 0) return true;            // el primero de la ruta siempre abierto
-  const prevId = order[pos - 1];        // módulo anterior de la MISMA ruta
-  return getLastScore(prevId) >= getPassingScore(prevId);
+  return true;
 }
+
+// ═══════════════════════════════════════════════════════
+// 🔗 ENLACES DIRECTOS A MÓDULOS (para Odoo)
+// Ejemplo: https://opticascvmas.github.io/cvmas-academy/?modulo=anatomia
+// El usuario inicia sesión y la academia abre ese módulo directo.
+// a = id en la academia de Asesores · o = id en la de Optometristas.
+// Para un módulo nuevo, agrega aquí su nombre corto.
+// ═══════════════════════════════════════════════════════
+const ENLACES_MODULOS = {
+  'adn-cv':               { a:1 },
+  'anatomia':             { a:2 },
+  'ametropias':           { a:3 },
+  'recetas':              { a:4 },
+  'lentes-oftalmicos':    { a:5 },
+  'fabricacion':          { a:6 },
+  'materiales':           { a:7 },
+  'tratamientos':         { a:8 },
+  'vision-sencilla':      { a:9 },
+  'progresivos':          { a:10 },
+  'progresivos-akkurat':  { a:11 },
+  'ocupacionales-akkurat':{ a:12 },
+  'antifatiga-akkurat':   { a:13 },
+  'vs-akkurat':           { a:14 },
+  'lentes-contacto':      { a:15 },
+  'luminex':              { a:16 },
+  'cierre-ventas':        { a:17 },
+  'aros-ficha-marca':     { a:18 },
+  'odoo':                 { a:19, o:2 },
+  'ingles-0':             { a:24, o:7 },
+  'ingles-1':             { a:20, o:3 },
+  'ingles-2':             { a:21, o:4 },
+  'ingles-3':             { a:22, o:5 },
+  'ingles-4':             { a:23, o:6 },
+  'flexicuotas':          { a:25, o:8 },
+  'sumas':                { a:26, o:9 },
+  'control-miopia':       { o:1 }
+};
+
+window.abrirModuloDesdeEnlace = function() {
+  let clave = null;
+  try { clave = new URLSearchParams(location.search).get('modulo'); } catch(e) { return; }
+  if (!clave) return;
+  clave = clave.toLowerCase().trim();
+
+  // Quitar ?modulo= de la barra de direcciones para que no se reabra al recargar
+  try {
+    const url = new URL(location.href);
+    url.searchParams.delete('modulo');
+    history.replaceState(null, '', url.pathname + url.search + url.hash);
+  } catch(e) {}
+
+  const destino = ENLACES_MODULOS[clave];
+  if (!destino) { alert('El enlace no corresponde a ningún módulo de la academia.'); return; }
+
+  let id = window.CVP_IS_OPTOMETRA ? destino.o : destino.a;
+
+  // El módulo existe solo en la otra academia: el admin cambia de vista automáticamente
+  if (id == null) {
+    let u = {};
+    try { u = JSON.parse(localStorage.getItem('cvplus_user') || '{}'); } catch(e) {}
+    if (u.role === 'admin' || u.role === 'admin_opto') {
+      toggleAcademiaAdmin();
+      id = window.CVP_IS_OPTOMETRA ? destino.o : destino.a;
+    }
+  }
+
+  if (id != null && MODULES.some(m => m.id === id)) {
+    showModule(id);
+  } else {
+    alert('Este módulo no está disponible para tu perfil.');
+  }
+};
 
 function buildNav() {
   const nav = document.getElementById('nav');
@@ -4555,16 +4621,6 @@ try {
 // 🔓 Refrescar tarjetas para reflejar módulos recién desbloqueados
 try {
   renderGrids(STATE.search || '');
-  // Avisar si este aprobado desbloqueó el siguiente módulo
-  if (pct >= getPassingScore(qs.module)) {
-    const order = getModuleOrder();
-    const pos = order.indexOf(qs.module);
-    const nextId = order[pos + 1];
-    if (nextId && !isModuleFree(nextId) && !isRutaLibre(nextId)) {   // no anunciar módulos ni rutas libres
-      const nextMod = MODULES.find(m => m.id === nextId);
-      setTimeout(() => alert(`🔓 ¡Desbloqueaste: ${nextMod ? nextMod.title : ''}!`), 300);
-    }
-  }
 } catch(e) {
   console.error(e);
 }
@@ -4854,6 +4910,13 @@ try {
   showDashboard();
 } catch(e) {
   console.error("ERROR showDashboard:", e);
+}
+
+// 🔗 Si llegó desde Odoo con ?modulo=..., abrir ese módulo directo
+try {
+  window.abrirModuloDesdeEnlace();
+} catch(e) {
+  console.error("ERROR enlace directo:", e);
 }
 
 document.getElementById("error").style.display = "none";
@@ -5502,7 +5565,7 @@ var CVPBOT_FAQ = [
   { kw:["progreso","avance","modulos completados","cuantos modulos"],
     r:"Tu progreso general aparece arriba del menú de módulos, en la barra lateral izquierda: muestra cuántos módulos has completado del total." },
   { kw:["bloqueado","bloqueada","candado","desbloquear","abrir modulo"],
-    r:"Los módulos se desbloquean en orden. Para abrir el siguiente, primero debes aprobar el quiz del módulo anterior con al menos 80%." },
+    r:"Todos los módulos están abiertos: puedes estudiarlos en el orden que quieras. Cada quiz sigue calificándote y para aprobarlo necesitas 80% (Flexi-Cuotas pide 85%)." },
   { kw:["nota minima","puntaje minimo","aprobar","porcentaje minimo"],
     r:"La nota mínima para aprobar cualquier quiz es 80%." },
   { kw:["repetir","reintentar","volver a intentar","reprobe","fallar"],
