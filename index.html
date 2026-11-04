@@ -237,6 +237,7 @@ min-height:260px;
     .cat-ventas { background:#FFF8E1; color:#E65100; }
     .cat-credito { background:#E0F7FA; color:#00838F; }
     .cat-lealtad { background:#FFF6DD; color:#8A6200; }
+    .cat-herramientas { background:#EDEFEC; color:#373A36; }
 
     /* ─── MODULE VIEW ─── */
     #module-view { display:none; }
@@ -571,6 +572,23 @@ min-height:260px;
       padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;
     }
     .cv-sumas-chips button:hover{border-color:#00abc8;color:#006b7e}
+    /* ── Modal Calculadora de Espesores ─────────────────── */
+    #modal-espesores{
+      display:none;position:fixed;inset:0;z-index:100000;
+      flex-direction:column;background:#f4f7f8;
+    }
+    #modal-espesores.abierto{display:flex}
+    #modal-espesores .cv-modal-bar{
+      display:flex;align-items:center;justify-content:space-between;gap:10px;
+      padding:12px 18px;background:#373a36;color:#fff;
+      font-size:14px;font-weight:600;flex-shrink:0;
+    }
+    #modal-espesores .cv-cerrar{
+      background:rgba(255,255,255,.14);color:#fff;border:none;border-radius:8px;
+      padding:7px 14px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;white-space:nowrap;
+    }
+    #modal-espesores .cv-cerrar:hover{background:rgba(255,255,255,.26)}
+    #modal-espesores iframe{flex:1;width:100%;border:0}
     .cv-odoo-cta{
       margin:2rem 0 1rem;display:flex;align-items:center;gap:1rem;
       background:linear-gradient(135deg,#0d2137 0%,#0a1a2e 100%);
@@ -872,7 +890,7 @@ margin-bottom:15px;
           <div id="studied-indicator"></div>
           <div style="display:flex;gap:10px;">
             <button class="btn btn-secondary" id="btn-mark-studied" onclick="toggleStudied()">✅ Marcar como estudiado</button>
-            <button class="btn btn-gold" onclick="startQuiz()">🧠 Iniciar Quiz</button>
+            <button class="btn btn-gold" id="btn-start-quiz-bottom" onclick="startQuiz()">🧠 Iniciar Quiz</button>
           </div>
         </div>
       </div>
@@ -3485,6 +3503,7 @@ MODULES_OPTO.push((function(){ var c={}; for(var k in MODULO_FLEXI) c[k]=MODULO_
 const MODULO_SUMAS = {
   title:"SUMÁS: Programa de Lealtad y Reactivación", icon:"⭐",
   category:"lealtad", chain:"lealtad", quizCount:20,
+  requisitos:"sumas",   // el quiz se libera al ver los 7 videos y recorrer la guía (ver bloque «REQUISITOS SUMÁS»)
   content:`
     <h2>SUMÁS: que el cliente vuelva</h2>
     <p>De cada <strong>100 clientes</strong>, solo <strong>18</strong> vuelven a comprarnos. En lentes casi no hay fidelidad de marca (la gente compra donde le queda cerca) y entre una compra y la siguiente pasan de <strong>12 a 36 meses</strong>: en ese tiempo el cliente se enfría. SUMÁS existe para que el cliente regrese y para medir qué funciona.</p>
@@ -3686,6 +3705,53 @@ const MODULO_SUMAS = {
 // Se inyecta con id propio en cada academia (asesores 26 · optometristas 9)
 MODULES_ASESOR.push((function(){ var c={}; for(var k in MODULO_SUMAS) c[k]=MODULO_SUMAS[k]; c.id=26; return c; })());
 MODULES_OPTO.push((function(){ var c={}; for(var k in MODULO_SUMAS) c[k]=MODULO_SUMAS[k]; c.id=9;  return c; })());
+
+// ═══════════════════════════════════════════════════════════════════════
+// 📏 MÓDULO CALCULADORA DE ESPESORES (herramienta de práctica)
+// Herramienta: herramientas/calculadora-espesores.html (se abre en modal).
+// - Va en las DOS academias (asesores id 27 · optometristas id 10).
+// - Siempre abierto: su categoría 'herramientas' está en RUTAS_LIBRES.
+// - sinQuiz:true → no muestra el botón de Quiz ni cuenta en el panel admin
+//   (por eso NO se agrega a MODULE_NAMES de js/admin.js).
+// ═══════════════════════════════════════════════════════════════════════
+const MODULO_ESPESORES = {
+  title:"Calculadora de Espesores", icon:"📏",
+  category:"herramientas", chain:"herramientas", sinQuiz:true,
+  content:`
+    <h2>Calculadora de Espesores CV+</h2>
+    <p>Estima de forma aproximada el <strong>espesor, el volumen y el peso</strong> de cada lente según la graduación, el centrado, la montura y <strong>dos opciones de material e índice</strong> lado a lado. Úsala para practicar y para mostrarle al cliente, con números y gráficos, por qué conviene un índice más alto o un aro distinto.</p>
+
+    <div class="cv-sumas-cta">
+      <div class="cv-sumas-txt">
+        <strong>📏 Abrir la Calculadora de Espesores</strong>
+        <span>Ingresa la receta, la DNP, las alturas y las medidas del aro; compara dos materiales y mira el lente en 3D.</span>
+      </div>
+      <button class="cv-btn-sumas" type="button" onclick="abrirEspesores()">Abrir calculadora</button>
+    </div>
+
+    <h2>Cómo usarla</h2>
+    <ol>
+      <li><strong>Prescripción:</strong> esfera, cilindro y eje de cada ojo (OD y OI). Deja «Diámetro mínimo» si no conoces el diámetro del lente.</li>
+      <li><strong>Centros pupilares:</strong> DNP y altura de cada ojo, en milímetros.</li>
+      <li><strong>Montura:</strong> ancho de aro, puente, altura de aro y tipo de montura (pasta, metal, ranurado, al aire o a filo).</li>
+      <li><strong>Materiales:</strong> elige la Opción 1 y la Opción 2 (por ejemplo, policarbonato 1.587 contra alto índice 1.67) y compara espesores, peso y precio de lista.</li>
+    </ol>
+
+    <h2>Qué hace más grueso un lente</h2>
+    <table class="comparison-table">
+      <tr><th>Factor</th><th>Qué pasa</th></tr>
+      <tr><td><strong>Graduación negativa (miopía)</strong></td><td>El lente es delgado al centro y <strong>grueso en el borde</strong>, sobre todo en el lado temporal.</td></tr>
+      <tr><td><strong>Graduación positiva (hipermetropía)</strong></td><td>El lente es <strong>grueso al centro</strong> y delgado en el borde.</td></tr>
+      <tr><td><strong>Aro grande o mal centrado</strong></td><td>Cuanto más lejos queda la pupila del centro del aro, más diámetro necesita el lente y más espesor gana.</td></tr>
+      <tr><td><strong>Tipo de montura</strong></td><td>Ranurados y al aire necesitan un borde mínimo mayor para sostener el lente.</td></tr>
+      <tr><td><strong>Índice de refracción</strong></td><td>A mayor índice, <strong>más delgado</strong> el lente con la misma graduación.</td></tr>
+    </table>
+    <div class="tip-box">💡 El resultado es una <strong>estimación</strong>. El espesor exacto depende de los parámetros del fabricante y del diseño real del lente; úsalo como guía para asesorar, no como dato de laboratorio.</div>
+  `
+};
+// Se inyecta con id propio en cada academia (asesores 27 · optometristas 10)
+MODULES_ASESOR.push((function(){ var c={}; for(var k in MODULO_ESPESORES) c[k]=MODULO_ESPESORES[k]; c.id=27; return c; })());
+MODULES_OPTO.push((function(){ var c={}; for(var k in MODULO_ESPESORES) c[k]=MODULO_ESPESORES[k]; c.id=10; return c; })());
 // MODULES es la lista "activa"; por defecto la de asesores
 let MODULES = MODULES_ASESOR;
 
@@ -3793,7 +3859,8 @@ async function saveProgress(p) {
     if(window.firebaseReady) {
 
       await saveUserData("progress", {
-        progress: p
+        progress: p,
+        sumas: window.SUMAS_AV || {}
       });
 
     }
@@ -3936,6 +4003,8 @@ window.hydrateUserData = async function() {
     // Progreso (módulos estudiados)
     const progressDoc = await window.loadUserData("progress");
     PROGRESS = (progressDoc && progressDoc.progress) ? progressDoc.progress : {};
+    window.SUMAS_AV = (progressDoc && progressDoc.sumas) ? progressDoc.sumas : {};
+    localStorage.setItem('cvplus_sumas_avance', JSON.stringify(window.SUMAS_AV));
 
     // Sincronizar el navegador con lo de Firebase (evita datos viejos pegados)
     localStorage.setItem('cvplus_quiz_scores', JSON.stringify(QUIZ_SCORES));
@@ -3960,6 +4029,7 @@ const CAT_INFO_ASESOR = {
   ventas: { label:'Ventas y Productos', dashTitle:'💼 Ventas y Productos', ids:[15,16,17,18] },
   credito: { label:'Crédito Flexi-Cuotas', dashTitle:'💳 Crédito · Flexi-Cuotas', ids:[25] },
   lealtad: { label:'Programa SUMÁS', dashTitle:'⭐ SUMÁS · Lealtad y Reactivación', ids:[26] },
+  herramientas: { label:'Herramientas de práctica', dashTitle:'📏 Herramientas de práctica', ids:[27] },
   ingles: { label:'Inglés CV+', dashTitle:'🇺🇸 Inglés CV+ · English Lab', ids:[24,20,21,22,23] },
 };
 // Categorías de Optometristas
@@ -3968,10 +4038,11 @@ const CAT_INFO_OPTO = {
   sistema: { label:'Sistema', dashTitle:'🔄 Sistema', ids:[2] },
   credito: { label:'Crédito Flexi-Cuotas', dashTitle:'💳 Crédito · Flexi-Cuotas', ids:[8] },
   lealtad: { label:'Programa SUMÁS', dashTitle:'⭐ SUMÁS · Lealtad y Reactivación', ids:[9] },
+  herramientas: { label:'Herramientas de práctica', dashTitle:'📏 Herramientas de práctica', ids:[10] },
   ingles: { label:'Inglés CV+', dashTitle:'🇺🇸 Inglés CV+ · English Lab', ids:[7,3,4,5,6] },
 };
 let CAT_INFO = CAT_INFO_ASESOR;
-const CAT_ICONS = { fundamentos:'🔬', fabricacion:'⚙️', akkurat:'✨', ventas:'💼', sistema:'🔄', credito:'💳', lealtad:'⭐', ingles:'🇺🇸' };
+const CAT_ICONS = { fundamentos:'🔬', fabricacion:'⚙️', akkurat:'✨', ventas:'💼', sistema:'🔄', credito:'💳', lealtad:'⭐', herramientas:'📏', ingles:'🇺🇸' };
 
 // Cambia el contenido (módulos + categorías) según el rol leído en Firebase
 window.aplicarRolContenido = function(role){
@@ -4070,7 +4141,7 @@ function isModuleFree(id) {
 // 'sistema' = Flujo de Servicio al Cliente en Odoo (id 19 asesores / id 2 opto).
 // Para liberar otra ruta completa, agrega su nombre a esta lista.
 // ═══════════════════════════════════════════════════════
-const RUTAS_LIBRES = ['ingles', 'sistema', 'credito', 'lealtad'];   // 'credito' = Flexi-Cuotas (id 25 asesores / id 8 opto) · 'lealtad' = SUMÁS (id 26 asesores / id 9 opto)
+const RUTAS_LIBRES = ['ingles', 'sistema', 'credito', 'lealtad', 'herramientas'];   // 'credito' = Flexi-Cuotas (id 25 asesores / id 8 opto) · 'lealtad' = SUMÁS (id 26 asesores / id 9 opto) · 'herramientas' = Calculadora de Espesores (id 27 asesores / id 10 opto)
 
 function isRutaLibre(id) {
   const m = MODULES.find(x => x.id === id);
@@ -4122,6 +4193,7 @@ const ENLACES_MODULOS = {
   'ingles-4':             { a:23, o:6 },
   'flexicuotas':          { a:25, o:8 },
   'sumas':                { a:26, o:9 },
+  'espesores':            { a:27, o:10 },
   'control-miopia':       { o:1 }
 };
 
@@ -4368,7 +4440,7 @@ function showModule(id) {
   document.getElementById('topbar-breadcrumb').textContent = getCatLabel(mod.category);
   document.getElementById('topbar-actions').innerHTML = `
     <button class="btn btn-secondary" onclick="showDashboard()">← Inicio</button>
-    <button class="btn btn-gold" onclick="startQuiz()">🧠 Quiz</button>`;
+    ${mod.sinQuiz ? '' : '<button class="btn btn-gold" onclick="startQuiz()">🧠 Quiz</button>'}`;
 
   document.getElementById('hero-icon').textContent = mod.icon;
   document.getElementById('hero-title').textContent = mod.title;
@@ -4392,6 +4464,7 @@ function showModule(id) {
   let html = mod.content;
   setView('module');
   document.getElementById('module-content-body').innerHTML = html;
+  if (window.cvpAjustarQuiz) window.cvpAjustarQuiz(mod);
   
   // Attach keyword tooltip listeners
   document.querySelectorAll('.kw').forEach(el => {
@@ -4406,7 +4479,7 @@ function showModule(id) {
 }
 
 function getCatLabel(cat) {
-  const labels = { fundamentos:'Fundamentos', fabricacion:'Fabricación y Materiales', akkurat:'Portafolio Akkurat', ventas:'Ventas y Productos', sistema:'Sistema', credito:'Crédito Flexi-Cuotas', lealtad:'Programa SUMÁS' };
+  const labels = { fundamentos:'Fundamentos', fabricacion:'Fabricación y Materiales', akkurat:'Portafolio Akkurat', ventas:'Ventas y Productos', sistema:'Sistema', credito:'Crédito Flexi-Cuotas', lealtad:'Programa SUMÁS', herramientas:'Herramientas de práctica' };
   return labels[cat] || cat;
 }
 
@@ -4425,6 +4498,11 @@ function toggleStudied() {
 function startQuiz() {
   const id = STATE.currentModule;
   const mod = MODULES.find(m=>m.id===id);
+  if (mod && mod.sinQuiz) return;
+  if (window.cvpQuizPermitido && !window.cvpQuizPermitido(mod)) {
+    alert('🔒 Quiz bloqueado.\n\nPrimero mira los 7 videos completos y recorre todos los procesos de la guía práctica hasta el final.');
+    return;
+  }
   STATE.quizState = { module: id, qIndex: 0, answers: [], answered: false };
   // El banco completo se conserva en quizBank: abajo mod.quiz se reemplaza por
   // la muestra de este intento, y sin esto el módulo perdería las preguntas
@@ -4955,14 +5033,19 @@ window.saveUserData = async function(collection, data) {
 // para que en computadoras compartidas el siguiente usuario no vea
 // el progreso del anterior.
 // ═══════════════════════════════════════════════════════
-window.cerrarSesion = async function() {
-  const ok = confirm("¿Cerrar sesión?");
-  if (!ok) return;
+window.cerrarSesion = async function(opciones) {
+  // opciones.auto = true → cierre por inactividad: no pregunta
+  const auto = !!(opciones && opciones.auto);
+  if (!auto) {
+    const ok = confirm("¿Cerrar sesión?");
+    if (!ok) return;
+  }
   try {
     // Borrar datos locales de esta cuenta
     localStorage.removeItem("cvplus_user");
     localStorage.removeItem("cvplus_quiz_scores");
     localStorage.removeItem("cvplus_progress");
+    localStorage.removeItem("cvplus_sumas_avance");
     localStorage.removeItem("cvplus_quiz_attempts");
 
     // Guardar duración de la sesión antes de cerrar
@@ -5316,6 +5399,177 @@ Cerrar
   document.addEventListener('keydown', function(e){
     var m = document.getElementById('modal-sumas');
     if(e.key === 'Escape' && m && m.classList.contains('abierto')) window.cerrarSumas();
+  });
+</script>
+<!-- ═══ REQUISITOS SUMÁS: el quiz se libera al terminar videos + guía ═══ -->
+<style>
+  .cv-req{margin:0 0 1.4rem;border:1px solid #ffc629;background:#fffaeb;border-radius:12px;padding:1rem 1.25rem}
+  .cv-req.ok{border-color:#2e9e5b;background:#eefaf2}
+  .cv-req h4{margin:0 0 .35rem;font-size:.98rem;color:#373a36}
+  .cv-req p{margin:0 0 .7rem;font-size:.84rem;color:#535651}
+  .cv-req-fila{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;margin:.35rem 0;font-size:.84rem;color:#373a36}
+  .cv-req-fila b{min-width:120px}
+  .cv-req-chip{display:inline-block;border-radius:999px;padding:2px 9px;font-size:.75rem;font-weight:600;background:#eceeed;color:#6b716a}
+  .cv-req-chip.si{background:#d6f3e1;color:#1d7a43}
+  .btn.cv-bloq{opacity:.55;filter:grayscale(.4)}
+</style>
+<script>
+(function(){
+  // Qué hay que completar (si se agrega un video o un proceso, súmalo aquí)
+  var REQ_VIDEOS   = ['v1','v2','v3','v4','v5','v6','v7'];
+  var REQ_PROCESOS = ['p1','pe','p2','p3','p4','p5','p6','p7','p8','p9'];   // 10 procesos, en el orden de la guía (el 2.º se llama 'pe')
+
+  // Avance por usuario: { v:{v1:[escenas vistas]}, vd:{v1:true}, g:{p1:true} }
+  // Se guarda en Firestore dentro del documento progress/{uid} (campo «sumas»).
+  try { window.SUMAS_AV = JSON.parse(localStorage.getItem('cvplus_sumas_avance') || '{}'); } catch(e) { window.SUMAS_AV = {}; }
+  function AV(){ var a = window.SUMAS_AV || (window.SUMAS_AV = {}); a.v = a.v || {}; a.vd = a.vd || {}; a.g = a.g || {}; return a; }
+  var tGuardar = null;
+  function guardar(){
+    try { localStorage.setItem('cvplus_sumas_avance', JSON.stringify(window.SUMAS_AV)); } catch(e) {}
+    clearTimeout(tGuardar);
+    tGuardar = setTimeout(function(){ try { saveProgress(PROGRESS); } catch(e) {} }, 1500);
+  }
+  function rolLibre(){
+    try { var r = (JSON.parse(localStorage.getItem('cvplus_user') || '{}').role) || ''; return r === 'admin' || r === 'admin_opto' || r === 'viewer'; } catch(e) { return false; }
+  }
+  function cuenta(){
+    var a = AV();
+    return { v: REQ_VIDEOS.filter(function(k){ return a.vd[k]; }).length,
+             g: REQ_PROCESOS.filter(function(k){ return a.g[k]; }).length };
+  }
+  function completo(){ var c = cuenta(); return c.v === REQ_VIDEOS.length && c.g === REQ_PROCESOS.length; }
+
+  window.cvpQuizPermitido = function(mod){
+    if (!mod || mod.requisitos !== 'sumas') return true;
+    return rolLibre() || completo();
+  };
+
+  // Ajusta los dos botones de quiz del módulo y pinta el panel de avance de SUMÁS
+  window.cvpAjustarQuiz = function(mod){
+    var btns = document.querySelectorAll('#topbar-actions [onclick="startQuiz()"], #btn-start-quiz-bottom');
+    var abajo = document.getElementById('btn-start-quiz-bottom');
+    if (abajo) abajo.style.display = mod.sinQuiz ? 'none' : '';
+    var bloqueado = !window.cvpQuizPermitido(mod);
+    btns.forEach(function(b){
+      b.classList.toggle('cv-bloq', bloqueado);
+      b.textContent = bloqueado ? '🔒 Quiz bloqueado' : (b.id === 'btn-start-quiz-bottom' ? '🧠 Iniciar Quiz' : '🧠 Quiz');
+    });
+    if (mod.requisitos !== 'sumas') return;
+    var a = AV(), c = cuenta(), ok = completo();
+    var chips = function(lista, mapa, pref){ return lista.map(function(k, i){ return '<span class="cv-req-chip' + (mapa[k] ? ' si' : '') + '">' + (mapa[k] ? '✓ ' : '') + pref + ' ' + (i+1) + '</span>'; }).join(' '); };
+    var panel = document.createElement('div');
+    panel.className = 'cv-req' + (ok ? ' ok' : '');
+    panel.innerHTML =
+      '<h4>' + (ok ? '✅ Quiz desbloqueado' : '🔒 Para desbloquear el quiz') + '</h4>' +
+      '<p>' + (ok ? 'Ya viste todos los videos y recorriste la guía completa. ¡Adelante con el quiz!'
+                 : 'Mira cada video hasta el final (sin saltar escenas) y abre cada proceso de la guía práctica y recórrelo hasta abajo. Tu avance se guarda solo.') +
+      (rolLibre() && !ok ? ' <i>(Como administrador, tú puedes entrar al quiz igual.)</i>' : '') + '</p>' +
+      '<div class="cv-req-fila"><b>🎬 Videos ' + c.v + '/' + REQ_VIDEOS.length + '</b>' + chips(REQ_VIDEOS, a.vd, 'Video') + '</div>' +
+      '<div class="cv-req-fila"><b>📘 Guía ' + c.g + '/' + REQ_PROCESOS.length + '</b>' + chips(REQ_PROCESOS, a.g, 'Proceso') + '</div>';
+    var body = document.getElementById('module-content-body');
+    if (body) body.insertBefore(panel, body.firstChild);
+  };
+
+  // ── Videos: una escena cuenta cuando se narraron TODAS sus líneas;
+  //    el video cuenta cuando todas sus escenas están vistas.
+  var TAG = /\((Énfasis|Enfasis|Pausa larga|Pausa|Alegre|Entusiasmo|Calma|Suave|Lento|Rápido|Rapido|Pregunta|Serio|Normal)\)/gi;
+  function engancharVideos(w){
+    var D = w.document, V = w.VIDEOS;
+    if (!V || typeof w.T !== 'function' || D.__cvpReq) return;
+    D.__cvpReq = true;
+    var oidas = {}, ultimo = '';
+    function norm(html){ var d = D.createElement('div'); d.innerHTML = String(html); return (d.textContent || '').replace(TAG, '').replace(/\s+/g, ''); }
+    function escenaLista(vid, si){
+      var a = AV(), arr = a.v[vid.id] || (a.v[vid.id] = []);
+      if (arr.indexOf(si) !== -1) return;
+      arr.push(si);
+      if (arr.length >= vid.esc.length) a.vd[vid.id] = true;
+      guardar();
+    }
+    function revisar(){
+      var sub = D.getElementById('sub'), info = D.getElementById('info'), tab = D.querySelector('.tab.on'), preg = D.getElementById('preg');
+      if (!sub || !info || !tab) return;
+      var vid = V[+tab.dataset.v], m = /^(\d+)\s*\//.exec(info.textContent || '');
+      if (!vid || !m) return;
+      var si = +m[1] - 1, e = vid.esc[si]; if (!e) return;
+      var total = e.lineas.filter(function(l){ return typeof l === 'string'; }).length;
+      if (!total) { if (D.querySelector('.escena.activa')) escenaLista(vid, si); return; }
+      if (preg && preg.classList.contains('ver')) return;
+      var txt = (sub.textContent || '').replace(/\s+/g, '');
+      if (!txt) { ultimo = ''; return; }
+      if (txt === ultimo) return; ultimo = txt;
+      var clave = vid.id + '|' + si, set = oidas[clave] || (oidas[clave] = {});
+      e.lineas.forEach(function(l, i){
+        if (typeof l === 'string' && norm(w.T('n.' + e.id + '.' + i, l)) === txt) set[i] = true;
+      });
+      if (Object.keys(set).length >= total) escenaLista(vid, si);
+    }
+    new w.MutationObserver(revisar).observe(D.body, { childList:true, subtree:true, characterData:true });
+  }
+
+  // ── Guía: un proceso cuenta cuando se abre y se recorre hasta el final.
+  function engancharGuia(w){
+    var D = w.document;
+    if (D.__cvpReq) return; D.__cvpReq = true;
+    function revisar(){
+      var v = D.getElementById('vista');
+      if (!v || !v.classList.contains('abierta') || !v.querySelector('.vfin')) return;
+      var id = (w.location.hash || '').replace('#', '');
+      if (REQ_PROCESOS.indexOf(id) === -1) return;
+      if (v.scrollTop + v.clientHeight >= v.scrollHeight - 80) {
+        var a = AV(); if (!a.g[id]) { a.g[id] = true; guardar(); }
+      }
+    }
+    D.addEventListener('scroll', revisar, true);
+    new w.MutationObserver(function(){ setTimeout(revisar, 700); }).observe(D.body, { childList:true, subtree:true });
+  }
+
+  var frame = document.getElementById('sumas-frame');
+  if (frame) frame.addEventListener('load', function(){
+    try {
+      var w = frame.contentWindow, url = w.location.pathname;
+      if (/video-interactivo-rfm/.test(url)) engancharVideos(w);
+      else if (/guia-ficha-crm-odoo/.test(url)) engancharGuia(w);
+    } catch(e) { console.warn('SUMÁS: no se pudo leer el avance', e); }
+  });
+
+  // Al cerrar el modal, se refresca el módulo para mostrar el avance nuevo
+  var cerrarOriginal = window.cerrarSumas;
+  window.cerrarSumas = function(){
+    cerrarOriginal();
+    try {
+      if (STATE.currentView === 'module') {
+        var mod = MODULES.find(function(m){ return m.id === STATE.currentModule; });
+        if (mod && mod.requisitos === 'sumas') showModule(mod.id);
+      }
+    } catch(e) {}
+  };
+})();
+</script>
+<!-- ═══ Calculadora de Espesores (herramienta de práctica) ═══ -->
+<div id="modal-espesores" role="dialog" aria-modal="true" aria-label="Calculadora de Espesores" aria-hidden="true">
+  <div class="cv-modal-bar">
+    <span>📏 Calculadora de Espesores CV+</span>
+    <button class="cv-cerrar" type="button" onclick="cerrarEspesores()">✕ Cerrar</button>
+  </div>
+  <iframe id="espesores-frame" title="Calculadora de Espesores CV+"></iframe>
+</div>
+<script>
+  window.abrirEspesores = function(){
+    var m = document.getElementById('modal-espesores');
+    var f = document.getElementById('espesores-frame');
+    if (!f.getAttribute('src')) f.src = 'herramientas/calculadora-espesores.html';
+    m.classList.add('abierto');
+    m.setAttribute('aria-hidden','false');
+  };
+  window.cerrarEspesores = function(){
+    var m = document.getElementById('modal-espesores');
+    m.classList.remove('abierto');
+    m.setAttribute('aria-hidden','true');
+  };
+  document.addEventListener('keydown', function(e){
+    var m = document.getElementById('modal-espesores');
+    if(e.key === 'Escape' && m && m.classList.contains('abierto')) window.cerrarEspesores();
   });
 </script>
 <!-- ═══ English Lab · Módulos de Inglés CV+ ═══ -->
@@ -6446,6 +6700,117 @@ function cvpBotToggleMic(){
       if (chatPanel) chatPanel.classList.remove('abierto');
     }
   }, 800);
+})();
+</script>
+
+<!-- ═══ CIERRE DE SESIÓN POR INACTIVIDAD ═══ -->
+<style>
+  #cv-inactivo{position:fixed;inset:0;z-index:200000;display:none;align-items:center;justify-content:center;
+    background:rgba(20,24,23,.6);padding:16px;font-family:inherit}
+  #cv-inactivo.ver{display:flex}
+  #cv-inactivo .caja{background:#fff;border-radius:16px;max-width:380px;width:100%;padding:24px;text-align:center;
+    box-shadow:0 20px 50px rgba(0,0,0,.3);border-top:6px solid #ffc629}
+  #cv-inactivo h3{margin:0 0 6px;font-size:18px;color:#373a36}
+  #cv-inactivo p{margin:0 0 14px;font-size:14px;color:#535651}
+  #cv-inactivo .seg{font-size:42px;font-weight:800;color:#00abc8;margin:4px 0 14px}
+  #cv-inactivo button{border:none;border-radius:10px;padding:12px 18px;font-weight:700;font-size:14px;cursor:pointer;font-family:inherit;margin:4px}
+  #cv-inactivo .si{background:#00abc8;color:#fff}
+  #cv-inactivo .no{background:#eceeed;color:#373a36}
+  .cv-aviso-salida{background:#fff6dd;border:1px solid #ffc629;color:#373a36;border-radius:10px;padding:10px 12px;font-size:13px;margin-bottom:14px;text-align:left}
+</style>
+<div id="cv-inactivo" role="alertdialog" aria-modal="true" aria-labelledby="cv-inactivo-t">
+  <div class="caja">
+    <h3 id="cv-inactivo-t">¿Sigues ahí?</h3>
+    <p>Por seguridad, tu sesión se cerrará por inactividad en:</p>
+    <div class="seg" id="cv-inactivo-seg">60</div>
+    <button class="si" type="button" id="cv-inactivo-sigo">Sigo aquí</button>
+    <button class="no" type="button" id="cv-inactivo-salir">Cerrar sesión</button>
+  </div>
+</div>
+<script>
+(function(){
+  // ✏️ Ajustes: minutos sin tocar la pantalla antes de cerrar sesión, y segundos de aviso previo
+  var LIMITE_MIN = 15;
+  var AVISO_SEG  = 60;
+
+  var ultima = Date.now(), activa = false, cerrando = false;
+  var modal = document.getElementById('cv-inactivo');
+  var seg = document.getElementById('cv-inactivo-seg');
+
+  // La sesión está abierta cuando ya no existe la pantalla de inicio de sesión
+  function sesionAbierta(){
+    return !document.getElementById('login-screen') && !!(window.auth && window.auth.currentUser);
+  }
+  function actividad(){
+    if (cerrando) return;
+    ultima = Date.now();
+    if (modal.classList.contains('ver')) modal.classList.remove('ver');
+  }
+  var EVENTOS = ['pointerdown','keydown','touchstart','wheel','mousemove','scroll'];
+  function escuchar(doc){
+    EVENTOS.forEach(function(ev){ doc.addEventListener(ev, actividad, { capture:true, passive:true }); });
+  }
+  escuchar(document);
+  // Lo que pasa dentro de los simuladores, videos y guías (iframes) también cuenta como actividad
+  function engancharFrame(f){
+    try { var d = f.contentDocument; if (d && !d.__cvInact) { d.__cvInact = true; escuchar(d); } } catch(e) {}
+  }
+  document.querySelectorAll('iframe').forEach(function(f){
+    f.addEventListener('load', function(){ engancharFrame(f); });
+    engancharFrame(f);
+  });
+  // Un video o una narración en curso también cuenta como actividad
+  function reproduciendo(){
+    var docs = [window];
+    document.querySelectorAll('iframe').forEach(function(f){ try { if (f.contentWindow && f.contentWindow.document) docs.push(f.contentWindow); } catch(e) {} });
+    return docs.some(function(w){
+      try {
+        if (w.speechSynthesis && w.speechSynthesis.speaking) return true;
+        return Array.prototype.some.call(w.document.querySelectorAll('video,audio'), function(m){ return !m.paused && !m.ended; });
+      } catch(e) { return false; }
+    });
+  }
+
+  function revisar(){
+    if (cerrando) return;
+    var abierta = sesionAbierta();
+    if (abierta && !activa) { activa = true; ultima = Date.now(); }   // recién inició sesión
+    if (!abierta) { activa = false; modal.classList.remove('ver'); return; }
+    if (reproduciendo()) ultima = Date.now();
+    var resta = Math.ceil((LIMITE_MIN * 60 * 1000 - (Date.now() - ultima)) / 1000);
+    if (resta <= 0) { salir(); return; }
+    if (resta <= AVISO_SEG) { seg.textContent = resta; modal.classList.add('ver'); }
+  }
+  function salir(){
+    if (cerrando) return;
+    cerrando = true;
+    modal.classList.remove('ver');
+    try { sessionStorage.setItem('cvplus_salida_inactividad', '1'); } catch(e) {}
+    if (typeof window.cerrarSesion === 'function') window.cerrarSesion({ auto:true });
+    else location.reload();
+  }
+  document.getElementById('cv-inactivo-sigo').addEventListener('click', function(){ actividad(); });
+  document.getElementById('cv-inactivo-salir').addEventListener('click', function(){ salir(); });
+
+  setInterval(revisar, 1000);
+  // Al volver de la pantalla bloqueada o de otra app, se revisa de inmediato (el tiempo dormido sí cuenta)
+  document.addEventListener('visibilitychange', function(){ if (!document.hidden) revisar(); });
+  window.addEventListener('pageshow', revisar);
+
+  // Aviso en la pantalla de inicio de sesión después de un cierre automático
+  try {
+    if (sessionStorage.getItem('cvplus_salida_inactividad')) {
+      sessionStorage.removeItem('cvplus_salida_inactividad');
+      var ls = document.getElementById('login-screen');
+      var btn = ls && ls.querySelector('button');
+      if (btn) {
+        var a = document.createElement('div');
+        a.className = 'cv-aviso-salida';
+        a.textContent = '🔒 Tu sesión se cerró por inactividad. Ingresa de nuevo con TU usuario.';
+        var primero = ls.querySelector('input') || btn; primero.parentNode.insertBefore(a, primero);
+      }
+    }
+  } catch(e) {}
 })();
 </script>
 </body>
