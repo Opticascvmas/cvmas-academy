@@ -1,5 +1,5 @@
 /* ============================================================================
-   ACADEMIA CV+  ·  PANEL DE ADMINISTRADOR  (versión mejorada)
+   ACADEMIA CV+  ·  PANEL DE ADMINISTRADOR  (v2 · noviembre 2026)
    ----------------------------------------------------------------------------
    Reemplaza tu admin.js anterior por este archivo.
    Se conecta igual a tu Firebase (usa window.db) y mantiene las mismas
@@ -114,7 +114,7 @@ function moduleName(key) {
 
 // Devuelve todos los intentos de un módulo para un usuario (ordenados por fecha)
 function allAttemptsForModule(uid, moduleKey) {
-  const intentos = CVP.history.filter(h =>
+  const intentos = cvxHistDe(uid).filter(h =>
     h.uid === uid && String(h.moduleId) === String(moduleKey) && h.score != null);
   intentos.sort((a, b) => new Date(a.date) - new Date(b.date));
   return intentos;
@@ -192,6 +192,7 @@ window.openAdminPanel = async function () {
     CVP.users   = window.CVP_MOCK.users;
     CVP.scores  = window.CVP_MOCK.scores;
     CVP.history = window.CVP_MOCK.history || [];
+    CVP.followMarks = window.CVP_MOCK.followMarks || {};
   } else {
     // MODO REAL: Firebase
     const { collection, getDocs } = await import(
@@ -209,6 +210,12 @@ window.openAdminPanel = async function () {
       const histSnap = await getDocs(collection(window.db, "quiz_history"));
       histSnap.forEach(d => CVP.history.push({ id: d.id, ...d.data() }));
     } catch (e) { console.warn("Sin histórico todavía:", e); }
+    // Marcas de "contactado" del tab Seguimiento
+    CVP.followMarks = {};
+    try {
+      const fSnap = await getDocs(collection(window.db, "admin_followups"));
+      fSnap.forEach(d => { CVP.followMarks[d.id] = d.data(); });
+    } catch (e) { /* sin permisos o sin datos: queda vacío */ }
   }
   CVP.ready = true;
   CVP.range = null; // null = "Cualquier fecha" (comportamiento original)
@@ -222,6 +229,7 @@ window.openAdminPanel = async function () {
   CVP.users   = CVP.users.filter(u => !excluded.includes((u.email || "").toLowerCase()));
   CVP.scores  = CVP.scores.filter(s => !excludedIds.includes(s.id));
   CVP.history = CVP.history.filter(h => !excludedIds.includes(h.uid));
+  cvxIndexarHistorial();
 
   // --- Calcular todo y dibujar ---
   const data = computeData(CVP.range);
@@ -272,6 +280,13 @@ window.cvpSetView = async function(view) {
    range = { from: Date, to: Date }
 ---------------------------------------------------------------------------- */
 // Día calendario en hora de El Salvador, formato "YYYY-MM-DD"
+// Histórico agrupado por persona: se arma una vez al abrir el panel (antes se recorría todo por cada módulo)
+function cvxIndexarHistorial() {
+  CVP.histByUid = {};
+  CVP.history.forEach(h => { (CVP.histByUid[h.uid] = CVP.histByUid[h.uid] || []).push(h); });
+}
+function cvxHistDe(uid) { return (CVP.histByUid && CVP.histByUid[uid]) || []; }
+
 function svDayKey(iso) {
   try {
     return new Date(iso).toLocaleDateString("en-CA", { timeZone: "America/El_Salvador" });
@@ -280,7 +295,7 @@ function svDayKey(iso) {
 
 // Preguntas falladas del ÚLTIMO intento de un usuario en un módulo (desde quiz_history)
 function latestWrongForModule(uid, moduleKey) {
-  const intentos = CVP.history.filter(h =>
+  const intentos = cvxHistDe(uid).filter(h =>
     h.uid === uid && String(h.moduleId) === String(moduleKey) && Array.isArray(h.wrong));
   if (!intentos.length) return [];
   // el más reciente por fecha
@@ -546,13 +561,15 @@ function computeData(range) {
   if (hardestModule && hardestModule.avg < 65)
     alerts.push({ level: "danger", text: `El módulo "${hardestModule.name}" tiene bajo rendimiento (${hardestModule.avg}%)` });
 
-  return {
+  const extra = cvxExtras(enriched, relevantHistory, range, now);
+
+  return CVP._last = Object.assign({
     enriched, globalAverage, totalQuizzes, totalAttempts,
     activeToday, activeWeek, inactive, totalUsers: enriched.length,
     participating, participationRate, approvalRate, weeklyTrend,
     ranking, bestUser, branchStats, positionStats, moduleStats, hardestModule,
     last7, buckets, lowPerformers, noActivity7, neverLogged, alerts
-  };
+  }, extra);
 }
 
 // Agrupa y promedia por un campo (branch / position)
@@ -570,110 +587,504 @@ function aggregateBy(list, field) {
 }
 
 
+// ── v2: indicadores adicionales (sin leer nada nuevo de Firebase) ───────────
+const CVX_MIN_MODS = 3;          // mínimo de módulos para entrar al ranking
+const CVX_DIAS_INACTIVO = 7;
+// Cohorte de ingreso: campo "cohorte" del usuario o texto "(Ingreso Junio)" en el nombre
+function cvxCohorte(u) {
+  if (u.cohorte) return String(u.cohorte);
+  const m = /\(\s*ingreso\s+([^)]+)\)/i.exec(u.name || '');
+  if (!m) return '';
+  const t = m[1].trim().toLowerCase();
+  return t.charAt(0).toUpperCase() + t.slice(1);
+}
+const CVX_MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+function cvxShort(name) {
+  const n = String(name).replace(/^Ingles Nivel (\d).*/, 'Inglés $1').replace(/ - .*$/, '');
+  return n.length > 24 ? n.slice(0, 23) + '…' : n;
+}
+
+function cvxExtras(enriched, relevantHistory, range, now) {
+  const enRango = h => {
+    if (!range) return true;
+    if (range.days) return new Set(range.days).has(svDayKey(h.date));
+    if (range.from && range.to) { const t = new Date(h.date).getTime(); return t >= range.from.getTime() && t <= range.to.getTime(); }
+    return true;
+  };
+  const hist = relevantHistory.filter(h => h.date && enRango(h));
+
+  // Semana actual vs. anterior (siempre relativa a hoy)
+  const ventana = (desde, hasta) => {
+    const xs = relevantHistory.filter(h => { const t = (now - new Date(h.date)) / 86400000; return t >= desde && t < hasta; });
+    return { count: xs.length, avg: xs.length ? Math.round(xs.reduce((s, h) => s + h.score, 0) / xs.length) : null };
+  };
+  const week = { cur: ventana(0, 7), prev: ventana(7, 14) };
+
+  // Aprobación por módulo (última nota ≥ 80), no por intento
+  let modAttempted = 0, modApproved = 0;
+  enriched.forEach(u => u.modules.forEach(m => { modAttempted++; if (m.lastScore >= 80) modApproved++; }));
+  const modApprovalRate = modAttempted ? Math.round(modApproved / modAttempted * 100) : 0;
+
+  // Quizzes por día · 14 días · solo la vista activa
+  const porDia = {};
+  relevantHistory.forEach(h => { if (h.date) { const k = svDayKey(h.date); porDia[k] = (porDia[k] || 0) + 1; } });
+  const last14 = [];
+  for (let i = 13; i >= 0; i--) {
+    const day = new Date(now); day.setDate(now.getDate() - i);
+    const key = day.toLocaleDateString("en-CA", { timeZone: "America/El_Salvador" });
+    last14.push({ label: day.toLocaleDateString("es-SV", { day: "numeric", month: "short", timeZone: "America/El_Salvador" }), count: porDia[key] || 0 });
+  }
+
+  // Ranking justo: 70% promedio + 30% avance, mínimo de módulos
+  const indice = u => Math.round(u.avg * 0.7 + u.progress * 0.3);
+  const fairRanking = enriched.filter(u => u.completed >= CVX_MIN_MODS)
+    .map(u => Object.assign({}, u, { indice: indice(u) }))
+    .sort((a, b) => b.indice - a.indice || b.avg - a.avg);
+  const bmap = {};
+  enriched.filter(u => u.completed > 0).forEach(u => {
+    const k = u.branch; if (!bmap[k]) bmap[k] = { sum: 0, n: 0, avg: 0 };
+    bmap[k].sum += indice(u); bmap[k].avg += u.avg; bmap[k].n++;
+  });
+  const branchFair = Object.entries(bmap).filter(([, v]) => v.n >= 2)
+    .map(([name, v]) => ({ name, people: v.n, indice: Math.round(v.sum / v.n), avg: Math.round(v.avg / v.n) }))
+    .sort((a, b) => b.indice - a.indice);
+
+  // Diagnóstico por módulo + preguntas más falladas (del campo "wrong" del histórico)
+  const md = {};
+  enriched.forEach(u => u.modules.forEach(m => {
+    if (!md[m.key]) md[m.key] = { key: m.key, name: m.name, sum: 0, n: 0, ok: 0, attempts: 0 };
+    const x = md[m.key]; x.sum += m.average; x.n++; x.attempts += m.attempts; if (m.lastScore >= 80) x.ok++;
+  }));
+  const wq = {};
+  hist.forEach(h => (Array.isArray(h.wrong) ? h.wrong : []).forEach(w => {
+    if (!w || !w.q) return;
+    const mk = String(h.moduleId); if (!wq[mk]) wq[mk] = {};
+    const q = wq[mk][w.q] || (wq[mk][w.q] = { q: w.q, n: 0, correcta: w.correcta || '', errores: {} });
+    q.n++; if (w.tuRespuesta) q.errores[w.tuRespuesta] = (q.errores[w.tuRespuesta] || 0) + 1;
+  }));
+  const moduleDiag = Object.values(md).map(x => {
+    const top = Object.values(wq[x.key] || {}).sort((a, b) => b.n - a.n).slice(0, 5).map(q => {
+      const e = Object.entries(q.errores).sort((a, b) => b[1] - a[1])[0];
+      return { q: q.q, n: q.n, correcta: q.correcta, error: e ? e[0] : '', errorN: e ? e[1] : 0 };
+    });
+    return { key: x.key, name: x.name, learners: x.n, avg: Math.round(x.sum / x.n), approved: Math.round(x.ok / x.n * 100),
+             avgAttempts: (x.attempts / x.n).toFixed(1), top };
+  }).sort((a, b) => a.avg - b.avg);
+
+  // Mapa de calor sucursal × módulo
+  const heatMods = Object.values(md).sort((a, b) => Number(a.key) - Number(b.key)).map(x => ({ key: x.key, name: x.name, short: cvxShort(x.name) }));
+  const cells = {}, peopleBy = {};
+  enriched.forEach(u => {
+    if (!u.modules.length) return;
+    peopleBy[u.branch] = (peopleBy[u.branch] || 0) + 1;
+    u.modules.forEach(m => {
+      const k = u.branch + '|' + m.key; const c = cells[k] || (cells[k] = { sum: 0, n: 0 });
+      c.sum += m.average; c.n++;
+    });
+  });
+  Object.values(cells).forEach(c => { c.avg = Math.round(c.sum / c.n); });
+  const heat = { modules: heatMods, cells,
+    branches: Object.keys(peopleBy).sort((a, b) => peopleBy[b] - peopleBy[a] || a.localeCompare(b)).map(n => ({ name: n, people: peopleBy[n] })) };
+
+  // Seguimiento: una fila por persona con sus motivos, ordenada por prioridad
+  const marks = CVP.followMarks || {};
+  const followups = [];
+  enriched.forEach(u => {
+    const motivos = [];
+    if (u.daysSince === Infinity) motivos.push({ tipo: 'nunca', nivel: 'danger', texto: 'Nunca ingresó', p: 3 });
+    else if (u.daysSince > CVX_DIAS_INACTIVO) motivos.push({ tipo: 'inactivo', nivel: 'warn', texto: `${u.daysSince} días sin entrar`, p: 2 });
+    if (u.avg > 0 && u.avg < 60) motivos.push({ tipo: 'bajo', nivel: 'danger', texto: `Promedio ${u.avg}%`, p: 3 });
+    const reprobados = u.modules.filter(m => m.lastScore < 80 && m.attempts >= 2).map(m => m.name);
+    if (reprobados.length) motivos.push({ tipo: 'reprobado', nivel: 'warn', texto: `${reprobados.length} módulo${reprobados.length > 1 ? 's' : ''} sin aprobar`, p: 1 });
+    if (u.daysSince !== Infinity && u.completed === 0) motivos.push({ tipo: 'sinavance', nivel: 'warn', texto: 'Entró pero 0 módulos', p: 2 });
+    if (!motivos.length) return;
+    motivos.sort((a, b) => b.p - a.p);
+    followups.push(Object.assign({}, u, { motivos, reprobados, dias: u.daysSince, cohorte: cvxCohorte(u),
+      nivel: motivos[0].nivel, prioridad: motivos.reduce((s, m) => s + m.p, 0), contactado: marks[u.id] || null }));
+  });
+  followups.sort((a, b) => (a.contactado ? 1 : 0) - (b.contactado ? 1 : 0) || b.prioridad - a.prioridad || a.name.localeCompare(b.name));
+
+  // Cohortes de nuevos ingresos
+  const cmap = {};
+  enriched.forEach(u => { const c = cvxCohorte(u); if (!c) return; (cmap[c] = cmap[c] || []).push(u); });
+  const ordenMes = n => { const i = CVX_MESES.indexOf(String(n).toLowerCase().split(' ')[0]); return i === -1 ? 99 : i; };
+  const cohorts = Object.entries(cmap).map(([name, ms]) => {
+    const conAvg = ms.filter(u => u.avg > 0);
+    return { name, people: ms.length,
+      progress: Math.round(ms.reduce((s, u) => s + u.progress, 0) / ms.length),
+      avg: conAvg.length ? Math.round(conAvg.reduce((s, u) => s + u.avg, 0) / conAvg.length) : 0,
+      active: ms.filter(u => u.daysSince <= 7).length,
+      members: ms.slice().sort((a, b) => b.progress - a.progress) };
+  }).sort((a, b) => ordenMes(b.name) - ordenMes(a.name));
+
+  // "Esta semana atiende": máximo 4 puntos, escritos solos
+  const attention = [];
+  if (moduleDiag[0] && moduleDiag[0].avg < 80)
+    attention.push({ level: cvxTone(moduleDiag[0].avg), title: `Reforzar ${moduleDiag[0].name}`,
+      text: `Es el módulo más difícil: ${moduleDiag[0].avg}% de promedio y ${moduleDiag[0].approved}% aprobado.${moduleDiag[0].top[0] ? ' Pregunta más fallada: «' + moduleDiag[0].top[0].q + '».' : ''}` });
+  const peorSuc = branchFair[branchFair.length - 1];
+  if (peorSuc && peorSuc.indice < 80)
+    attention.push({ level: cvxTone(peorSuc.avg), title: `Acompañar a ${peorSuc.name}`, text: `Es la sucursal con menor puntaje (${peorSuc.indice} pts · ${peorSuc.avg}% de promedio) con ${peorSuc.people} personas evaluadas.` });
+  const nunca = followups.filter(f => f.motivos.some(m => m.tipo === 'nunca')).length;
+  const inact = followups.filter(f => f.motivos.some(m => m.tipo === 'inactivo')).length;
+  if (nunca || inact)
+    attention.push({ level: 'warn', title: 'Seguimiento pendiente', text: `${nunca} nunca han ingresado y ${inact} llevan más de ${CVX_DIAS_INACTIVO} días sin entrar.` });
+  if (week.cur.avg != null && week.prev.avg != null && week.cur.avg < week.prev.avg - 3)
+    attention.push({ level: 'danger', title: 'El promedio bajó', text: `Pasó de ${week.prev.avg}% a ${week.cur.avg}% esta semana.` });
+
+  return { week, modApprovalRate, modApproved, modAttempted, last14, fairRanking, branchFair, moduleDiag, heat, followups, cohorts, attention };
+}
+
+
 /* ============================================================================
-   5) RENDER  ·  estructura general con pestañas
+   5) RENDER  ·  estructura general con pestañas  (v2 · nov 2026)
+   La pestaña USUARIOS se conserva tal cual (renderUsers / renderUserCard).
    ========================================================================== */
+// Íconos de línea propios (en lugar de emojis en títulos)
+const CVX_ICO = {
+  resumen:  '<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
+  usuarios: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5"/><circle cx="17.5" cy="9" r="2.5"/><path d="M17 14.5c2.3.2 4 1.8 4.6 4.5"/>',
+  ranking:  '<path d="M8 21h8M12 17v4M7 4h10v4a5 5 0 0 1-10 0z"/><path d="M7 6H4a3 3 0 0 0 3 4M17 6h3a3 3 0 0 1-3 4"/>',
+  modulos:  '<path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5A2.5 2.5 0 0 0 6.5 23H20v-5"/>',
+  seguimiento: '<path d="M9 11l3 3 8-8"/><path d="M20 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h11"/>',
+  ingresos: '<circle cx="10" cy="8" r="4"/><path d="M3 21c1-4 3.8-6 7-6 1.6 0 3 .5 4.2 1.3"/><path d="M19 15v6M16 18h6"/>',
+  alerta:   '<path d="M12 3l10 18H2z"/><path d="M12 10v5M12 18h.01"/>',
+  reporte:  '<path d="M6 2h9l5 5v15H6z"/><path d="M14 2v6h6M9 13h8M9 17h5"/>',
+};
+const cvxIco = (k, s) => `<svg class="cvx-ico" width="${s||18}" height="${s||18}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${CVX_ICO[k]||''}</svg>`;
+const cvxTone = v => v >= 80 ? "ok" : v >= 60 ? "warn" : "danger";
+const cvxDelta = (cur, prev, suf) => {
+  if (cur == null || prev == null) return `<span class="cvx-delta neutral">sin dato anterior</span>`;
+  const d = cur - prev;
+  if (d === 0) return `<span class="cvx-delta neutral">= igual que la semana anterior</span>`;
+  return `<span class="cvx-delta ${d > 0 ? 'up' : 'down'}">${d > 0 ? '▲' : '▼'} ${Math.abs(d)}${suf || ''} vs. semana anterior</span>`;
+};
+
 function renderShell(d) {
+  const tab = (k, label, extra) =>
+    `<button class="cvp-tab${k === 'dashboard' ? ' active' : ''}" data-tab="${k}">${cvxIco(k === 'dashboard' ? 'resumen' : k)}<span>${label}</span>${extra || ''}</button>`;
   return `
-  <div class="cvp">
+  <div class="cvp cvx">
     <header class="cvp-head">
       <div class="cvp-head-title">
-        <div class="cvp-logo"><img src="logo-cvplus.svg" alt="CV+" style="height:38px;display:block"></div>
+        <div class="cvp-logo"><img src="${window.CVP_LOGO || 'logo-cvplus.svg'}" alt="CV+" style="height:34px;display:block"></div>
         <div>
-          <h1>Panel Administrador</h1>
-          <p>Academia CV+ · ${CVP.view === 'optometras' ? '👁️ Optometristas' : '👓 Asesores'} · ${d.totalUsers} usuarios${currentCanEdit() ? "" : " · Solo lectura"}</p>
+          <h1>Panel de Capacitación</h1>
+          <p>Academia CV+ · ${CVP.view === 'optometras' ? 'Optometristas' : 'Asesores'} · ${d.totalUsers} colaboradores${currentCanEdit() ? "" : " · Solo lectura"}</p>
         </div>
       </div>
       <div class="cvp-head-actions">
-        ${currentCanEdit() ? `<button class="cvp-btn gold" onclick="window.open('herramientas/crear-usuarios.html','_blank')" title="Crear usuarios en Firebase desde un Excel">➕ Alta masiva de usuarios</button>` : ''}
-        <button class="cvp-btn ghost" onclick="cvpExportXLSX()">⬇️ Excel</button>
-        <button class="cvp-btn ghost" onclick="cvpExportPDF()">🖨️ PDF</button>
+        <button class="cvp-btn gold" onclick="cvpReporteDireccion()">${cvxIco('reporte', 16)} Reporte para dirección</button>
+        ${currentCanEdit() ? `<button class="cvp-btn ghost" onclick="window.open('herramientas/crear-usuarios.html','_blank')" title="Crear usuarios en Firebase desde un Excel">＋ Alta masiva</button>` : ''}
+        <button class="cvp-btn ghost" onclick="cvpExportXLSX()">Excel</button>
         <button class="cvp-btn close" onclick="closeAdminPanel()">✕ Cerrar</button>
       </div>
     </header>
 
-    <div class="cvp-calbar" id="cvpCalArea"><!-- calendario: lo llena wireUpCalendar() --></div>
-
-    ${window.CVP_CURRENT_ROLE !== 'admin_opto' ? `
-    <div class="cvp-role-toggle">
-      <button class="cvp-role-btn ${CVP.view === 'asesores' ? 'active' : ''}" onclick="cvpSetView('asesores')">👓 Asesores</button>
-      <button class="cvp-role-btn ${CVP.view === 'optometras' ? 'active' : ''}" onclick="cvpSetView('optometras')">👁️ Optometristas</button>
-    </div>` : ''}
+    <div class="cvx-toolbar">
+      ${window.CVP_CURRENT_ROLE !== 'admin_opto' ? `
+      <div class="cvp-role-toggle">
+        <button class="cvp-role-btn ${CVP.view === 'asesores' ? 'active' : ''}" onclick="cvpSetView('asesores')">Asesores</button>
+        <button class="cvp-role-btn ${CVP.view === 'optometras' ? 'active' : ''}" onclick="cvpSetView('optometras')">Optometristas</button>
+      </div>` : ''}
+      <div class="cvp-calbar" id="cvpCalArea"><!-- calendario: lo llena wireUpCalendar() --></div>
+    </div>
 
     <nav class="cvp-tabs">
-      <button class="cvp-tab active" data-tab="dashboard">📊 Dashboard</button>
-      <button class="cvp-tab" data-tab="usuarios">👥 Usuarios</button>
-      <button class="cvp-tab" data-tab="leaderboard">🏆 Leaderboard</button>
-      <button class="cvp-tab" data-tab="modulos">📚 Módulos</button>
-      <button class="cvp-tab" data-tab="analiticas">🧠 Analíticas</button>
-      <button class="cvp-tab" data-tab="alertas">🔔 Alertas
-        ${d.alerts.length ? `<span class="cvp-badge">${d.alerts.length}</span>` : ""}
-      </button>
+      ${tab('dashboard', 'Resumen')}
+      ${tab('usuarios', 'Usuarios')}
+      ${tab('seguimiento', 'Seguimiento', d.followups.length ? `<span class="cvp-badge">${d.followups.filter(f => !f.contactado).length}</span>` : '')}
+      ${tab('modulos', 'Módulos')}
+      ${tab('ranking', 'Ranking')}
+      ${tab('ingresos', 'Nuevos ingresos')}
     </nav>
 
     <main class="cvp-body">
       <section class="cvp-panel active" data-panel="dashboard">${renderDashboard(d)}</section>
       <section class="cvp-panel" data-panel="usuarios">${renderUsers(d)}</section>
-      <section class="cvp-panel" data-panel="leaderboard">${renderLeaderboard(d)}</section>
+      <section class="cvp-panel" data-panel="seguimiento">${renderSeguimiento(d)}</section>
       <section class="cvp-panel" data-panel="modulos">${renderModules(d)}</section>
-      <section class="cvp-panel" data-panel="analiticas">${renderAnalytics(d)}</section>
-      <section class="cvp-panel" data-panel="alertas">${renderAlerts(d)}</section>
+      <section class="cvp-panel" data-panel="ranking">${renderLeaderboard(d)}</section>
+      <section class="cvp-panel" data-panel="ingresos">${renderCohortes(d)}</section>
     </main>
   </div>`;
 }
 
 
-/* ---------- DASHBOARD ---------- */
+/* ---------- RESUMEN EJECUTIVO ---------- */
 function renderDashboard(d) {
-  const card = (icon, label, value, sub, cls) => `
-    <div class="cvp-stat ${cls}">
-      <div class="cvp-stat-top">${icon} ${label}</div>
-      <div class="cvp-stat-value">${value}</div>
-      <div class="cvp-stat-sub">${sub}</div>
+  const w = d.week;
+  const kpi = (label, value, sub, delta, tone, meta) => `
+    <div class="cvx-kpi ${tone || ''}">
+      <div class="cvx-kpi-label">${label}</div>
+      <div class="cvx-kpi-value">${value}</div>
+      ${meta != null ? `<div class="cvx-meter"><i style="width:${Math.min(100, Math.max(0, meta))}%"></i><b style="left:80%"></b></div>` : ''}
+      <div class="cvx-kpi-sub">${sub}</div>
+      ${delta || ''}
     </div>`;
+
+  const heat = renderHeatmap(d);
+  const atiende = d.attention.length
+    ? `<ol class="cvx-attn">${d.attention.map(a => `<li class="${a.level}"><b>${esc(a.title)}</b><span>${esc(a.text)}</span></li>`).join('')}</ol>`
+    : `<p class="cvp-empty">Sin puntos críticos esta semana.</p>`;
 
   return `
-    <div class="cvp-grid stats">
-      ${card("📈", "Promedio Global", d.globalAverage + "%", "Rendimiento general", "teal")}
-      ${card("🟢", "Activos hoy", d.activeToday, "Usuarios conectados", "green")}
-      ${card("🏆", "Mejor promedio",
-            d.bestUser ? esc(d.bestUser.name) : "N/A",
-            d.bestUser ? d.bestUser.avg + "%" : "—", "navy")}
-      ${card("⚠️", "Módulo difícil",
-            d.hardestModule ? esc(d.hardestModule.name) : "N/A",
-            d.hardestModule ? d.hardestModule.avg + "% promedio" : "Sin datos", "amber")}
-      ${card("📊", "Participación", `${d.participating}/${d.totalUsers}`,
-            `${d.participationRate}% completaron ≥1 módulo`, "teal")}
-      ${card("✅", "Tasa de aprobación", d.approvalRate + "%",
-            `${d.approvalRate >= 80 ? "✔ Por encima del objetivo" : "⚠ Por debajo del 80%"}`, "navy")}
-      ${card("🔥", "Intentos", d.totalAttempts, "Intentos acumulados", "amber")}
-      ${card("📅", "Activos (7 días)", d.activeWeek, `${d.inactive} inactivos`, "green")}
+    <div class="cvx-kpis">
+      ${kpi('Participación', d.participationRate + '%', `${d.participating} de ${d.totalUsers} con al menos un módulo`, '', cvxTone(d.participationRate), d.participationRate)}
+      ${kpi('Promedio de la semana', w.cur.avg != null ? w.cur.avg + '%' : '—', `${w.cur.count} quizzes en los últimos 7 días`, cvxDelta(w.cur.avg, w.prev.avg, ' pts'), w.cur.avg != null ? cvxTone(w.cur.avg) : '', w.cur.avg)}
+      ${kpi('Módulos aprobados', d.modApprovalRate + '%', `${d.modApproved} de ${d.modAttempted} módulos con última nota ≥ 80%`, '', cvxTone(d.modApprovalRate), d.modApprovalRate)}
+      ${kpi('Activos 7 días', d.activeWeek, `de ${d.totalUsers} · ${d.inactive} sin entrar esta semana`, '', d.totalUsers ? cvxTone(Math.round(d.activeWeek / d.totalUsers * 100)) : '', d.totalUsers ? Math.round(d.activeWeek / d.totalUsers * 100) : 0)}
     </div>
 
-    <div class="cvp-grid charts">
-      <div class="cvp-card">
-        <h3>Quizzes realizados por día (últimos 7 días)</h3>
-        <canvas id="cvpChartWeek" height="160"></canvas>
+    <div class="cvx-row">
+      <div class="cvp-card cvx-grow">
+        <div class="cvx-card-head"><h3>Tendencia del promedio</h3><span class="cvx-legend"><i class="l1"></i>Promedio semanal <i class="l2"></i>Meta 80%</span></div>
+        <div class="cvx-chart"><canvas id="cvpChartTrend"></canvas></div>
       </div>
-      <div class="cvp-card">
-        <h3>Rendimiento por sucursal</h3>
-        <canvas id="cvpChartBranch" height="160"></canvas>
+      <div class="cvp-card cvx-side">
+        <div class="cvx-card-head"><h3>${cvxIco('alerta')} Esta semana atiende</h3></div>
+        ${atiende}
+        <button class="cvx-link" onclick="cvxIrA('seguimiento')">Ver lista de seguimiento →</button>
       </div>
-      <div class="cvp-card">
-        <h3>Distribución de notas</h3>
-        <canvas id="cvpChartDist" height="160"></canvas>
-      </div>
-      <div class="cvp-card">
-        <h3>Promedio por usuario</h3>
-        <div id="cvpChartPosWrap" style="position:relative;overflow:hidden"><canvas id="cvpChartPos"></canvas></div>
-      </div>
-      <div class="cvp-card" style="grid-column:1/-1">
-        <h3>📈 Tendencia del promedio — últimas 6 semanas</h3>
-        <p class="cvp-muted" style="margin-bottom:8px">Promedio de notas por semana. Permite ver si el equipo está mejorando con el tiempo.</p>
-        <canvas id="cvpChartTrend" height="100"></canvas>
-      </div>
+    </div>
+
+    <div class="cvp-card">
+      <div class="cvx-card-head"><h3>Sucursal × módulo</h3><span class="cvp-muted">Promedio de cada sucursal en cada módulo. Gris = nadie lo ha hecho.</span></div>
+      ${heat}
+    </div>
+
+    <div class="cvp-card">
+      <div class="cvx-card-head"><h3>Quizzes por día</h3><span class="cvp-muted">Últimos 14 días · ${CVP.view === 'optometras' ? 'optometristas' : 'asesores'}</span></div>
+      <div class="cvx-chart small"><canvas id="cvpChartWeek"></canvas></div>
     </div>`;
 }
+
+function renderHeatmap(d) {
+  const h = d.heat;
+  if (!h.branches.length || !h.modules.length) return `<p class="cvp-empty">Aún no hay datos suficientes.</p>`;
+  const head = h.modules.map(m => `<th title="${esc(m.name)}"><span>${esc(m.short)}</span></th>`).join('');
+  const rows = h.branches.map(b => `<tr><th class="cvx-hb">${esc(b.name)}<small>${b.people} pers.</small></th>${
+    h.modules.map(m => {
+      const c = h.cells[b.name + '|' + m.key];
+      return c ? `<td class="${cvxTone(c.avg)}" title="${esc(b.name)} · ${esc(m.name)}: ${c.avg}% (${c.n} pers.)">${c.avg}</td>` : `<td class="vacio">·</td>`;
+    }).join('')}</tr>`).join('');
+  return `<div class="cvx-heatwrap"><table class="cvx-heat"><thead><tr><th></th>${head}</tr></thead><tbody>${rows}</tbody></table></div>
+    <div class="cvx-heatlegend"><span class="ok">80–100</span><span class="warn">60–79</span><span class="danger">&lt; 60</span></div>`;
+}
+
+
+/* ---------- RANKING (justo) ---------- */
+function renderLeaderboard(d) {
+  const r = d.fairRanking;
+  if (!r.length) return `<div class="cvp-card"><p class="cvp-empty">Todavía nadie tiene ${CVX_MIN_MODS} módulos o más.</p></div>`;
+  const podio = r.slice(0, 3).map((u, i) => `
+    <div class="cvx-pod p${i + 1}">
+      <div class="cvx-pod-pos">${i + 1}</div>
+      <b>${esc(u.name)}</b><small>${esc(u.branch)}</small>
+      <div class="cvx-pod-score">${u.indice}<span>pts</span></div>
+      <small>${u.avg}% promedio · ${u.completed}/${u.totalMod} módulos</small>
+    </div>`).join('');
+  const resto = r.slice(3, 15).map((u, i) => `
+    <div class="cvx-rk">
+      <span class="cvx-rk-pos">${i + 4}</span>
+      <div class="cvx-rk-info"><b>${esc(u.name)}</b><small>${esc(u.branch)} · ${esc(u.position)}</small></div>
+      <div class="cvx-rk-bars"><small>${u.avg}% · ${u.completed}/${u.totalMod}</small><div class="cvp-bar"><div style="width:${u.indice}%"></div></div></div>
+      <span class="cvx-rk-score">${u.indice}</span>
+    </div>`).join('');
+  const suc = d.branchFair.slice(0, 12).map((b, i) => `
+    <li><span>${i + 1}. ${esc(b.name)} <small>${b.people} pers.</small></span><b>${b.indice}</b></li>`).join('');
+  return `
+    <div class="cvp-card">
+      <div class="cvx-card-head"><h3>Ranking CV+</h3><span class="cvp-muted">Puntaje = 70% promedio + 30% avance. Entran quienes tienen ${CVX_MIN_MODS} módulos o más.</span></div>
+      <div class="cvx-podio">${podio}</div>
+      <div class="cvx-rklist">${resto}</div>
+    </div>
+    <div class="cvp-card">
+      <div class="cvx-card-head"><h3>Ranking por sucursal</h3><span class="cvp-muted">Promedio del puntaje de su gente. Solo sucursales con 2 personas o más.</span></div>
+      <ul class="cvp-list">${suc || '<li>Sin datos</li>'}</ul>
+    </div>`;
+}
+
+
+/* ---------- MÓDULOS (diagnóstico) ---------- */
+function renderModules(d) {
+  if (!d.moduleDiag.length)
+    return `<div class="cvp-card"><p class="cvp-empty">Aún no hay datos de módulos.</p></div>`;
+  const filas = d.moduleDiag.map((m, i) => `
+    <tr class="cvx-mrow" onclick="cvxToggleMod(${i})">
+      <td><b>${esc(m.name)}</b></td>
+      <td class="num">${m.learners}</td>
+      <td class="num"><span class="cvx-chip ${cvxTone(m.avg)}">${m.avg}%</span></td>
+      <td class="num">${m.approved}%</td>
+      <td class="num">${m.avgAttempts}</td>
+      <td class="cvx-topq">${m.top[0] ? esc(m.top[0].q) : '<span class="cvp-muted">Sin errores registrados</span>'}</td>
+      <td class="num">${m.top.length ? '▾' : ''}</td>
+    </tr>
+    <tr class="cvx-mdet" id="cvxMod${i}" hidden><td colspan="7">
+      ${m.top.length ? `<div class="cvx-qlist">${m.top.map(q => `
+        <div class="cvx-q">
+          <div class="cvx-q-n">${q.n}<small>veces</small></div>
+          <div><b>${esc(q.q)}</b>
+            ${q.correcta ? `<div class="cvp-wrong-ok">✔ Correcta: ${esc(q.correcta)}</div>` : ''}
+            ${q.error ? `<div class="cvp-wrong-bad">✖ Respuesta equivocada más elegida: ${esc(q.error)} (${q.errorN})</div>` : ''}
+          </div>
+        </div>`).join('')}</div>` : '<p class="cvp-empty">Sin preguntas falladas en el periodo.</p>'}
+    </td></tr>`).join('');
+  return `
+    <div class="cvp-card">
+      <div class="cvx-card-head"><h3>Diagnóstico por módulo</h3><span class="cvp-muted">Ordenado del más difícil al más fácil. Toca un módulo para ver sus preguntas más falladas.</span></div>
+      <div class="cvx-tablewrap"><table class="cvx-table">
+        <thead><tr><th>Módulo</th><th class="num">Personas</th><th class="num">Promedio</th><th class="num">Aprobado</th><th class="num">Intentos por persona</th><th>Pregunta más fallada</th><th></th></tr></thead>
+        <tbody>${filas}</tbody>
+      </table></div>
+    </div>`;
+}
+window.cvxToggleMod = function (i) {
+  const r = document.getElementById('cvxMod' + i);
+  if (r) r.hidden = !r.hidden;
+};
+
+
+/* ---------- SEGUIMIENTO ---------- */
+function renderSeguimiento(d) {
+  if (!d.followups.length)
+    return `<div class="cvp-card"><p class="cvp-empty">Nadie necesita seguimiento en este momento.</p></div>`;
+  const motivosTxt = { nunca: 'Nunca ingresó', inactivo: 'Sin entrar', bajo: 'Bajo rendimiento', reprobado: 'Módulo sin aprobar', sinavance: 'Entró pero no avanza' };
+  const cuenta = {};
+  d.followups.forEach(f => f.motivos.forEach(m => { cuenta[m.tipo] = (cuenta[m.tipo] || 0) + 1; }));
+  const chips = Object.keys(motivosTxt).filter(k => cuenta[k]).map(k =>
+    `<button class="cvx-fchip" data-f="${k}" onclick="cvxFiltrarSeg('${k}', this)">${motivosTxt[k]} <b>${cuenta[k]}</b></button>`).join('');
+  const filas = d.followups.map(f => `
+    <div class="cvx-seg ${f.nivel}${f.contactado ? ' hecho' : ''}" data-tipos="${f.motivos.map(m => m.tipo).join(' ')}">
+      <div class="cvx-seg-main">
+        <b>${esc(f.cohorte ? f.name.replace(/\s*\(\s*ingreso[^)]*\)\s*/i, ' ').trim() : f.name)}</b>
+        <small>${esc(f.branch)} · ${esc(f.position)}${f.cohorte ? ' · Ingreso ' + esc(f.cohorte) : ''}</small>
+        <div class="cvx-seg-tags">${f.motivos.map(m => `<span class="cvx-tag ${m.nivel}">${esc(m.texto)}</span>`).join('')}</div>
+      </div>
+      <div class="cvx-seg-acc">
+        ${f.contactado ? `<span class="cvx-hecho">✓ Contactado ${esc(fechaElSalvador(f.contactado.at).slice(0, 10))}</span>` : ''}
+        <button class="cvp-btn ghost dark" onclick="cvxCopiarMsg('${f.id}', this)">Copiar mensaje</button>
+        ${currentCanEdit() ? `<button class="cvp-btn ${f.contactado ? 'ghost dark' : 'apply'}" onclick="cvxContactado('${f.id}', this)">${f.contactado ? 'Quitar marca' : 'Marcar contactado'}</button>` : ''}
+      </div>
+    </div>`).join('');
+  return `
+    <div class="cvp-card">
+      <div class="cvx-card-head"><h3>Seguimiento</h3><span class="cvp-muted">Una fila por persona, ordenada por prioridad. Copia el mensaje para WhatsApp y marca a quién ya contactaste.</span></div>
+      <div class="cvx-fchips"><button class="cvx-fchip on" data-f="" onclick="cvxFiltrarSeg('', this)">Todos <b>${d.followups.length}</b></button>${chips}</div>
+      <div class="cvx-seglist">${filas}</div>
+    </div>`;
+}
+window.cvxFiltrarSeg = function (tipo, btn) {
+  document.querySelectorAll('.cvx-fchip').forEach(b => b.classList.toggle('on', b === btn));
+  document.querySelectorAll('.cvx-seg').forEach(r => { r.hidden = !!tipo && r.dataset.tipos.split(' ').indexOf(tipo) === -1; });
+};
+function cvxMensaje(f) {
+  const nombre = (f.name || '').replace(/\s*\(.*\)\s*/g, '').split(' ')[0];
+  const m = f.motivos[0] ? f.motivos[0].tipo : '';
+  const base = `Hola ${nombre}, te saluda el equipo de Capacitación CV+. `;
+  if (m === 'nunca') return base + 'Aún no has ingresado a la Academia CV+. Entra con tu correo y la contraseña que te enviamos; si tienes problemas para entrar, escríbenos y te ayudamos.';
+  if (m === 'inactivo') return base + `Hace ${f.dias} días que no entras a la Academia CV+. Te esperan tus módulos pendientes: ${f.completed} de ${f.totalMod} completados. ¡Tú puedes!`;
+  if (m === 'bajo') return base + `Revisamos tus resultados (promedio ${f.avg}%). Te recomendamos repasar el contenido y repetir los quizzes; si quieres, agendamos un refuerzo juntos.`;
+  if (m === 'reprobado') return base + `Te falta aprobar ${f.reprobados.join(', ')}. Repasa el módulo y vuelve a intentar el quiz: necesitas 80% o más.`;
+  return base + 'Vimos que entraste a la Academia CV+ pero aún no completas tu primer módulo. Empieza por ADN CV+: toma pocos minutos.';
+}
+window.cvxCopiarMsg = function (uid, btn) {
+  const f = (CVP._last && CVP._last.followups || []).find(x => x.id === uid);
+  if (!f) return;
+  const txt = cvxMensaje(f);
+  const ok = () => { const t = btn.textContent; btn.textContent = '✓ Copiado'; setTimeout(() => { btn.textContent = t; }, 1600); };
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(txt).then(ok, () => window.prompt('Copia el mensaje:', txt));
+  else window.prompt('Copia el mensaje:', txt);
+};
+window.cvxContactado = async function (uid, btn) {
+  if (!currentCanEdit()) return;
+  const ya = CVP.followMarks[uid];
+  btn.disabled = true;
+  try {
+    if (!window.CVP_MOCK) {
+      const { doc, setDoc, deleteDoc } = await import("https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js");
+      if (ya) await deleteDoc(doc(window.db, "admin_followups", uid));
+      else await setDoc(doc(window.db, "admin_followups", uid), { at: new Date().toISOString(), by: window.CVP_CURRENT_EMAIL || "admin" });
+    }
+    if (ya) delete CVP.followMarks[uid]; else CVP.followMarks[uid] = { at: new Date().toISOString() };
+    cvxRedibujar('seguimiento');
+  } catch (e) { btn.disabled = false; alert('No se pudo guardar. Revisa tu conexión.'); }
+};
+
+
+/* ---------- NUEVOS INGRESOS ---------- */
+function renderCohortes(d) {
+  if (!d.cohorts.length)
+    return `<div class="cvp-card"><p class="cvp-empty">No hay cohortes de ingreso identificadas. Se detectan por el texto «(Ingreso Mes)» en el nombre.</p></div>`;
+  const tarjetas = d.cohorts.map(c => `
+    <div class="cvx-coh">
+      <div class="cvx-coh-head"><h3>Ingreso ${esc(c.name)}</h3><span>${c.people} personas</span></div>
+      <div class="cvx-coh-kpis">
+        <div><b>${c.progress}%</b><small>avance promedio</small></div>
+        <div><b>${c.avg ? c.avg + '%' : '—'}</b><small>promedio</small></div>
+        <div><b>${c.active}/${c.people}</b><small>activos 7 días</small></div>
+      </div>
+      <div class="cvx-coh-list">${c.members.map(u => `
+        <div class="cvx-coh-m ${u.progress === 0 ? 'cero' : ''}">
+          <span>${esc(u.name.replace(/\s*\(.*\)\s*/g, ''))}<small>${esc(u.branch)}</small></span>
+          <div class="cvp-bar"><div style="width:${u.progress}%"></div></div>
+          <b>${u.completed}/${u.totalMod}</b>
+        </div>`).join('')}</div>
+    </div>`).join('');
+  return `
+    <div class="cvp-card">
+      <div class="cvx-card-head"><h3>Nuevos ingresos por cohorte</h3><span class="cvp-muted">Compara cómo avanza cada grupo de ingreso. En rojo, quienes no han completado ningún módulo.</span></div>
+      <div class="cvx-cohs">${tarjetas}</div>
+    </div>`;
+}
+
+// Cambiar de pestaña desde un botón
+window.cvxIrA = function (name) {
+  const t = document.querySelector(`.cvp-tab[data-tab="${name}"]`);
+  if (t) t.click();
+};
+// Redibuja el panel conservando la pestaña activa
+async function cvxRedibujar(activeName) {
+  const data = computeData(CVP.range);
+  const container = document.getElementById("admin-users");
+  const y = (document.getElementById("admin-panel") || {}).scrollTop || 0;
+  container.innerHTML = renderShell(data);
+  wireUpTabs(); wireUpUserFilters(); wireUpCalendar();
+  cvxIrA(activeName || 'dashboard');
+  await loadChartJs(); drawCharts(data);
+  const p = document.getElementById("admin-panel"); if (p) p.scrollTop = y;
+}
+
+
+/* ---------- REPORTE PARA DIRECCIÓN (una página) ---------- */
+window.cvpReporteDireccion = function () {
+  const d = CVP._last || computeData(CVP.range);
+  const fecha = new Date().toLocaleDateString("es-SV", { year: "numeric", month: "long", day: "numeric", timeZone: "America/El_Salvador" });
+  const top = d.branchFair.slice(0, 3), bot = d.branchFair.slice(-3).reverse();
+  const mods = d.moduleDiag.slice(0, 3);
+  const html = `
+    <div class="cvx-rep-doc">
+      <div class="cvx-rep-top"><img src="${window.CVP_LOGO || 'logo-cvplus.svg'}" alt="CV+"><div><h2>Academia CV+ · Reporte de capacitación</h2><p>${CVP.view === 'optometras' ? 'Optometristas' : 'Asesores'} · ${fecha}${CVP.range ? ' · periodo seleccionado' : ''}</p></div></div>
+      <div class="cvx-rep-kpis">
+        <div><b>${d.participationRate}%</b><span>Participación</span></div>
+        <div><b>${d.week.cur.avg != null ? d.week.cur.avg + '%' : '—'}</b><span>Promedio semana</span></div>
+        <div><b>${d.modApprovalRate}%</b><span>Módulos aprobados</span></div>
+        <div><b>${d.activeWeek}/${d.totalUsers}</b><span>Activos 7 días</span></div>
+      </div>
+      <h4>Lo que hay que atender</h4>
+      <ul>${d.attention.map(a => `<li><b>${esc(a.title)}:</b> ${esc(a.text)}</li>`).join('') || '<li>Sin puntos críticos.</li>'}</ul>
+      <div class="cvx-rep-2">
+        <div><h4>Sucursales con mejor resultado</h4><ol>${top.map(b => `<li>${esc(b.name)} · ${b.indice} pts</li>`).join('')}</ol></div>
+        <div><h4>Sucursales a reforzar</h4><ol>${bot.map(b => `<li>${esc(b.name)} · ${b.indice} pts</li>`).join('')}</ol></div>
+      </div>
+      <h4>Módulos más difíciles</h4>
+      <ol>${mods.map(m => `<li>${esc(m.name)} · ${m.avg}% promedio${m.top[0] ? ' · más fallada: «' + esc(m.top[0].q) + '»' : ''}</li>`).join('')}</ol>
+      <p class="cvx-rep-pie">Equipo de Capacitación CV+</p>
+    </div>`;
+  let ov = document.getElementById('cvxRep');
+  if (!ov) { ov = document.createElement('div'); ov.id = 'cvxRep'; document.body.appendChild(ov); }
+  ov.innerHTML = `<div class="cvx-rep-bar"><b>Reporte para dirección</b><span><button class="cvp-btn apply" onclick="window.print()">Imprimir o guardar PDF</button> <button class="cvp-btn ghost dark" onclick="document.getElementById('cvxRep').remove()">Cerrar</button></span></div>${html}`;
+};
 
 
 /* ---------- USUARIOS ---------- */
@@ -866,122 +1277,6 @@ window.cvpToggleQuiz = function(headEl, ev) {
 };
 
 
-/* ---------- LEADERBOARD ---------- */
-function renderLeaderboard(d) {
-  const medals = ["🥇", "🥈", "🥉"];
-  const rows = d.ranking.map((u, i) => {
-    const top = i < 3 ? `top${i + 1}` : "";
-    const medal = medals[i] || `#${i + 1}`;
-    return `
-      <div class="cvp-rank ${top}">
-        <div class="cvp-rank-pos">${medal}</div>
-        <div class="cvp-rank-info">
-          <b>${esc(u.name)}</b>
-          <small>🏢 ${esc(u.branch)} · 💼 ${esc(u.position)}</small>
-          <div class="cvp-bar light"><div style="width:${u.avg}%"></div></div>
-        </div>
-        <div class="cvp-rank-avg">${u.avg}%</div>
-      </div>`;
-  }).join("");
-
-  const byBranch = d.branchStats.slice(0, 8).map((b, i) =>
-    `<li><span>${i + 1}. ${esc(b.name)}</span><b>${b.avg}%</b></li>`).join("");
-  const byPos = d.positionStats.slice(0, 8).map((p, i) =>
-    `<li><span>${i + 1}. ${esc(p.name)}</span><b>${p.avg}%</b></li>`).join("");
-
-  return `
-    <div class="cvp-card"><h3>🏆 Top 10 CV+</h3><div class="cvp-ranklist">${rows || '<p class="cvp-empty">Sin datos</p>'}</div></div>
-    <div class="cvp-grid two">
-      <div class="cvp-card"><h3>🏢 Ranking por sucursal</h3><ul class="cvp-list">${byBranch || '<li>Sin datos</li>'}</ul></div>
-      <div class="cvp-card"><h3>💼 Ranking por cargo</h3><ul class="cvp-list">${byPos || '<li>Sin datos</li>'}</ul></div>
-    </div>`;
-}
-
-
-/* ---------- MÓDULOS ---------- */
-function renderModules(d) {
-  if (!d.moduleStats.length)
-    return `<div class="cvp-card"><p class="cvp-empty">Aún no hay datos de módulos.</p></div>`;
-
-  const rows = d.moduleStats.map(m => {
-    const c = m.avg >= 80 ? "ok" : m.avg >= 60 ? "warn" : "danger";
-    return `
-      <div class="cvp-mod ${c}">
-        <div class="cvp-mod-head">
-          <b>📘 ${esc(m.name)}</b>
-          <span class="cvp-mod-avg">${m.avg}%</span>
-        </div>
-        <div class="cvp-bar"><div style="width:${m.avg}%"></div></div>
-        <small>${m.learners} usuarios · ${m.attempts} intentos</small>
-      </div>`;
-  }).join("");
-
-  return `
-    <div class="cvp-card">
-      <h3>📚 Rendimiento por módulo</h3>
-      <p class="cvp-muted">Promedio real de cada módulo, ordenado de mejor a peor.
-      El de hasta abajo es el más difícil.</p>
-      <div class="cvp-grid mods">${rows}</div>
-    </div>`;
-}
-
-
-/* ---------- ANALÍTICAS ---------- */
-function renderAnalytics(d) {
-  const list = (arr, mapFn, empty) =>
-    arr.length ? `<ul class="cvp-list">${arr.map(mapFn).join("")}</ul>` : `<li class="cvp-empty">${empty}</li>`;
-
-  return `
-    <div class="cvp-grid two">
-      <div class="cvp-card danger-card">
-        <h3>📉 Bajo rendimiento (&lt;60%)</h3>
-        ${list(d.lowPerformers, u => `<li><span>${esc(u.name)}</span><b>${u.avg}%</b></li>`, "Nadie por debajo de 60% 🎉")}
-      </div>
-      <div class="cvp-card warn-card">
-        <h3>😴 Sin actividad (+7 días)</h3>
-        ${list(d.noActivity7, u => `<li><span>${esc(u.name)}</span><b>${u.daysSince} días</b></li>`, "Todos activos esta semana")}
-      </div>
-      <div class="cvp-card">
-        <h3>🚫 Nunca ingresaron</h3>
-        ${list(d.neverLogged, u => `<li><span>${esc(u.name)}</span><b>—</b></li>`, "Todos han ingresado")}
-      </div>
-      <div class="cvp-card">
-        <h3>⚠️ Módulos más difíciles</h3>
-        ${list(d.moduleStats.slice().reverse().slice(0, 5),
-          m => `<li><span>${esc(m.name)}</span><b>${m.avg}%</b></li>`, "Sin datos")}
-      </div>
-    </div>
-    <div class="cvp-card cvp-note">
-      <h3>🚀 Próximas funciones premium</h3>
-      <p class="cvp-muted">Estas requieren guardar datos adicionales en Firebase
-      (tiempo por quiz, preguntas falladas, histórico mensual). Cuando quieras las activamos:</p>
-      <div class="cvp-roadmap">
-        <span>⏱️ Tiempo promedio por quiz</span>
-        <span>❌ Preguntas más falladas</span>
-        <span>📈 Tendencia mensual</span>
-        <span>🎓 Certificados automáticos</span>
-        <span>🤖 Análisis con IA</span>
-        <span>🔔 Notificaciones push</span>
-      </div>
-    </div>`;
-}
-
-
-/* ---------- ALERTAS ---------- */
-function renderAlerts(d) {
-  if (!d.alerts.length)
-    return `<div class="cvp-card"><p class="cvp-empty">Todo en orden ✅ No hay alertas.</p></div>`;
-
-  const order = { danger: 0, warn: 1, ok: 2 };
-  const items = [...d.alerts].sort((a, b) => order[a.level] - order[b.level]).map(a => {
-    const dot = a.level === "danger" ? "🔴" : a.level === "warn" ? "🟡" : "🟢";
-    return `<div class="cvp-alert ${a.level}">${dot} ${esc(a.text)}</div>`;
-  }).join("");
-
-  return `<div class="cvp-card"><h3>🔔 Centro de alertas</h3>${items}</div>`;
-}
-
-
 /* ============================================================================
    6) OPCIONES DE SUCURSAL Y CARGO (para los selects de edición)
    ========================================================================== */
@@ -1044,6 +1339,7 @@ function wireUpTabs() {
       document.querySelectorAll(".cvp-panel").forEach(p => p.classList.remove("active"));
       tab.classList.add("active");
       document.querySelector(`.cvp-panel[data-panel="${name}"]`).classList.add("active");
+      if (name === "dashboard") cvpCharts.forEach(c => { try { c.resize(); } catch (e) {} });
     });
   });
 }
@@ -1348,7 +1644,7 @@ async function loadChartJs() {
   await new Promise((res, rej) => {
     const s = document.createElement("script");
     s.src = "https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js";
-    s.onload = res; s.onerror = rej;
+    s.onload = res; s.onerror = () => res();   // sin internet o CDN bloqueado: el panel sigue sin gráficas
     document.head.appendChild(s);
   });
 }
@@ -1357,104 +1653,34 @@ let cvpCharts = [];
 function drawCharts(d) {
   if (!window.Chart) return;
   cvpCharts.forEach(c => c.destroy()); cvpCharts = [];
-  const teal = "#00B9D6", green = "#28a745", amber = "#f3b300", navy = "#0B2137";
+  Chart.defaults.font.family = "'Plus Jakarta Sans', system-ui, sans-serif";
+  Chart.defaults.color = "#5a6b7b";
+  const teal = "#00abc8", gold = "#ffc629", navy = "#0B2137", grid = "#eef2f7";
+  const mk = (id, cfg) => { const el = document.getElementById(id); if (el) cvpCharts.push(new Chart(el, cfg)); };
 
-  const mk = (id, cfg) => {
-    const el = document.getElementById(id);
-    if (el) cvpCharts.push(new Chart(el, cfg));
-  };
-
-  mk("cvpChartWeek", {
-    type: "line",
-    data: { labels: d.last7.map(x => x.label),
-      datasets: [{ data: d.last7.map(x => x.count), borderColor: teal,
-        backgroundColor: "rgba(0,185,214,.15)", fill: true, tension: .4, borderWidth: 3,
-        pointBackgroundColor: teal, pointRadius: 5 }] },
-    options: baseOpts(true)
-  });
-
-  mk("cvpChartBranch", {
-    type: "bar",
-    data: { labels: d.branchStats.slice(0, 7).map(b => b.name),
-      datasets: [{ data: d.branchStats.slice(0, 7).map(b => b.avg),
-        backgroundColor: teal, borderRadius: 8 }] },
-    options: baseOpts(true)
-  });
-
-  mk("cvpChartDist", {
-    type: "doughnut",
-    data: { labels: Object.keys(d.buckets),
-      datasets: [{ data: Object.values(d.buckets),
-        backgroundColor: ["#dc3545", amber, "#ffcb3d", "#43c463", green] }] },
-    options: { responsive: true, plugins: { legend: { position: "bottom" } } }
-  });
-
-  const usersChart = d.enriched
-    .filter(u => u.avg > 0)
-    .sort((a, b) => b.avg - a.avg);
-  const posEl = document.getElementById("cvpChartPos");
-  const BAR_H = 28, BAR_GAP = 12;
-  const posWrap = document.getElementById("cvpChartPosWrap");
-  const chartH = usersChart.length * (BAR_H + BAR_GAP) + 56;
-  if (posWrap) { posWrap.style.height = chartH + "px"; }
-  if (posEl) posEl.style.height = chartH + "px";
-  mk("cvpChartPos", {
-    type: "bar",
-    data: {
-      labels: usersChart.map(u => u.name),
-      datasets: [{
-        data: usersChart.map(u => u.avg),
-        backgroundColor: usersChart.map(u =>
-          u.avg >= 80 ? "#28a745" : u.avg >= 60 ? amber : "#dc3545"),
-        borderRadius: 6,
-        barThickness: BAR_H
-      }]
-    },
-    options: {
-      indexAxis: "y",
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
-      layout: { padding: { top: 4, bottom: 4 } },
-      scales: {
-        x: { min: 0, max: 100, grid: { color: "#eef2f7" },
-             ticks: { callback: v => v + "%" } },
-        y: { grid: { display: false }, ticks: { font: { size: 12 } } }
-      }
-    }
-  });
-
+  const ultimo = d.weeklyTrend.length - 1;
   mk("cvpChartTrend", {
     type: "line",
-    data: {
-      labels: d.weeklyTrend.map(w => w.label),
-      datasets: [{
-        label: "Promedio semanal",
-        data: d.weeklyTrend.map(w => w.avg),
-        borderColor: green,
-        backgroundColor: "rgba(40,167,69,.12)",
-        fill: true, tension: .4, borderWidth: 3,
-        pointBackgroundColor: green, pointRadius: 5,
-        spanGaps: true
-      }, {
-        label: "Objetivo (80%)",
-        data: d.weeklyTrend.map(() => 80),
-        borderColor: "#dc3545",
-        borderWidth: 2, borderDash: [6, 4],
-        pointRadius: 0, fill: false
-      }]
-    },
-    options: {
-      responsive: true,
-      plugins: { legend: { display: true, position: "bottom" } },
-      scales: {
-        y: { min: 0, max: 100, grid: { color: "#eef2f7" },
-             ticks: { callback: v => v + "%" } },
-        x: { grid: { display: false } }
-      }
-    }
+    data: { labels: d.weeklyTrend.map(w => w.label), datasets: [
+      { label: "Promedio semanal", data: d.weeklyTrend.map(w => w.avg), borderColor: teal, backgroundColor: "rgba(0,171,200,.10)",
+        fill: true, tension: .35, borderWidth: 3, spanGaps: true,
+        pointRadius: d.weeklyTrend.map((w, i) => i === ultimo ? 6 : 3), pointBackgroundColor: d.weeklyTrend.map((w, i) => i === ultimo ? navy : teal) },
+      { label: "Meta 80%", data: d.weeklyTrend.map(() => 80), borderColor: gold, borderWidth: 2, borderDash: [6, 4], pointRadius: 0, fill: false }
+    ] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false },
+        tooltip: { callbacks: { label: c => c.datasetIndex ? "Meta 80%" : `${c.parsed.y}% · ${d.weeklyTrend[c.dataIndex].count} quizzes` } } },
+      scales: { y: { min: 40, max: 100, grid: { color: grid }, ticks: { callback: v => v + "%" } }, x: { grid: { display: false } } } }
+  });
+
+  mk("cvpChartWeek", {
+    type: "bar",
+    data: { labels: d.last14.map(x => x.label), datasets: [{ data: d.last14.map(x => x.count),
+      backgroundColor: d.last14.map((x, i) => i === d.last14.length - 1 ? navy : teal), borderRadius: 6, maxBarThickness: 26 }] },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } },
+      scales: { y: { beginAtZero: true, grid: { color: grid }, ticks: { precision: 0 } }, x: { grid: { display: false } } } }
   });
 }
+
 
 function baseOpts(hideLegend) {
   return {
@@ -1834,6 +2060,143 @@ function injectStyles() {
   .cvp-panel{display:block!important}
   #admin-panel{position:static;background:#fff}
 }
+
+/* ===================== v2 · Panel de Capacitación ===================== */
+.cvx{--cx-c:#00abc8;--cx-cd:#007f95;--cx-g:#ffc629;--cx-k:#0B2137;--cx-m:#5a6b7b;--cx-l:#e3e9ef;--cx-ok:#1d8a4e;--cx-okb:#e6f5ec;--cx-w:#a86f00;--cx-wb:#fff4d6;--cx-d:#c4302b;--cx-db:#fdecea}
+.cvx .cvp-head{background:linear-gradient(120deg,#0B2137 0%,#173452 60%,#0d6f82 130%);border-radius:18px;padding:18px 22px}
+.cvx .cvp-head h1{font-size:20px;letter-spacing:-.2px}
+.cvx .cvp-btn{display:inline-flex;align-items:center;gap:6px}
+.cvx .cvp-btn.close{background:rgba(255,255,255,.12);color:#fff}
+.cvx .cvp-btn.close:hover{background:#c4302b}
+.cvx-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:14px}
+.cvx .cvp-calbar{margin-top:0}
+.cvx .cvp-role-toggle{margin:0;background:#fff;border:1px solid var(--cx-l);border-radius:999px;padding:4px;gap:4px}
+.cvx .cvp-role-btn{border:none;padding:8px 18px;font-size:13px}
+.cvx .cvp-tabs{gap:4px;background:#fff;border:1px solid var(--cx-l);border-radius:14px;padding:5px;margin:14px 0 18px;flex-wrap:wrap}
+.cvx .cvp-tab{box-shadow:none;background:transparent;color:var(--cx-m);display:inline-flex;align-items:center;gap:8px;padding:9px 14px;border-radius:10px;font-size:13.5px}
+.cvx .cvp-tab:hover{transform:none;background:#f2f6f8;color:var(--cx-k)}
+.cvx .cvp-tab.active{background:var(--cx-k);color:#fff;box-shadow:0 4px 12px rgba(11,33,55,.25)}
+.cvx .cvp-tab .cvp-badge{background:var(--cx-g);color:var(--cx-k)}
+.cvx-ico{flex:none;vertical-align:-3px}
+.cvx .cvp-card{border:1px solid var(--cx-l);box-shadow:none;border-radius:16px}
+.cvx-card-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.cvx-card-head h3{margin:0;display:flex;align-items:center;gap:8px;font-size:16px}
+.cvx-card-head .cvp-muted{margin:0;font-size:12.5px}
+/* KPIs */
+.cvx-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px;margin-bottom:16px}
+.cvx-kpi{background:#fff;border:1px solid var(--cx-l);border-radius:16px;padding:16px 18px;position:relative;overflow:hidden}
+.cvx-kpi::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--cx-l)}
+.cvx-kpi.ok::before{background:var(--cx-ok)}.cvx-kpi.warn::before{background:var(--cx-g)}.cvx-kpi.danger::before{background:var(--cx-d)}
+.cvx-kpi-label{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--cx-m)}
+.cvx-kpi-value{font-size:34px;font-weight:800;color:var(--cx-k);line-height:1.1;margin:6px 0 8px;font-variant-numeric:tabular-nums}
+.cvx-kpi-sub{font-size:12.5px;color:var(--cx-m)}
+.cvx-meter{position:relative;height:6px;background:#edf1f5;border-radius:99px;margin-bottom:8px}
+.cvx-meter i{display:block;height:100%;border-radius:99px;background:var(--cx-c)}
+.cvx-kpi.ok .cvx-meter i{background:var(--cx-ok)}.cvx-kpi.warn .cvx-meter i{background:var(--cx-g)}.cvx-kpi.danger .cvx-meter i{background:var(--cx-d)}
+.cvx-meter b{position:absolute;top:-3px;width:2px;height:12px;background:var(--cx-k);opacity:.45}
+.cvx-delta{display:inline-block;margin-top:8px;font-size:11.5px;font-weight:700;border-radius:999px;padding:2px 8px}
+.cvx-delta.up{background:var(--cx-okb);color:var(--cx-ok)}.cvx-delta.down{background:var(--cx-db);color:var(--cx-d)}.cvx-delta.neutral{background:#f0f3f6;color:var(--cx-m)}
+.cvx-row{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:16px}
+.cvx-row .cvp-card{margin-bottom:16px}
+.cvx-chart{position:relative;height:260px}.cvx-chart.small{height:180px}
+.cvx-legend{font-size:12px;color:var(--cx-m);display:flex;align-items:center;gap:6px}
+.cvx-legend i{display:inline-block;width:14px;height:3px;border-radius:2px;margin-left:8px}
+.cvx-legend i.l1{background:var(--cx-c)}.cvx-legend i.l2{background:var(--cx-g)}
+.cvx-attn{list-style:none;margin:0 0 10px;padding:0;display:grid;gap:10px;counter-reset:a}
+.cvx-attn li{counter-increment:a;display:grid;grid-template-columns:28px 1fr;column-gap:10px;padding:10px 12px;border-radius:12px;background:#f6f8fa}
+.cvx-attn li::before{content:counter(a);grid-row:span 2;width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;background:var(--cx-k);color:#fff}
+.cvx-attn li.danger::before{background:var(--cx-d)}.cvx-attn li.warn::before{background:var(--cx-g);color:var(--cx-k)}
+.cvx-attn b{font-size:14px}.cvx-attn span{font-size:12.5px;color:var(--cx-m)}
+.cvx-link{border:none;background:none;color:var(--cx-cd);font:inherit;font-weight:700;font-size:13px;cursor:pointer;padding:0}
+/* Mapa de calor */
+.cvx-heatwrap{overflow-x:auto}
+.cvx-heat{border-collapse:separate;border-spacing:3px;font-size:12px;font-variant-numeric:tabular-nums}
+.cvx-heat thead th{height:150px;vertical-align:bottom;padding:0 0 4px}
+.cvx-heat thead th span{display:inline-block;writing-mode:vertical-rl;transform:rotate(180deg);font-weight:600;color:var(--cx-m);white-space:nowrap}
+.cvx-heat td{width:34px;min-width:34px;height:30px;text-align:center;border-radius:6px;font-weight:700}
+.cvx-heat td.ok{background:#cdebd8;color:#145c34}.cvx-heat td.warn{background:#ffe8a6;color:#6b4a00}.cvx-heat td.danger{background:#f6c4c1;color:#8c201c}
+.cvx-heat td.vacio{background:#f2f5f7;color:#b7c0c8}
+.cvx-hb{text-align:left;padding-right:10px;white-space:nowrap;font-weight:700;color:var(--cx-k)}
+.cvx-hb small{display:block;font-weight:500;color:var(--cx-m);font-size:11px}
+.cvx-heatlegend{display:flex;gap:8px;margin-top:10px;font-size:11.5px;font-weight:700}
+.cvx-heatlegend span{border-radius:6px;padding:2px 8px}
+.cvx-heatlegend .ok{background:#cdebd8;color:#145c34}.cvx-heatlegend .warn{background:#ffe8a6;color:#6b4a00}.cvx-heatlegend .danger{background:#f6c4c1;color:#8c201c}
+/* Ranking */
+.cvx-podio{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:14px;align-items:end}
+.cvx-pod{border-radius:16px;padding:16px;text-align:center;background:#f6f8fa;border:1px solid var(--cx-l);display:grid;gap:2px}
+.cvx-pod.p1{background:linear-gradient(160deg,#fff6d8,#ffe9a3);border-color:#f3d77a;padding-top:26px}
+.cvx-pod.p2{background:#f1f4f7}.cvx-pod.p3{background:#fbefe4;border-color:#f0d4b9}
+.cvx-pod-pos{width:34px;height:34px;margin:0 auto 6px;border-radius:50%;background:var(--cx-k);color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center}
+.cvx-pod.p1 .cvx-pod-pos{background:var(--cx-g);color:var(--cx-k)}
+.cvx-pod b{font-size:15px}.cvx-pod small{font-size:12px;color:var(--cx-m)}
+.cvx-pod-score{font-size:32px;font-weight:800;color:var(--cx-k);margin:4px 0}.cvx-pod-score span{font-size:13px;margin-left:3px;color:var(--cx-m)}
+.cvx-rklist{display:grid;gap:6px}
+.cvx-rk{display:grid;grid-template-columns:34px minmax(0,1fr) minmax(120px,200px) 44px;align-items:center;gap:12px;padding:10px 12px;border-radius:12px;background:#f8fafb}
+.cvx-rk-pos{font-weight:800;color:var(--cx-m);text-align:center}
+.cvx-rk-info b{display:block;font-size:14px}.cvx-rk-info small,.cvx-rk-bars small{font-size:12px;color:var(--cx-m)}
+.cvx-rk-bars .cvp-bar{height:7px;margin-top:4px}
+.cvx-rk-score{font-size:18px;font-weight:800;text-align:right;font-variant-numeric:tabular-nums}
+.cvx .cvp-list li small{color:var(--cx-m);font-weight:500;margin-left:4px}
+/* Tabla de módulos */
+.cvx-tablewrap{overflow-x:auto}
+.cvx-table{width:100%;border-collapse:collapse;font-size:13.5px}
+.cvx-table th{text-align:left;font-size:11.5px;text-transform:uppercase;letter-spacing:.5px;color:var(--cx-m);padding:8px 10px;border-bottom:2px solid var(--cx-l);white-space:nowrap}
+.cvx-table td{padding:11px 10px;border-bottom:1px solid #eef2f5;vertical-align:top}
+.cvx-table .num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.cvx-mrow{cursor:pointer}.cvx-mrow:hover td{background:#f6fafb}
+.cvx-topq{color:#3c4a57;max-width:380px}
+.cvx-chip{display:inline-block;border-radius:999px;padding:2px 9px;font-weight:800;font-size:12.5px}
+.cvx-chip.ok{background:var(--cx-okb);color:var(--cx-ok)}.cvx-chip.warn{background:var(--cx-wb);color:var(--cx-w)}.cvx-chip.danger{background:var(--cx-db);color:var(--cx-d)}
+.cvx-mdet td{background:#fbfcfd}
+.cvx-qlist{display:grid;gap:8px}
+.cvx-q{display:grid;grid-template-columns:56px 1fr;gap:12px;align-items:start;background:#fff;border:1px solid var(--cx-l);border-radius:12px;padding:10px 12px}
+.cvx-q-n{font-size:22px;font-weight:800;color:var(--cx-d);text-align:center;line-height:1}.cvx-q-n small{display:block;font-size:10.5px;color:var(--cx-m);font-weight:600}
+/* Seguimiento */
+.cvx-fchips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.cvx-fchip{border:1px solid var(--cx-l);background:#fff;border-radius:999px;padding:6px 12px;font:inherit;font-size:12.5px;font-weight:600;color:var(--cx-k);cursor:pointer}
+.cvx-fchip b{margin-left:4px;color:var(--cx-cd)}
+.cvx-fchip.on{background:var(--cx-k);color:#fff;border-color:var(--cx-k)}.cvx-fchip.on b{color:var(--cx-g)}
+.cvx-seglist{display:grid;gap:8px}
+.cvx-seg{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 14px;border:1px solid var(--cx-l);border-left:4px solid var(--cx-g);border-radius:12px;background:#fff}
+.cvx-seg.danger{border-left-color:var(--cx-d)}
+.cvx-seg.hecho{opacity:.6;border-left-color:var(--cx-ok)}
+.cvx-seg-main{min-width:0;flex:1 1 280px}
+.cvx-seg-main b{font-size:14.5px}.cvx-seg-main small{display:block;font-size:12px;color:var(--cx-m)}
+.cvx-seg-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+.cvx-tag{font-size:11.5px;font-weight:700;border-radius:6px;padding:2px 8px}
+.cvx-tag.danger{background:var(--cx-db);color:var(--cx-d)}.cvx-tag.warn{background:var(--cx-wb);color:var(--cx-w)}
+.cvx-seg-acc{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.cvx-seg-acc .cvp-btn{padding:7px 12px;font-size:12.5px}
+.cvx-hecho{font-size:12px;font-weight:700;color:var(--cx-ok)}
+/* Cohortes */
+.cvx-cohs{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+.cvx-coh{border:1px solid var(--cx-l);border-radius:14px;padding:14px;background:#fbfcfd}
+.cvx-coh-head{display:flex;justify-content:space-between;align-items:baseline}
+.cvx-coh-head h3{margin:0;font-size:16px}.cvx-coh-head span{font-size:12.5px;color:var(--cx-m)}
+.cvx-coh-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0}
+.cvx-coh-kpis div{background:#fff;border:1px solid var(--cx-l);border-radius:10px;padding:8px;text-align:center}
+.cvx-coh-kpis b{display:block;font-size:20px}.cvx-coh-kpis small{font-size:11px;color:var(--cx-m)}
+.cvx-coh-list{display:grid;gap:6px;max-height:320px;overflow:auto}
+.cvx-coh-m{display:grid;grid-template-columns:minmax(0,1fr) 90px 40px;align-items:center;gap:10px;font-size:13px}
+.cvx-coh-m span small{display:block;font-size:11px;color:var(--cx-m)}
+.cvx-coh-m .cvp-bar{height:7px;margin:0}.cvx-coh-m b{text-align:right;font-variant-numeric:tabular-nums}
+.cvx-coh-m.cero span{color:var(--cx-d)}
+/* Reporte para dirección */
+#cvxRep{position:fixed;inset:0;z-index:10001;background:rgba(11,33,55,.6);overflow:auto;padding:20px 16px;font-family:'Plus Jakarta Sans',sans-serif}
+.cvx-rep-bar{max-width:820px;margin:0 auto 10px;display:flex;justify-content:space-between;align-items:center;gap:10px;color:#fff;flex-wrap:wrap}
+.cvx-rep-doc{max-width:820px;margin:0 auto;background:#fff;border-radius:14px;padding:32px;color:#0B2137}
+.cvx-rep-top{display:flex;gap:16px;align-items:center;border-bottom:3px solid #00abc8;padding-bottom:14px;margin-bottom:18px}
+.cvx-rep-top img{height:40px}.cvx-rep-top h2{margin:0;font-size:20px}.cvx-rep-top p{margin:2px 0 0;color:#5a6b7b;font-size:13px}
+.cvx-rep-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px}
+.cvx-rep-kpis div{background:#f2f8fa;border-radius:10px;padding:12px;text-align:center}
+.cvx-rep-kpis b{display:block;font-size:24px}.cvx-rep-kpis span{font-size:11.5px;color:#5a6b7b}
+.cvx-rep-doc h4{margin:16px 0 6px;font-size:14px;text-transform:uppercase;letter-spacing:.6px;color:#007f95}
+.cvx-rep-doc ul,.cvx-rep-doc ol{margin:0;padding-left:20px;font-size:13.5px;line-height:1.6}
+.cvx-rep-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.cvx-rep-pie{margin-top:22px;font-size:12px;color:#5a6b7b;border-top:1px solid #e3e9ef;padding-top:10px}
+@media print{ body>*:not(#cvxRep){display:none!important} #cvxRep{position:static;background:#fff;padding:0} .cvx-rep-bar{display:none} .cvx-rep-doc{border-radius:0;padding:0} }
+@media(max-width:820px){ .cvx-row{grid-template-columns:1fr} .cvx-rep-kpis{grid-template-columns:1fr 1fr} .cvx-rep-2{grid-template-columns:1fr} }
+@media(max-width:600px){ .cvx-podio{grid-template-columns:1fr} .cvx-rk{grid-template-columns:28px minmax(0,1fr) 44px} .cvx-rk-bars{display:none} .cvx .cvp-tab span{display:none} .cvx .cvp-tab.active span{display:inline} }
 `;
   document.head.appendChild(css);
 }
