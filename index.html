@@ -4989,6 +4989,9 @@ try {
 // ═══════════════════════════════════════════════════════
 try {
   if (user && window.db) {
+    // doc y setDoc se importan aquí: las del bloque de arriba no existen en este bloque
+    // (antes fallaba en silencio y nunca se guardaba lastSeen → "Sin dato de duración aún")
+    const { doc, setDoc } = await import("https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js");
     const _hbRef = doc(window.db, "users", user.uid);
     const _hbFn = async () => {
       try {
