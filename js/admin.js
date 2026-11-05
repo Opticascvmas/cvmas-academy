@@ -1074,8 +1074,8 @@ window.cvpReporteDireccion = function () {
       <h4>Lo que hay que atender</h4>
       <ul>${d.attention.map(a => `<li><b>${esc(a.title)}:</b> ${esc(a.text)}</li>`).join('') || '<li>Sin puntos críticos.</li>'}</ul>
       <div class="cvx-rep-2">
-        <div><h4>Sucursales con mejor resultado</h4><ol>${top.map(b => `<li>${esc(b.name)} · ${b.indice} pts</li>`).join('')}</ol></div>
-        <div><h4>Sucursales a reforzar</h4><ol>${bot.map(b => `<li>${esc(b.name)} · ${b.indice} pts</li>`).join('')}</ol></div>
+        <div><h4>Sucursales con mejor resultado</h4>${top.length ? `<ol>${top.map(b => `<li>${esc(b.name)} · ${b.indice} pts</li>`).join('')}</ol>` : '<p class="cvp-muted">Aún no hay sucursales con 2 personas evaluadas o más.</p>'}</div>
+        <div><h4>Sucursales a reforzar</h4>${bot.length ? `<ol>${bot.map(b => `<li>${esc(b.name)} · ${b.indice} pts</li>`).join('')}</ol>` : '<p class="cvp-muted">Aún no hay sucursales con 2 personas evaluadas o más.</p>'}</div>
       </div>
       <h4>Módulos más difíciles</h4>
       <ol>${mods.map(m => `<li>${esc(m.name)} · ${m.avg}% promedio${m.top[0] ? ' · más fallada: «' + esc(m.top[0].q) + '»' : ''}</li>`).join('')}</ol>
@@ -1799,6 +1799,8 @@ function injectStyles() {
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
 #admin-panel{position:fixed;inset:0;background:#eef2f7;z-index:9999;overflow:auto}
+#admin-panel>h1{display:none!important}   /* título viejo del index: el panel ya trae su encabezado */
+#admin-panel{padding:0!important;background:#eef2f7!important}
 .cvp{font-family:'Plus Jakarta Sans',sans-serif;color:#0B2137;max-width:1280px;margin:0 auto;padding:18px}
 .cvp-loading{font-family:'Plus Jakarta Sans',sans-serif;padding:60px;text-align:center;color:#0B2137;font-weight:600}
 
@@ -2182,7 +2184,7 @@ function injectStyles() {
 .cvx-coh-m .cvp-bar{height:7px;margin:0}.cvx-coh-m b{text-align:right;font-variant-numeric:tabular-nums}
 .cvx-coh-m.cero span{color:var(--cx-d)}
 /* Reporte para dirección */
-#cvxRep{position:fixed;inset:0;z-index:10001;background:rgba(11,33,55,.6);overflow:auto;padding:20px 16px;font-family:'Plus Jakarta Sans',sans-serif}
+#cvxRep{position:fixed;inset:0;z-index:150000;background:rgba(11,33,55,.6);overflow:auto;padding:20px 16px;font-family:'Plus Jakarta Sans',sans-serif}
 .cvx-rep-bar{max-width:820px;margin:0 auto 10px;display:flex;justify-content:space-between;align-items:center;gap:10px;color:#fff;flex-wrap:wrap}
 .cvx-rep-doc{max-width:820px;margin:0 auto;background:#fff;border-radius:14px;padding:32px;color:#0B2137}
 .cvx-rep-top{display:flex;gap:16px;align-items:center;border-bottom:3px solid #00abc8;padding-bottom:14px;margin-bottom:18px}
