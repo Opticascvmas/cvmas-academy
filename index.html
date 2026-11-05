@@ -5075,6 +5075,8 @@ window.cerrarSesion = async function(opciones) {
     const ok = confirm("¿Cerrar sesión?");
     if (!ok) return;
   }
+  // Guardar el avance de SUMÁS pendiente antes de salir
+  try { if (window.cvpGuardarSumasAhora) await window.cvpGuardarSumasAhora(); } catch(e) {}
   try {
     // Borrar datos locales de esta cuenta
     localStorage.removeItem("cvplus_user");
@@ -5458,12 +5460,18 @@ Cerrar
   // Se guarda en Firestore dentro del documento progress/{uid} (campo «sumas»).
   try { window.SUMAS_AV = JSON.parse(localStorage.getItem('cvplus_sumas_avance') || '{}'); } catch(e) { window.SUMAS_AV = {}; }
   function AV(){ var a = window.SUMAS_AV || (window.SUMAS_AV = {}); a.v = a.v || {}; a.vd = a.vd || {}; a.g = a.g || {}; return a; }
-  var tGuardar = null;
+  // Cada escena o proceso completado se guarda AL INSTANTE (navegador + Firebase)
+  var pendiente = null;
   function guardar(){
     try { localStorage.setItem('cvplus_sumas_avance', JSON.stringify(window.SUMAS_AV)); } catch(e) {}
-    clearTimeout(tGuardar);
-    tGuardar = setTimeout(function(){ try { saveProgress(PROGRESS); } catch(e) {} }, 1500);
+    try { pendiente = Promise.resolve(saveProgress(PROGRESS)); } catch(e) { pendiente = null; }
+    return pendiente;
   }
+  // Se llama antes de cerrar sesión (manual o por inactividad) para no perder lo último
+  window.cvpGuardarSumasAhora = function(){
+    var esp = pendiente || Promise.resolve();
+    return esp.then(function(){ return saveProgress(PROGRESS); }).catch(function(){});
+  };
   function rolLibre(){
     try { var r = (JSON.parse(localStorage.getItem('cvplus_user') || '{}').role) || ''; return r === 'admin' || r === 'admin_opto' || r === 'viewer'; } catch(e) { return false; }
   }
@@ -5473,6 +5481,62 @@ Cerrar
              g: REQ_PROCESOS.filter(function(k){ return a.g[k]; }).length };
   }
   function completo(){ var c = cuenta(); return c.v === REQ_VIDEOS.length && c.g === REQ_PROCESOS.length; }
+
+  // ¿Qué le falta? Primer video incompleto (y su primera escena sin ver); si no, primer proceso pendiente
+  function siguiente(){
+    var a = AV();
+    for (var i = 0; i < REQ_VIDEOS.length; i++) {
+      var v = REQ_VIDEOS[i];
+      if (!a.vd[v]) {
+        var vistas = a.v[v] || [], e = 0;
+        while (vistas.indexOf(e) !== -1) e++;
+        return { tipo:'video', id:v, n:i + 1, escena:e };
+      }
+    }
+    for (var j = 0; j < REQ_PROCESOS.length; j++) {
+      if (!a.g[REQ_PROCESOS[j]]) return { tipo:'guia', id:REQ_PROCESOS[j], n:j + 1 };
+    }
+    return null;
+  }
+  function textoContinuar(){
+    var s = siguiente(); if (!s) return '';
+    if (s.tipo === 'video') return s.escena > 0 ? '▶ Continuar donde lo dejaste · Video ' + s.n + ', escena ' + (s.escena + 1) : '▶ Continuar · Video ' + s.n;
+    return '▶ Continuar · Guía, proceso ' + s.n;
+  }
+  window.cvpContinuarSumas = function(){
+    var s = siguiente(); if (!s) return;
+    if (s.tipo === 'guia') { abrirSumas('guia', s.id); return; }
+    window.__cvpSalto = s;                      // se aplica cuando cargue el video
+    abrirSumas('videos', s.id);
+  };
+  // Lleva el video a la escena pendiente y lo deja en pausa: la asesora toca ▶ para seguir
+  function aplicarSalto(w){
+    var s = window.__cvpSalto; window.__cvpSalto = null;
+    if (!s || !s.escena) return;
+    var D = w.document;
+    var cap = D.querySelector('#caps .cap[data-i="' + s.escena + '"]');
+    if (!cap) return;
+    cap.click();
+    setTimeout(function(){
+      var bp = D.getElementById('bPlay');
+      if (bp && bp.textContent.indexOf('❚') !== -1) bp.click();   // queda en pausa
+      var t = document.getElementById('sumas-titulo');
+      if (t) t.textContent = '🎬 Retomas el Video ' + s.n + ' en la escena ' + (s.escena + 1) + ' · toca ▶ para continuar';
+    }, 150);
+  }
+  // Pausa el video si la asesora deja la academia (cambia a Odoo, bloquea el iPad, cambia de pestaña)
+  function pausarVideo(){
+    try {
+      var f = document.getElementById('sumas-frame'), w = f && f.contentWindow, D = w && w.document;
+      var bp = D && D.getElementById('bPlay');
+      if (bp && bp.textContent.indexOf('❚') !== -1) bp.click();
+      else if (w && w.speechSynthesis && w.speechSynthesis.speaking) w.speechSynthesis.cancel();
+    } catch(e) {}
+  }
+  document.addEventListener('visibilitychange', function(){
+    if (document.hidden) { pausarVideo(); try { saveProgress(PROGRESS); } catch(e) {} }
+  });
+  window.addEventListener('pagehide', function(){ pausarVideo(); try { saveProgress(PROGRESS); } catch(e) {} });
 
   window.cvpQuizPermitido = function(mod){
     if (!mod || mod.requisitos !== 'sumas') return true;
@@ -5500,7 +5564,8 @@ Cerrar
                  : 'Mira cada video hasta el final (sin saltar escenas) y abre cada proceso de la guía práctica y recórrelo hasta abajo. Tu avance se guarda solo.') +
       (rolLibre() && !ok ? ' <i>(Como administrador, tú puedes entrar al quiz igual.)</i>' : '') + '</p>' +
       '<div class="cv-req-fila"><b>🎬 Videos ' + c.v + '/' + REQ_VIDEOS.length + '</b>' + chips(REQ_VIDEOS, a.vd, 'Video') + '</div>' +
-      '<div class="cv-req-fila"><b>📘 Guía ' + c.g + '/' + REQ_PROCESOS.length + '</b>' + chips(REQ_PROCESOS, a.g, 'Proceso') + '</div>';
+      '<div class="cv-req-fila"><b>📘 Guía ' + c.g + '/' + REQ_PROCESOS.length + '</b>' + chips(REQ_PROCESOS, a.g, 'Proceso') + '</div>' +
+      (ok ? '' : '<div style="margin-top:.8rem"><button class="cv-btn-sumas" type="button" onclick="cvpContinuarSumas()">' + textoContinuar() + '</button></div>');
     var body = document.getElementById('module-content-body');
     if (body) body.insertBefore(panel, body.firstChild);
   };
@@ -5563,7 +5628,7 @@ Cerrar
   if (frame) frame.addEventListener('load', function(){
     try {
       var w = frame.contentWindow, url = w.location.pathname;
-      if (/video-interactivo-rfm/.test(url)) engancharVideos(w);
+      if (/video-interactivo-rfm/.test(url)) { engancharVideos(w); setTimeout(function(){ aplicarSalto(w); }, 400); }
       else if (/guia-ficha-crm-odoo/.test(url)) engancharGuia(w);
     } catch(e) { console.warn('SUMÁS: no se pudo leer el avance', e); }
   });
