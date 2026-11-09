@@ -210,6 +210,13 @@ window.openAdminPanel = async function () {
       const histSnap = await getDocs(collection(window.db, "quiz_history"));
       histSnap.forEach(d => CVP.history.push({ id: d.id, ...d.data() }));
     } catch (e) { console.warn("Sin histórico todavía:", e); }
+    // Usuarios eliminados: si vuelven a entrar con la misma cuenta, el login les
+    // recrea el perfil; esta lista evita que reaparezcan en el panel.
+    CVP.eliminados = new Set();
+    try {
+      const eSnap = await getDocs(collection(window.db, "usuarios_eliminados"));
+      eSnap.forEach(d => CVP.eliminados.add(d.id));
+    } catch (e) { /* sin datos o sin permisos: no se filtra nada */ }
     // Marcas de "contactado" del tab Seguimiento
     CVP.followMarks = {};
     try {
@@ -227,6 +234,11 @@ window.openAdminPanel = async function () {
     .filter(u => excluded.includes((u.email || "").toLowerCase()))
     .map(u => u.id);
   CVP.users   = CVP.users.filter(u => !excluded.includes((u.email || "").toLowerCase()));
+  if (CVP.eliminados && CVP.eliminados.size) {
+    CVP.users   = CVP.users.filter(u => !CVP.eliminados.has(u.id));
+    CVP.scores  = CVP.scores.filter(s => !CVP.eliminados.has(s.id));
+    CVP.history = CVP.history.filter(h => !CVP.eliminados.has(h.uid));
+  }
   CVP.scores  = CVP.scores.filter(s => !excludedIds.includes(s.id));
   CVP.history = CVP.history.filter(h => !excludedIds.includes(h.uid));
   cvxIndexarHistorial();
@@ -1445,6 +1457,7 @@ function renderUserCard(u) {
           <option value="admin" ${u.role === "admin" ? "selected" : ""}>admin</option>
         </select>
         <button class="cvp-btn save" onclick="saveUserInfo('${u.id}')">💾 Guardar cambios</button>
+        <button class="cvp-btn cvx-eliminar" onclick="cvxEliminarUsuario('${u.id}')">🗑️ Eliminar usuario</button>
       </div>` : ``}
     </div>
   </div>`;
@@ -1521,6 +1534,87 @@ window.saveUserInfo = async function (userId) {
 
   alert("✅ Usuario actualizado");
   openAdminPanel();
+};
+
+
+/* ---------- ELIMINAR USUARIO (definitivo) ----------
+   Borra de Firestore: perfil (users), notas (quiz_scores), progreso (progress),
+   historial de quizzes (quiz_history) y marca de seguimiento (admin_followups).
+   Deja una constancia en usuarios_eliminados y en admin_logs.
+   ⚠️ La cuenta de acceso (correo y contraseña) se borra aparte en
+   Firebase Console → Authentication. */
+window.cvxEliminarUsuario = function (uid) {
+  if (!currentCanEdit()) { alert("👁️ Tu cuenta es de solo lectura. No tienes permiso para eliminar usuarios."); return; }
+  const u = CVP.users.find(x => x.id === uid);
+  if (!u) return;
+  const nHist = CVP.history.filter(h => h.uid === uid).length;
+  const vieja = document.getElementById("cvxDel"); if (vieja) vieja.remove();
+  const m = document.createElement("div");
+  m.id = "cvxDel";
+  m.innerHTML = `
+    <div class="cvx-del-box" role="dialog" aria-modal="true">
+      <h3>🗑️ Eliminar usuario</h3>
+      <p>Vas a eliminar <b>definitivamente</b> a:</p>
+      <div class="cvx-del-user"><b>${esc(u.name || u.email)}</b><small>${esc(u.email || "")} · ${esc(u.branch || "Sin sucursal")}</small></div>
+      <p>Se borrarán su perfil, sus notas, su progreso y <b>${nHist}</b> intento(s) del historial. <b>No se puede deshacer.</b></p>
+      <p class="cvx-del-nota">Después, borra también su cuenta de acceso en Firebase Console → Authentication, para que no pueda volver a entrar.</p>
+      <label>Escribe <b>ELIMINAR</b> para confirmar:</label>
+      <input id="cvxDelTxt" autocomplete="off" placeholder="ELIMINAR">
+      <div class="cvx-del-acc">
+        <button class="cvp-btn ghost dark" type="button" id="cvxDelNo">Cancelar</button>
+        <button class="cvp-btn cvx-eliminar" type="button" id="cvxDelSi" disabled>Eliminar definitivamente</button>
+      </div>
+      <div class="cvx-del-estado" id="cvxDelEstado"></div>
+    </div>`;
+  document.body.appendChild(m);
+  const txt = m.querySelector("#cvxDelTxt"), si = m.querySelector("#cvxDelSi");
+  txt.focus();
+  txt.addEventListener("input", () => { si.disabled = txt.value.trim().toUpperCase() !== "ELIMINAR"; });
+  m.querySelector("#cvxDelNo").onclick = () => m.remove();
+  m.addEventListener("click", e => { if (e.target === m) m.remove(); });
+  si.onclick = async () => {
+    si.disabled = true; m.querySelector("#cvxDelNo").disabled = true;
+    const estado = m.querySelector("#cvxDelEstado");
+    estado.textContent = "Eliminando…";
+    try {
+      const f = await import("https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js");
+      // Historial: se buscan en Firestore todos los intentos de este usuario
+      const refs = [];
+      try {
+        const hs = await f.getDocs(f.query(f.collection(window.db, "quiz_history"), f.where("uid", "==", uid)));
+        hs.forEach(d => refs.push(d.ref));
+      } catch (e) {
+        CVP.history.filter(h => h.uid === uid && h.id).forEach(h => refs.push(f.doc(window.db, "quiz_history", h.id)));
+      }
+      ["users", "quiz_scores", "progress", "admin_followups"].forEach(c => refs.push(f.doc(window.db, c, uid)));
+      // Borrado en lotes (máximo 450 operaciones por lote)
+      for (let i = 0; i < refs.length; i += 450) {
+        const b = f.writeBatch(window.db);
+        refs.slice(i, i + 450).forEach(r => b.delete(r));
+        await b.commit();
+      }
+      const constancia = { email: u.email || "", name: u.name || "", branch: u.branch || "",
+        eliminadoPor: window.CVP_CURRENT_EMAIL || "admin", at: new Date().toISOString() };
+      await f.setDoc(f.doc(window.db, "usuarios_eliminados", uid), constancia);
+      try {
+        await f.setDoc(f.doc(f.collection(window.db, "admin_logs")), Object.assign({ userId: uid, accion: "eliminar_usuario",
+          changedBy: constancia.eliminadoPor }, { at: constancia.at, name: constancia.name, email: constancia.email }));
+      } catch (e) {}
+      // Quitarlo del panel sin recargar todo
+      CVP.users   = CVP.users.filter(x => x.id !== uid);
+      CVP.scores  = CVP.scores.filter(x => x.id !== uid);
+      CVP.history = CVP.history.filter(x => x.uid !== uid);
+      if (CVP.eliminados) CVP.eliminados.add(uid);
+      cvxIndexarHistorial();
+      m.remove();
+      await cvxRedibujar("usuarios");
+      alert(`✅ ${u.name || u.email} fue eliminado.\n\nRecuerda borrar también su cuenta en Firebase Console → Authentication.`);
+    } catch (e) {
+      console.error("Error al eliminar usuario:", e);
+      estado.innerHTML = `❌ No se pudo eliminar (${esc(e.code || e.message)}). Revisa que las reglas de Firestore permitan borrar al administrador.`;
+      m.querySelector("#cvxDelNo").disabled = false;
+    }
+  };
 };
 
 
@@ -2675,6 +2769,24 @@ function injectStyles() {
 .cvx .cvx-heat td.ok,.cvx .cvx-mx tbody td.cvx-mx-c.ok,.cvx .cvx-heatlegend .ok{background:#e7f5ec;color:var(--cvp-ok)}
 .cvx .cvx-heat td.warn,.cvx .cvx-mx tbody td.cvx-mx-c.warn,.cvx .cvx-heatlegend .warn{background:#fff6dd;color:var(--cvp-alerta)}
 .cvx .cvx-heat td.danger,.cvx .cvx-mx tbody td.cvx-mx-c.danger,.cvx .cvx-heatlegend .danger{background:#fdeaea;color:var(--cvp-critico)}
+/* Eliminar usuario */
+.cvp-btn.cvx-eliminar{background:#fff;color:#d64545;border:1px solid #f3c6c6;width:100%;padding:11px}
+.cvp-btn.cvx-eliminar:hover:not(:disabled){background:#d64545;color:#fff}
+.cvp-btn.cvx-eliminar:disabled{opacity:.45;cursor:not-allowed}
+#cvxDel{position:fixed;inset:0;z-index:160000;background:rgba(55,58,54,.55);display:flex;align-items:center;justify-content:center;padding:16px;font-family:'Poppins','Segoe UI',Arial,sans-serif}
+.cvx-del-box{background:#fff;color:#373a36;border-radius:18px;max-width:440px;width:100%;padding:22px;border-top:5px solid #d64545;box-shadow:0 12px 40px rgba(0,0,0,.25)}
+.cvx-del-box h3{margin:0 0 8px;font-size:18px}
+.cvx-del-box p{font-size:13.5px;margin:8px 0;line-height:1.5}
+.cvx-del-user{background:#fdeaea;border-radius:10px;padding:10px 12px}
+.cvx-del-user small{display:block;color:#6b6e6a;font-size:12px}
+.cvx-del-nota{background:#fff6dd;border-left:4px solid #ffc629;border-radius:8px;padding:8px 10px;font-size:12.5px!important}
+.cvx-del-box label{display:block;font-size:13px;margin-top:10px}
+.cvx-del-box input{width:100%;box-sizing:border-box;margin-top:6px;padding:10px;border-radius:10px;border:2px solid #dfe5e7;font:inherit;font-size:14px}
+.cvx-del-box input:focus{outline:none;border-color:#d64545}
+.cvx-del-acc{display:flex;gap:8px;margin-top:14px}
+.cvx-del-acc .cvp-btn{flex:1;width:auto}
+#cvxDel .cvp-btn.cvx-eliminar:not(:disabled){background:#d64545;color:#fff;border-color:#d64545}
+.cvx-del-estado{font-size:12.5px;margin-top:10px;color:#d64545}
 /* Pie */
 .cvx-pie{margin:18px 0 6px;text-align:center;font-size:12px;color:var(--cvp-gris)}
 /* Reporte para dirección */
