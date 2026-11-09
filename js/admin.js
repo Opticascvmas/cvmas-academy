@@ -1027,14 +1027,15 @@ function cvxMatrizKpis(d) {
   const pend = total - hechos;
   const pct = total ? Math.round(hechos / total * 100) : 0;
   const ambito = CVX_MATRIZ.sucs.length ? (CVX_MATRIZ.sucs.length === 1 ? `en ${esc(CVX_MATRIZ.sucs[0])}` : `en ${CVX_MATRIZ.sucs.length} sucursales`) : 'en todas las sucursales';
-  const etq = mod ? `<b>${esc(mod.key)}. ${esc(mod.name)}</b>` : 'al menos un módulo';
+  const pctNo = total ? 100 - pct : 0;
+  const equiv = n => `Equivalente a ${n} ${n === 1 ? 'usuario' : 'usuarios'}`;
   return `
     <div class="cvx-mx-kpis">
       <div class="cvx-kpi"><div class="cvx-kpi-label">Usuarios creados</div><div class="cvx-kpi-value">${total}</div><div class="cvx-kpi-sub">${ambito}</div></div>
-      <div class="cvx-kpi ok"><div class="cvx-kpi-label">${mod ? 'Ya realizaron el módulo' : 'Han realizado'}</div><div class="cvx-kpi-value">${hechos}<small> · ${pct}%</small></div>
-        <div class="cvx-meter"><i style="width:${pct}%"></i></div><div class="cvx-kpi-sub">${etq}</div></div>
-      <div class="cvx-kpi ${pend ? 'danger' : 'ok'}"><div class="cvx-kpi-label">${mod ? 'Aún no lo han realizado' : 'Sin ningún módulo'}</div><div class="cvx-kpi-value">${pend}<small> · ${total ? 100 - pct : 0}%</small></div>
-        <div class="cvx-kpi-sub">${mod ? 'pendientes de este módulo' : 'no han hecho ningún quiz'}</div></div>
+      <div class="cvx-kpi ok"><div class="cvx-kpi-label">${mod ? 'Ya realizaron el módulo' : 'Han realizado al menos un módulo'}</div><div class="cvx-kpi-value">${pct}%</div>
+        <div class="cvx-meter"><i style="width:${pct}%"></i></div><div class="cvx-kpi-sub">${equiv(hechos)}</div></div>
+      <div class="cvx-kpi ${pend ? 'danger' : 'ok'}"><div class="cvx-kpi-label">${mod ? 'Aún no lo han realizado' : 'Sin ningún módulo'}</div><div class="cvx-kpi-value">${pctNo}%</div>
+        <div class="cvx-meter"><i style="width:${pctNo}%"></i></div><div class="cvx-kpi-sub">${equiv(pend)}</div></div>
     </div>`;
 }
 // Tabla de quiénes sí y quiénes no realizaron el módulo elegido
@@ -1077,7 +1078,7 @@ function renderMatriz(d) {
   return `
     <div class="cvp-card">
       <div class="cvx-card-head"><h3>${cvxIco('matriz')} Notas por módulo</h3>
-        <span class="cvp-muted">Nota promedio de cada persona en cada módulo${CVP.range ? ' (periodo seleccionado)' : ''}. Desliza la tabla: el nombre y los módulos quedan fijos.</span></div>
+        <span class="cvp-muted">Nota promedio de cada persona en cada módulo${CVP.range ? ' (periodo seleccionado)' : ''}. Los filtros aplican a toda la pestaña.</span></div>
       <div class="cvp-filters cvx-mx-filtros">
         <input id="cvxMxBuscar" placeholder="🔍 Buscar colaborador…" value="${esc(CVX_MATRIZ.q)}" oninput="cvxMatrizFiltrar('q', this.value)">
         <select id="cvxMxMod" onchange="cvxMatrizFiltrar('mod', this.value)">
@@ -1096,12 +1097,15 @@ function renderMatriz(d) {
         </select>
       </div>
       <div id="cvxMxKpis">${cvxMatrizKpis(d)}</div>
-      <div class="cvx-mx-wrap" id="cvxMxTabla">${cvxMatrizTabla(d)}</div>
-      <div class="cvx-heatlegend"><span class="ok">80–100</span><span class="warn">60–79</span><span class="danger">&lt; 60</span><span style="background:#f2f5f7;color:#a3a6a2">· sin realizar</span></div>
     </div>
     <div class="cvp-card">
       <div class="cvx-card-head"><h3>${cvxIco('usuarios')} ¿Quién ya realizó el módulo?</h3><span class="cvp-muted">Respeta el filtro de sucursales.</span></div>
       <div id="cvxMxSiNo">${cvxMatrizSiNo(d)}</div>
+    </div>
+    <div class="cvp-card">
+      <div class="cvx-card-head"><h3>${cvxIco('matriz')} Tabla general: usuarios y módulos</h3><span class="cvp-muted">Desliza la tabla: el nombre y los módulos quedan fijos.</span></div>
+      <div class="cvx-mx-wrap" id="cvxMxTabla">${cvxMatrizTabla(d)}</div>
+      <div class="cvx-heatlegend"><span class="ok">80–100</span><span class="warn">60–79</span><span class="danger">&lt; 60</span><span style="background:#f2f5f7;color:#a3a6a2">· sin realizar</span></div>
     </div>`;
 }
 function cvxMatrizRefrescar() {
@@ -2510,7 +2514,7 @@ function injectStyles() {
 .cvx-mx tbody td.cvx-mx-c.vacio{background:#f7f9fa;color:#c9cdc8}
 .cvx-mx-vacia{padding:18px!important;text-align:center;color:var(--cx-m)}
 /* Notas por módulo: indicadores, filtro multi-sucursal, módulo único y lista Sí / No */
-.cvx-mx-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:14px}
+.cvx-mx-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin:4px 0 2px}
 .cvx-mx-kpis .cvx-kpi-value small{font-size:15px;font-weight:600;color:var(--cx-m)}
 .cvx-msel{position:relative}
 .cvx-msel-btn{width:100%;height:100%;min-height:46px;text-align:left;padding:12px;border-radius:12px;border:1px solid #dfe5e7;background:#fff;font:inherit;font-size:14px;color:var(--cx-k);cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
