@@ -953,7 +953,7 @@ window.cvxToggleMod = function (i) {
    Una fila por colaborador y una columna por módulo con su nota promedio.
    La primera columna (nombre) y la primera fila (módulos) quedan fijas al
    deslizar la tabla hacia los lados o hacia abajo. */
-const CVX_MATRIZ = { orden: 'nombre', q: '', suc: '' };
+const CVX_MATRIZ = { orden: 'nombre', q: '', sucs: [], mod: '' };
 
 function cvxMatrizModulos() {
   const names = CVP.view === 'optometras' ? MODULE_NAMES_OPTO : MODULE_NAMES;
@@ -966,26 +966,41 @@ function cvxMatrizFila(u, mods) {
   const prom = hechos.length ? Math.round(hechos.reduce((a, m) => a + porMod[m.key].average, 0) / hechos.length) : null;
   return { u, porMod, hechos: hechos.length, prom };
 }
-function cvxMatrizFilas(d) {
+// Módulos que se muestran como columnas (todos o solo el elegido en el filtro)
+function cvxMatrizModsVisibles() {
+  const mods = cvxMatrizModulos();
+  if (CVX_MATRIZ.mod && !mods.some(m => m.key === CVX_MATRIZ.mod)) CVX_MATRIZ.mod = '';
+  return CVX_MATRIZ.mod ? mods.filter(m => m.key === CVX_MATRIZ.mod) : mods;
+}
+const cvxPorNombre = (a, b) => a.u.name.localeCompare(b.u.name, 'es', { sensitivity: 'base' });
+// Filas según sucursales marcadas (sin búsqueda): base de los indicadores y de la lista Sí / No
+function cvxMatrizBase(d) {
   const mods = cvxMatrizModulos();
   let filas = d.enriched.map(u => cvxMatrizFila(u, mods));
+  if (CVX_MATRIZ.sucs.length) filas = filas.filter(f => CVX_MATRIZ.sucs.includes(f.u.branch));
+  return filas;
+}
+function cvxMatrizFilas(d) {
+  const mods = cvxMatrizModsVisibles();
+  let filas = cvxMatrizBase(d);
   const q = CVX_MATRIZ.q.trim().toLowerCase();
   if (q) filas = filas.filter(f => (f.u.name + ' ' + f.u.email).toLowerCase().includes(q));
-  if (CVX_MATRIZ.suc) filas = filas.filter(f => f.u.branch === CVX_MATRIZ.suc);
-  const porNombre = (a, b) => a.u.name.localeCompare(b.u.name, 'es', { sensitivity: 'base' });
-  if (CVX_MATRIZ.orden === 'promedio') filas.sort((a, b) => (b.prom ?? -1) - (a.prom ?? -1) || porNombre(a, b));
-  else if (CVX_MATRIZ.orden === 'modulos') filas.sort((a, b) => b.hechos - a.hechos || porNombre(a, b));
-  else if (CVX_MATRIZ.orden === 'sucursal') filas.sort((a, b) => a.u.branch.localeCompare(b.u.branch, 'es') || porNombre(a, b));
-  else filas.sort(porNombre);
+  const notaMod = f => (CVX_MATRIZ.mod && f.porMod[CVX_MATRIZ.mod]) ? f.porMod[CVX_MATRIZ.mod].average : (CVX_MATRIZ.mod ? -1 : (f.prom ?? -1));
+  if (CVX_MATRIZ.orden === 'promedio') filas.sort((a, b) => notaMod(b) - notaMod(a) || cvxPorNombre(a, b));
+  else if (CVX_MATRIZ.orden === 'modulos') filas.sort((a, b) => b.hechos - a.hechos || cvxPorNombre(a, b));
+  else if (CVX_MATRIZ.orden === 'sucursal') filas.sort((a, b) => a.u.branch.localeCompare(b.u.branch, 'es') || cvxPorNombre(a, b));
+  else filas.sort(cvxPorNombre);
   return { mods, filas };
 }
-function cvxMatrizCuerpo(d) {
+function cvxMatrizTabla(d) {
   const { mods, filas } = cvxMatrizFilas(d);
-  if (!filas.length) return `<tr><th class="cvx-mx-nom">—</th><td colspan="${mods.length + 2}" class="cvx-mx-vacia">No hay colaboradores con ese filtro.</td></tr>`;
-  return filas.map(f => `<tr>
+  const totalMods = cvxMatrizModulos().length;
+  const cuerpo = !filas.length
+    ? `<tr><th class="cvx-mx-nom">—</th><td colspan="${mods.length + 2}" class="cvx-mx-vacia">No hay colaboradores con ese filtro.</td></tr>`
+    : filas.map(f => `<tr>
       <th class="cvx-mx-nom" scope="row" title="${esc(f.u.email)}">${esc(f.u.name)}<small>${esc(f.u.branch)}</small></th>
       <td class="cvx-mx-res">${f.prom == null ? '<span class="cvx-mx-na">—</span>' : `<span class="cvx-chip ${cvxTone(f.prom)}">${f.prom}%</span>`}</td>
-      <td class="cvx-mx-res">${f.hechos}<small>/${mods.length}</small></td>
+      <td class="cvx-mx-res">${f.hechos}<small>/${totalMods}</small></td>
       ${mods.map(m => {
         const c = f.porMod[m.key];
         return c
@@ -993,42 +1008,132 @@ function cvxMatrizCuerpo(d) {
           : `<td class="cvx-mx-c vacio" title="${esc(f.u.name)} · ${esc(m.name)}: sin realizar">·</td>`;
       }).join('')}
     </tr>`).join('');
+  return `<table class="cvx-mx${CVX_MATRIZ.mod ? ' uno' : ''}">
+        <thead><tr>
+          <th class="cvx-mx-nom cvx-mx-esq" scope="col">Colaborador</th>
+          <th class="cvx-mx-res" scope="col">Promedio general</th>
+          <th class="cvx-mx-res" scope="col">Módulos</th>
+          ${mods.map(m => `<th class="cvx-mx-mod" scope="col" title="${esc(m.key)}. ${esc(m.name)}"><span><b>${esc(m.key)}</b> ${esc(m.name)}</span></th>`).join('')}
+        </tr></thead>
+        <tbody>${cuerpo}</tbody>
+      </table>`;
+}
+// Indicadores: usuarios creados / lo realizaron / aún no
+function cvxMatrizKpis(d) {
+  const base = cvxMatrizBase(d);
+  const total = base.length;
+  const mod = CVX_MATRIZ.mod ? cvxMatrizModulos().find(m => m.key === CVX_MATRIZ.mod) : null;
+  const hechos = mod ? base.filter(f => f.porMod[mod.key]).length : base.filter(f => f.hechos > 0).length;
+  const pend = total - hechos;
+  const pct = total ? Math.round(hechos / total * 100) : 0;
+  const ambito = CVX_MATRIZ.sucs.length ? (CVX_MATRIZ.sucs.length === 1 ? `en ${esc(CVX_MATRIZ.sucs[0])}` : `en ${CVX_MATRIZ.sucs.length} sucursales`) : 'en todas las sucursales';
+  const etq = mod ? `<b>${esc(mod.key)}. ${esc(mod.name)}</b>` : 'al menos un módulo';
+  return `
+    <div class="cvx-mx-kpis">
+      <div class="cvx-kpi"><div class="cvx-kpi-label">Usuarios creados</div><div class="cvx-kpi-value">${total}</div><div class="cvx-kpi-sub">${ambito}</div></div>
+      <div class="cvx-kpi ok"><div class="cvx-kpi-label">${mod ? 'Ya realizaron el módulo' : 'Han realizado'}</div><div class="cvx-kpi-value">${hechos}<small> · ${pct}%</small></div>
+        <div class="cvx-meter"><i style="width:${pct}%"></i></div><div class="cvx-kpi-sub">${etq}</div></div>
+      <div class="cvx-kpi ${pend ? 'danger' : 'ok'}"><div class="cvx-kpi-label">${mod ? 'Aún no lo han realizado' : 'Sin ningún módulo'}</div><div class="cvx-kpi-value">${pend}<small> · ${total ? 100 - pct : 0}%</small></div>
+        <div class="cvx-kpi-sub">${mod ? 'pendientes de este módulo' : 'no han hecho ningún quiz'}</div></div>
+    </div>`;
+}
+// Tabla de quiénes sí y quiénes no realizaron el módulo elegido
+function cvxMatrizSiNo(d) {
+  const mod = CVX_MATRIZ.mod ? cvxMatrizModulos().find(m => m.key === CVX_MATRIZ.mod) : null;
+  if (!mod) return `<div class="cvx-mx-aviso">${cvxIco('matriz', 16)} Elige un módulo en el filtro <b>“Módulo”</b> para ver quiénes ya lo realizaron y quiénes aún no.</div>`;
+  const base = cvxMatrizBase(d);
+  const si = base.filter(f => f.porMod[mod.key]).sort((a, b) => b.porMod[mod.key].average - a.porMod[mod.key].average || cvxPorNombre(a, b));
+  const no = base.filter(f => !f.porMod[mod.key]).sort((a, b) => a.u.branch.localeCompare(b.u.branch, 'es') || cvxPorNombre(a, b));
+  const filaSi = f => { const m = f.porMod[mod.key]; return `<tr><td><b>${esc(f.u.name)}</b></td><td>${esc(f.u.branch)}</td><td class="num"><span class="cvx-chip ${cvxTone(m.average)}">${m.average}%</span></td><td class="num">${m.attempts}</td></tr>`; };
+  const filaNo = f => `<tr><td><b>${esc(f.u.name)}</b></td><td>${esc(f.u.branch)}</td><td>${f.u.lastLogin ? esc(fechaElSalvador(f.u.lastLogin)) : '<span class="cvp-muted">Nunca ha entrado</span>'}</td></tr>`;
+  return `
+    <div class="cvx-mx-sino">
+      <div class="cvx-mx-lista si">
+        <h4>✔ Ya lo realizaron <span>${si.length}</span></h4>
+        <div class="cvx-tablewrap cvx-mx-scroll"><table class="cvx-table">
+          <thead><tr><th>Colaborador</th><th>Sucursal</th><th class="num">Nota promedio</th><th class="num">Intentos</th></tr></thead>
+          <tbody>${si.map(filaSi).join('') || '<tr><td colspan="4" class="cvp-empty">Nadie lo ha realizado todavía.</td></tr>'}</tbody>
+        </table></div>
+      </div>
+      <div class="cvx-mx-lista no">
+        <h4>✖ Aún no lo realizan <span>${no.length}</span></h4>
+        <div class="cvx-tablewrap cvx-mx-scroll"><table class="cvx-table">
+          <thead><tr><th>Colaborador</th><th>Sucursal</th><th>Último acceso</th></tr></thead>
+          <tbody>${no.map(filaNo).join('') || '<tr><td colspan="3" class="cvp-empty">¡Todos ya lo realizaron! 🎉</td></tr>'}</tbody>
+        </table></div>
+      </div>
+    </div>`;
+}
+function cvxSucTexto() {
+  const n = CVX_MATRIZ.sucs.length;
+  return n === 0 ? 'Todas las sucursales' : n === 1 ? CVX_MATRIZ.sucs[0] : `${n} sucursales`;
 }
 function renderMatriz(d) {
   const mods = cvxMatrizModulos();
   const sucursales = [...new Set(d.enriched.map(u => u.branch))].sort((a, b) => a.localeCompare(b, 'es'));
-  if (CVX_MATRIZ.suc && !sucursales.includes(CVX_MATRIZ.suc)) CVX_MATRIZ.suc = '';
+  CVX_MATRIZ.sucs = CVX_MATRIZ.sucs.filter(s => sucursales.includes(s));
+  cvxMatrizModsVisibles();
   const opt = (v, t) => `<option value="${v}"${CVX_MATRIZ.orden === v ? ' selected' : ''}>${t}</option>`;
   return `
     <div class="cvp-card">
       <div class="cvx-card-head"><h3>${cvxIco('matriz')} Notas por módulo</h3>
-        <span class="cvp-muted">${d.enriched.length} colaboradores · ${mods.length} módulos · nota promedio de cada persona en cada módulo${CVP.range ? ' (periodo seleccionado)' : ''}. Desliza la tabla: el nombre y los módulos quedan fijos.</span></div>
+        <span class="cvp-muted">Nota promedio de cada persona en cada módulo${CVP.range ? ' (periodo seleccionado)' : ''}. Desliza la tabla: el nombre y los módulos quedan fijos.</span></div>
       <div class="cvp-filters cvx-mx-filtros">
         <input id="cvxMxBuscar" placeholder="🔍 Buscar colaborador…" value="${esc(CVX_MATRIZ.q)}" oninput="cvxMatrizFiltrar('q', this.value)">
-        <select onchange="cvxMatrizFiltrar('suc', this.value)">
-          <option value="">Todas las sucursales</option>
-          ${sucursales.map(b => `<option value="${esc(b)}"${CVX_MATRIZ.suc === b ? ' selected' : ''}>${esc(b)}</option>`).join('')}
+        <select id="cvxMxMod" onchange="cvxMatrizFiltrar('mod', this.value)">
+          <option value="">Módulo: todos (${mods.length})</option>
+          ${mods.map(m => `<option value="${esc(m.key)}"${CVX_MATRIZ.mod === m.key ? ' selected' : ''}>${esc(m.key)}. ${esc(m.name)}</option>`).join('')}
         </select>
+        <div class="cvx-msel" id="cvxMxSuc">
+          <button type="button" class="cvx-msel-btn" onclick="cvxSucAbrir(event)"><span id="cvxMxSucTxt">${esc(cvxSucTexto())}</span> ▾</button>
+          <div class="cvx-msel-pop" hidden>
+            <div class="cvx-msel-acc"><button type="button" onclick="cvxSucTodas(true)">Marcar todas</button><button type="button" onclick="cvxSucTodas(false)">Quitar todas</button></div>
+            ${sucursales.map(b => `<label><input type="checkbox" value="${esc(b)}"${CVX_MATRIZ.sucs.includes(b) ? ' checked' : ''} onchange="cvxSucCambio()"> ${esc(b)}</label>`).join('')}
+          </div>
+        </div>
         <select onchange="cvxMatrizFiltrar('orden', this.value)">
-          ${opt('nombre', 'Ordenar: Nombre (A-Z)')}${opt('promedio', 'Ordenar: Mejor promedio')}${opt('modulos', 'Ordenar: Más módulos realizados')}${opt('sucursal', 'Ordenar: Sucursal')}
+          ${opt('nombre', 'Ordenar: Nombre (A-Z)')}${opt('promedio', 'Ordenar: Mejor nota')}${opt('modulos', 'Ordenar: Más módulos realizados')}${opt('sucursal', 'Ordenar: Sucursal')}
         </select>
       </div>
-      <div class="cvx-mx-wrap"><table class="cvx-mx">
-        <thead><tr>
-          <th class="cvx-mx-nom cvx-mx-esq" scope="col">Colaborador</th>
-          <th class="cvx-mx-res" scope="col">Promedio</th>
-          <th class="cvx-mx-res" scope="col">Módulos</th>
-          ${mods.map(m => `<th class="cvx-mx-mod" scope="col" title="${esc(m.key)}. ${esc(m.name)}"><span><b>${esc(m.key)}</b> ${esc(m.name)}</span></th>`).join('')}
-        </tr></thead>
-        <tbody id="cvxMxBody">${cvxMatrizCuerpo(d)}</tbody>
-      </table></div>
-      <div class="cvx-heatlegend"><span class="ok">80–100</span><span class="warn">60–79</span><span class="danger">&lt; 60</span><span style="background:#f4f7f8;color:#a3a6a2">· sin realizar</span></div>
+      <div id="cvxMxKpis">${cvxMatrizKpis(d)}</div>
+      <div class="cvx-mx-wrap" id="cvxMxTabla">${cvxMatrizTabla(d)}</div>
+      <div class="cvx-heatlegend"><span class="ok">80–100</span><span class="warn">60–79</span><span class="danger">&lt; 60</span><span style="background:#f2f5f7;color:#a3a6a2">· sin realizar</span></div>
+    </div>
+    <div class="cvp-card">
+      <div class="cvx-card-head"><h3>${cvxIco('usuarios')} ¿Quién ya realizó el módulo?</h3><span class="cvp-muted">Respeta el filtro de sucursales.</span></div>
+      <div id="cvxMxSiNo">${cvxMatrizSiNo(d)}</div>
     </div>`;
+}
+function cvxMatrizRefrescar() {
+  const d = CVP._last; if (!d) return;
+  const k = document.getElementById('cvxMxKpis'), t = document.getElementById('cvxMxTabla'), s = document.getElementById('cvxMxSiNo');
+  if (k) k.innerHTML = cvxMatrizKpis(d);
+  if (t) { t.innerHTML = cvxMatrizTabla(d); }
+  if (s) s.innerHTML = cvxMatrizSiNo(d);
+  const tx = document.getElementById('cvxMxSucTxt'); if (tx) tx.textContent = cvxSucTexto();
 }
 window.cvxMatrizFiltrar = function (campo, valor) {
   CVX_MATRIZ[campo] = valor;
-  const body = document.getElementById('cvxMxBody');
-  if (body && CVP._last) body.innerHTML = cvxMatrizCuerpo(CVP._last);
+  cvxMatrizRefrescar();
+};
+// Filtro de sucursales con selección múltiple
+window.cvxSucAbrir = function (ev) {
+  ev.stopPropagation();
+  const pop = document.querySelector('#cvxMxSuc .cvx-msel-pop');
+  if (!pop) return;
+  pop.hidden = !pop.hidden;
+  if (!pop.hidden) {
+    const cerrar = e => { if (!e.target.closest('#cvxMxSuc')) { pop.hidden = true; document.removeEventListener('click', cerrar, true); } };
+    document.addEventListener('click', cerrar, true);
+  }
+};
+window.cvxSucCambio = function () {
+  CVX_MATRIZ.sucs = [...document.querySelectorAll('#cvxMxSuc input[type=checkbox]:checked')].map(i => i.value);
+  cvxMatrizRefrescar();
+};
+window.cvxSucTodas = function (on) {
+  document.querySelectorAll('#cvxMxSuc input[type=checkbox]').forEach(i => { i.checked = on; });
+  cvxSucCambio();
 };
 
 
@@ -2404,6 +2509,28 @@ function injectStyles() {
 .cvx-mx tbody td.cvx-mx-c.ok{background:#e7f5ec;color:#2e9e5b}.cvx-mx tbody td.cvx-mx-c.warn{background:#fff6dd;color:#e0a800}.cvx-mx tbody td.cvx-mx-c.danger{background:#fdeaea;color:#d64545}
 .cvx-mx tbody td.cvx-mx-c.vacio{background:#f7f9fa;color:#c9cdc8}
 .cvx-mx-vacia{padding:18px!important;text-align:center;color:var(--cx-m)}
+/* Notas por módulo: indicadores, filtro multi-sucursal, módulo único y lista Sí / No */
+.cvx-mx-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-bottom:14px}
+.cvx-mx-kpis .cvx-kpi-value small{font-size:15px;font-weight:600;color:var(--cx-m)}
+.cvx-msel{position:relative}
+.cvx-msel-btn{width:100%;height:100%;min-height:46px;text-align:left;padding:12px;border-radius:12px;border:1px solid #dfe5e7;background:#fff;font:inherit;font-size:14px;color:var(--cx-k);cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cvx-msel-pop{position:absolute;z-index:20;top:calc(100% + 6px);left:0;min-width:100%;max-height:300px;overflow:auto;background:#fff;border:1px solid #dfe5e7;border-radius:12px;box-shadow:0 12px 30px rgba(55,58,54,.18);padding:8px}
+.cvx-msel-pop label{display:flex;align-items:center;gap:8px;padding:7px 8px;border-radius:8px;font-size:13.5px;cursor:pointer;white-space:nowrap}
+.cvx-msel-pop label:hover{background:#e5f6f9}
+.cvx-msel-pop input{accent-color:#00abc8;width:16px;height:16px}
+.cvx-msel-acc{display:flex;gap:6px;padding:2px 2px 8px;border-bottom:1px solid #eef1f2;margin-bottom:6px}
+.cvx-msel-acc button{flex:1;border:none;border-radius:8px;padding:6px 8px;background:#e5f6f9;color:var(--cx-k);font:inherit;font-size:12px;font-weight:600;cursor:pointer}
+.cvx-mx.uno{width:100%}
+.cvx-mx.uno .cvx-mx-mod{min-width:180px;max-width:none}
+.cvx-mx-aviso{display:flex;align-items:center;gap:8px;padding:14px 16px;border-radius:12px;background:#e5f6f9;color:var(--cx-k);font-size:13.5px}
+.cvx-mx-sino{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px}
+.cvx-mx-lista h4{margin:0 0 8px;font-size:14.5px;display:flex;align-items:center;gap:8px}
+.cvx-mx-lista h4 span{border-radius:999px;padding:1px 10px;font-size:12.5px}
+.cvx-mx-lista.si h4{color:#2e9e5b}.cvx-mx-lista.si h4 span{background:#e7f5ec}
+.cvx-mx-lista.no h4{color:#d64545}.cvx-mx-lista.no h4 span{background:#fdeaea}
+.cvx-mx-scroll{max-height:420px;overflow:auto;border-radius:10px}
+.cvx-mx-scroll thead th{position:sticky;top:0;z-index:1}
+.cvx-mx-lista .cvx-table tbody tr:nth-child(even) td{background:#e5f6f9}
 @media(max-width:600px){ .cvx-mx-nom{min-width:130px;max-width:150px} .cvx-mx-mod{min-width:78px;max-width:78px} .cvx-mx-wrap{max-height:65vh} }
 
 /* Mapa de calor */
