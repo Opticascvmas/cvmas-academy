@@ -1043,7 +1043,7 @@ function cvxMatrizKpis(d) {
   const equiv = n => `Equivalente a ${n} ${n === 1 ? 'usuario' : 'usuarios'}`;
   return `
     <div class="cvx-mx-kpis">
-      <div class="cvx-kpi"><div class="cvx-kpi-label">Usuarios creados</div><div class="cvx-kpi-value">${total}</div><div class="cvx-kpi-sub">${ambito}</div></div>
+      <div class="cvx-kpi"><div class="cvx-kpi-label">Usuarios activos</div><div class="cvx-kpi-value">${total}</div><div class="cvx-kpi-sub">${ambito}</div></div>
       <div class="cvx-kpi ok"><div class="cvx-kpi-label">${mod ? 'Ya realizaron el módulo' : 'Han realizado al menos un módulo'}</div><div class="cvx-kpi-value">${pct}%</div>
         <div class="cvx-meter"><i style="width:${pct}%"></i></div><div class="cvx-kpi-sub">${equiv(hechos)}</div></div>
       <div class="cvx-kpi ${pend ? 'danger' : 'ok'}"><div class="cvx-kpi-label">${mod ? 'Aún no lo han realizado' : 'Sin ningún módulo'}</div><div class="cvx-kpi-value">${pctNo}%</div>
