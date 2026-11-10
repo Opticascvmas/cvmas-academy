@@ -105,9 +105,29 @@ const EXCLUDED_EMAILS = [
 // "Sin zona asignada" hasta que las agregues aquí.
 // ─────────────────────────────────────────────────────────────
 const ZONAS = [
-  { nombre: "Zona 1",      sucursales: [ /* "Metrocentro 1", "Plaza Mundo", ... */ ] },
-  { nombre: "Zona 2",      sucursales: [ ] },
-  { nombre: "Zona 3",      sucursales: [ ] },
+  // Zona 1 · Occidente / San Salvador Poniente
+  { nombre: "Zona 1", sucursales: [
+      "Metrocentro 1", "Metro SS", "Metrocentro San Salvador",
+      "Metrocentro Lourdes", "Metro Lourdes",
+      "Metrocentro 2", "Metro 2",
+      "San Marcos", "Alta Vista", "Altavista", "Zaragoza", "Acajutla", "Sonsonate",
+      "Puerto de La Libertad", "La Libertad", "Aguilares",
+      "Encuentro Lourdes", "ECO Lourdes" ] },
+  // Zona 2 · Centro / San Salvador Oriente
+  { nombre: "Zona 2", sucursales: [
+      "Metrocentro Santa Ana", "Metro SA",
+      "Galerias", "Zona Rosa", "El Paseo", "Paseo", "Unicentro Soyapango",
+      "Las Ramblas", "Ramblas", "Encuentro Santa Ana", "ECO SA",
+      "Plaza Mundo", "PMS", "Plaza Mundo Soyapango",
+      "Usulutan", "PM Usulutan", "Plaza Mundo Usulutan",
+      "Zacatecoluca Centro", "Zacatecoluca",
+      "Encuentro Zacatecoluca", "ECO Zacatecoluca" ] },
+  // Zona 3 · Oriente / Norte
+  { nombre: "Zona 3", sucursales: [
+      "Armenia", "El Casco", "Casco", "Metropolis",
+      "San Francisco Gotera", "Morazan", "Multiplaza",
+      "Apopa", "PM Apopa", "Plaza Mundo Apopa",
+      "San Gabriel", "San Martin", "San Miguel", "Santa Rosa", "Valle Dulce" ] },
   { nombre: "Mercadeo",    sucursales: ["Mercadeo"] },
   { nombre: "SAC",         sucursales: ["SAC"] },
   { nombre: "Compras",     sucursales: ["Compras"] },
