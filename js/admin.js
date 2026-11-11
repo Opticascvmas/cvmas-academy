@@ -140,6 +140,16 @@ function cvxNorm(t) { return String(t || "").normalize("NFD").replace(/[\u0300-\
 const CVX_ZONA_DE = {};
 ZONAS.forEach(z => z.sucursales.forEach(b => { CVX_ZONA_DE[cvxNorm(b)] = z.nombre; }));
 function zonaDe(branch) { return CVX_ZONA_DE[cvxNorm(branch)] || ZONA_SIN; }
+// Unifica el nombre de la sucursal: quita espacios de más y usa la forma oficial
+// de la lista BRANCHES ("metrocentro 1 " y "Metrocentro  1" → "Metrocentro 1").
+// Así una misma sucursal no aparece repetida en los filtros.
+function cvxSucursal(raw) {
+  const t = String(raw || "").replace(/\s+/g, " ").trim();
+  if (!t) return "Sin sucursal";
+  const clave = x => cvxNorm(x).replace(/ /g, "");
+  const oficial = (typeof BRANCHES !== "undefined" ? BRANCHES : []).find(b => clave(b) === clave(t));
+  return oficial || t;
+}
 function cvxOrdenZona(z) { const i = ZONAS.findIndex(x => x.nombre === z); return i === -1 ? 999 : i; }
 
 // ¿El usuario que está viendo el panel puede editar?
@@ -513,8 +523,8 @@ function computeData(range) {
       id: u.id,
       name: u.name || u.email || "Sin nombre",
       email: u.email || "Sin correo",
-      branch: u.branch || "Sin sucursal",
-      zona: zonaDe(u.branch || "Sin sucursal"),
+      branch: cvxSucursal(u.branch),
+      zona: zonaDe(cvxSucursal(u.branch)),
       position: u.position || "Sin cargo",
       role: u.role || u.rol || "participant",  // tolera 'rol' y 'role'
       lastLogin: u.lastLogin || null,
