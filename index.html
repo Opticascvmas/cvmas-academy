@@ -5178,9 +5178,10 @@ window.saveQuizHistory = async function(moduleId, score, attempt, wrong) {
     if (reintentar) a.querySelector('button').onclick = reintentar;
     a.style.display = 'flex';
     clearTimeout(a._t);
-    if (tipo === 'ok') a._t = setTimeout(function(){ a.style.display = 'none'; }, 3500);
+    if (tipo === 'ok') a._t = setTimeout(function(){ a.style.display = 'none'; }, 6000);
   }
   window.cvpGuardarQuiz = function(moduleId, pct, attempt, wrong){
+    aviso('guardando', '⏳ Guardando tu nota… no cierres sesión todavía.');
     var lento = setTimeout(function(){
       aviso('guardando', '⏳ Guardando tu nota… revisa tu conexión a internet y no cierres sesión todavía.');
     }, 4000);
@@ -5193,8 +5194,7 @@ window.saveQuizHistory = async function(moduleId, score, attempt, wrong) {
       }
       clearTimeout(lento);
       if (okS && okH) {
-        var a = document.getElementById('cv-aviso-quiz');
-        if (a && a.style.display !== 'none') aviso('ok', '✅ Tu nota quedó guardada.');
+        aviso('ok', '✅ Tu nota quedó guardada.');
       } else {
         aviso('error', '⚠️ Tu nota NO se pudo guardar. Revisa tu internet y toca Reintentar. No cierres sesión.',
           function(){ window.cvpGuardarQuiz(moduleId, pct, attempt, wrong); });
