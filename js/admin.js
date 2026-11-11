@@ -92,9 +92,11 @@ const SUPER_ADMINS = [
 // alumnos y ensucian los datos. Agrega aquí los que quieras ocultar.
 // ─────────────────────────────────────────────────────────────
 const EXCLUDED_EMAILS = [
-  "oskarmchdo@gmail.com",
-  "alevargas93@hotmail.com",
-  "erick.ramirez@opticascvmas.com"
+  // Nov 2026: Oscar, Alejandra y Erick ahora SÍ se muestran en el panel.
+  // Para volver a ocultar a alguien, quita las dos barras (//) de su línea.
+  // "oskarmchdo@gmail.com",
+  // "alevargas93@hotmail.com",
+  // "erick.ramirez@opticascvmas.com"
 ];
 
 // ─────────────────────────────────────────────────────────────
