@@ -3979,11 +3979,16 @@ async function saveQuizScores(s) {
         }
       );
 
+      return true;   // guardado confirmado por Firebase
+
     }
+
+    return false;
 
   } catch(e) {
 
     console.error(e);
+    return false;
 
   }
 
@@ -4686,21 +4691,10 @@ previousData.lastActivity =
   new Date().toISOString();
 
 QUIZ_SCORES[qs.module] = previousData;
+// 💾 Guardar la nota y el intento (con reintentos y aviso si falla)
 try {
-
-  saveQuizScores(QUIZ_SCORES);
-
-} catch(e) {
-
-  console.error(e);
-
-}
-
-// 📅 Guardar este intento en el histórico (Plan B)
-try {
-  if (window.saveQuizHistory) {
-    window.saveQuizHistory(qs.module, pct, previousData.attempts, preguntasFalladas);
-  }
+  localStorage.setItem('cvplus_quiz_scores', JSON.stringify(QUIZ_SCORES));
+  window.cvpGuardarQuiz(qs.module, pct, previousData.attempts, preguntasFalladas);
 } catch(e) {
   console.error(e);
 }
@@ -5059,9 +5053,13 @@ window.saveUserData = async function(collection, data) {
     "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js"
   );
 
+  // merge: true → solo agrega o actualiza lo que se envía, NUNCA borra lo que ya
+  // estaba guardado. Evita que un dispositivo con datos viejos borre quizzes
+  // (por ejemplo SUMÁS) que la persona hizo en otro iPad o computadora.
   await setDoc(
     doc(window.db, collection, user.uid),
-    data
+    data,
+    { merge: true }
   );
 }
 
@@ -5078,6 +5076,8 @@ window.cerrarSesion = async function(opciones) {
     const ok = confirm("¿Cerrar sesión?");
     if (!ok) return;
   }
+  // Esperar a que termine de guardarse el último quiz (máximo 15 s)
+  try { if (window.__cvpGuardandoQuiz) await Promise.race([window.__cvpGuardandoQuiz, new Promise(function(r){ setTimeout(r, 15000); })]); } catch(e) {}
   // Guardar el avance de SUMÁS pendiente antes de salir
   try { if (window.cvpGuardarSumasAhora) await window.cvpGuardarSumasAhora(); } catch(e) {}
   try {
@@ -5148,10 +5148,63 @@ window.saveQuizHistory = async function(moduleId, score, attempt, wrong) {
       wrong: Array.isArray(wrong) ? wrong : [],   // preguntas falladas (texto + respuestas)
       date: new Date().toISOString()
     });
+    return true;
   } catch (e) {
     console.error("No se pudo guardar el histórico:", e);
+    return false;
   }
 };
+
+// ═══════════════════════════════════════════════════════
+// 💾 GUARDADO SEGURO DEL QUIZ
+// Guarda la nota (quiz_scores) y el intento (quiz_history), reintenta si
+// falla y avisa a la persona si su nota todavía no está guardada, para que
+// no cierre sesión ni apague el iPad antes de tiempo. Al cerrar sesión
+// (manual o por inactividad) se espera a que termine este guardado.
+// ═══════════════════════════════════════════════════════
+(function(){
+  function aviso(tipo, texto, reintentar){
+    var a = document.getElementById('cv-aviso-quiz');
+    if (!a) {
+      a = document.createElement('div'); a.id = 'cv-aviso-quiz';
+      a.style.cssText = 'position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:300000;max-width:92vw;'
+        + 'padding:12px 16px;border-radius:12px;font:600 14px Poppins,sans-serif;box-shadow:0 8px 24px rgba(0,0,0,.25);'
+        + 'display:flex;gap:12px;align-items:center;flex-wrap:wrap';
+      document.body.appendChild(a);
+    }
+    var colores = { guardando:['#fff6dd','#373a36','#ffc629'], error:['#fdeaea','#a12b2b','#d64545'], ok:['#e7f5ec','#1d7a43','#2e9e5b'] }[tipo];
+    a.style.background = colores[0]; a.style.color = colores[1]; a.style.border = '2px solid ' + colores[2];
+    a.innerHTML = '<span>' + texto + '</span>' + (reintentar ? '<button type="button" style="border:0;border-radius:8px;padding:8px 14px;background:#d64545;color:#fff;font:600 13px Poppins,sans-serif;cursor:pointer">Reintentar</button>' : '');
+    if (reintentar) a.querySelector('button').onclick = reintentar;
+    a.style.display = 'flex';
+    clearTimeout(a._t);
+    if (tipo === 'ok') a._t = setTimeout(function(){ a.style.display = 'none'; }, 3500);
+  }
+  window.cvpGuardarQuiz = function(moduleId, pct, attempt, wrong){
+    var lento = setTimeout(function(){
+      aviso('guardando', '⏳ Guardando tu nota… revisa tu conexión a internet y no cierres sesión todavía.');
+    }, 4000);
+    var tarea = (async function(){
+      var okS = false, okH = false;
+      for (var i = 0; i < 3 && !(okS && okH); i++) {
+        if (i) await new Promise(function(r){ setTimeout(r, 2000 * i); });
+        if (!okS) okS = await saveQuizScores(QUIZ_SCORES);
+        if (!okH) okH = !!(window.saveQuizHistory && await window.saveQuizHistory(moduleId, pct, attempt, wrong));
+      }
+      clearTimeout(lento);
+      if (okS && okH) {
+        var a = document.getElementById('cv-aviso-quiz');
+        if (a && a.style.display !== 'none') aviso('ok', '✅ Tu nota quedó guardada.');
+      } else {
+        aviso('error', '⚠️ Tu nota NO se pudo guardar. Revisa tu internet y toca Reintentar. No cierres sesión.',
+          function(){ window.cvpGuardarQuiz(moduleId, pct, attempt, wrong); });
+      }
+      return okS && okH;
+    })();
+    window.__cvpGuardandoQuiz = tarea;
+    return tarea;
+  };
+})();
 
 window.loadUserData = async function(collection) {
 
