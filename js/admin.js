@@ -1304,7 +1304,7 @@ function renderMatriz(d) {
       <div id="cvxMxKpis">${cvxMatrizKpis(d)}</div>
     </div>
     <div class="cvp-card">
-      <div class="cvx-card-head"><h3>${cvxIco('usuarios')} ¿Quién ya realizó el módulo?</h3><span class="cvp-muted">Respeta el filtro de sucursales.</span></div>
+      <div class="cvx-card-head"><h3>${cvxIco('usuarios')} ¿Quién ya realizó el módulo?</h3><span class="cvx-sino-acc"><span class="cvp-muted">Respeta el filtro de zonas y sucursales.</span><button class="cvp-btn gold" type="button" onclick="cvxExportSiNo()">⬇ Descargar Excel</button></span></div>
       <div id="cvxMxSiNo">${cvxMatrizSiNo(d)}</div>
     </div>
     <div class="cvp-card">
@@ -2225,6 +2225,90 @@ function cvxPie(ws, fila, texto) {
   c.font = { name: "Poppins", size: 9, italic: true, color: { argb: CVX_XLS.gris } };
 }
 
+/* Excel de "¿Quién ya realizó el módulo?": dos hojas (ya lo realizaron / aún no),
+   con el módulo y las zonas o sucursales que estén filtradas en la pestaña. */
+window.cvxExportSiNo = async function () {
+  const mod = CVX_MATRIZ.mod ? cvxMatrizModulos().find(m => m.key === CVX_MATRIZ.mod) : null;
+  if (!mod) { alert("Primero elige un módulo en el filtro «Módulo»."); return; }
+  try {
+    if (!window.ExcelJS) await cvxCargarScript("https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js");
+  } catch (e) { alert("No se pudo cargar el generador de Excel. Revisa tu conexión."); return; }
+  const d = CVP._last || computeData(CVP.range);
+  const base = cvxMatrizBase(d);
+  const si = base.filter(f => f.porMod[mod.key]).sort((a, b) => b.porMod[mod.key].lastScore - a.porMod[mod.key].lastScore || cvxPorNombre(a, b));
+  const no = base.filter(f => !f.porMod[mod.key]).sort(cvxPorZona);
+  const esSumas = /suma/i.test(cvxNorm(mod.name));
+  const vista = CVP.view === "optometras" ? "Optometristas" : "Asesores";
+  const sucsVista = [...new Set(d.enriched.map(u => u.branch))];
+  const ambito = CVX_MATRIZ.sucs.length ? cvxSelTexto(CVX_MATRIZ.sucs, sucsVista) : "Todas las zonas y sucursales";
+  const fecha = new Date().toLocaleDateString("es-SV", { year: "numeric", month: "long", day: "numeric", timeZone: "America/El_Salvador" });
+  const pct = base.length ? Math.round(si.length / base.length * 100) : 0;
+  const subt = `${vista} · ${ambito} · ${si.length} lo realizaron (${pct}%) · ${no.length} pendientes · Generado el ${fecha}`;
+  const pie = `Ópticas CV+ · ¿Quién ya realizó el módulo? · Generado el ${fecha}`;
+  let logo = null; try { logo = await cvxLogoPNG(); } catch (e) {}
+  const wb = new window.ExcelJS.Workbook(); wb.creator = "Academia CV+";
+  const fuente = { name: "Poppins", size: 10, color: { argb: CVX_XLS.carbon } };
+  const hoja = (nombre, titulo, cols, filas, pintar) => {
+    const ws = wb.addWorksheet(nombre, { views: [{ state: "frozen", xSplit: 1, ySplit: 5, showGridLines: false }] });
+    ws.columns = cols.map(c => ({ width: c[1] }));
+    ws.pageSetup = { orientation: "landscape", fitToPage: true, fitToWidth: 1, fitToHeight: 0 };
+    cvxHojaEncabezado(ws, wb, logo, titulo, subt, cols.length);
+    const h = ws.getRow(5); h.values = cols.map(c => c[0]); cvxEstiloCabecera(h, 28);
+    filas.forEach((vals, i) => {
+      const r = ws.getRow(6 + i); r.values = vals; r.height = 20;
+      for (let c = 1; c <= cols.length; c++) {
+        const cel = r.getCell(c); cel.font = fuente;
+        cel.alignment = { vertical: "middle", horizontal: cols[c - 1][2] || "left", wrapText: true };
+        cel.border = { bottom: { style: "hair", color: { argb: "FFDFE5E7" } } };
+        if (i % 2 === 1) cel.fill = { type: "pattern", pattern: "solid", fgColor: { argb: CVX_XLS.cianSuave } };
+      }
+      r.getCell(1).font = Object.assign({}, fuente, { bold: true });
+      if (pintar) pintar(r, i);
+    });
+    if (filas.length) ws.autoFilter = { from: { row: 5, column: 1 }, to: { row: 5 + filas.length, column: cols.length } };
+    cvxPie(ws, 7 + filas.length, pie);
+    return ws;
+  };
+  const sv = iso => { const k = new Date(iso).toLocaleDateString("en-CA", { timeZone: "America/El_Salvador" }).split("-").map(Number); return new Date(Date.UTC(k[0], k[1] - 1, k[2])); };
+  // Hoja 1: ya lo realizaron
+  hoja("Ya lo realizaron", `${mod.key}. ${mod.name} · Ya lo realizaron (${si.length})`,
+    [["Colaborador", 32], ["Zona", 16], ["Sucursal", 22], ["Última nota", 13, "center"], ["Resultado", 14, "center"], ["Promedio de intentos", 14, "center"], ["Intentos", 10, "center"], ["Observación", 28]],
+    si.map(f => { const m = f.porMod[mod.key]; return [f.u.name, f.u.zona, f.u.branch, m.lastScore / 100, m.lastScore >= 80 ? "Aprobado" : "No aprobado", m.average / 100, m.attempts, m.rescatado ? "Recuperado del historial" : ""]; }),
+    (r, i) => {
+      const m = si[i].porMod[mod.key];
+      [4, 6].forEach(c => { r.getCell(c).numFmt = "0%"; });
+      const [tf, tb] = cvxTono(m.lastScore);
+      [4, 5].forEach(c => { r.getCell(c).font = Object.assign({}, fuente, { bold: true, color: { argb: CVX_XLS[tf] } }); r.getCell(c).fill = { type: "pattern", pattern: "solid", fgColor: { argb: CVX_XLS[tb] } }; });
+    });
+  // Hoja 2: aún no lo realizan
+  const colsNo = [["Colaborador", 32], ["Zona", 16], ["Sucursal", 22]];
+  if (esSumas) colsNo.push(["Avance del contenido", 26], ["Videos", 10, "center"], ["Guía", 10, "center"], ["Quiz habilitado por Capacitación", 18, "center"]);
+  colsNo.push(["Último acceso", 15, "center"]);
+  hoja("Aún no lo realizan", `${mod.key}. ${mod.name} · Aún no lo realizan (${no.length})`, colsNo,
+    no.map(f => {
+      const v = f.u.sumas || { videos: 0, guia: 0 };
+      const est = (v.videos === 7 && v.guia === 10) ? "Contenido completo · falta el quiz" : (v.videos || v.guia ? "Contenido incompleto" : "Sin avance");
+      const fila = [f.u.name, f.u.zona, f.u.branch];
+      if (esSumas) fila.push(est, `${v.videos}/7`, `${v.guia}/10`, f.u.excepcionSumas ? "Sí" : "");
+      fila.push(f.u.lastLogin ? sv(f.u.lastLogin) : "Nunca ha entrado");
+      return fila;
+    }),
+    (r, i) => {
+      const ultima = colsNo.length; if (no[i].u.lastLogin) r.getCell(ultima).numFmt = "dd/mm/yyyy";
+      if (esSumas) {
+        const t = r.getCell(4).value; const [tf, tb] = t === "Sin avance" ? ["cr", "crB"] : t.startsWith("Contenido completo") ? ["al", "alB"] : ["carbon", "cianSuave"];
+        r.getCell(4).font = Object.assign({}, fuente, { bold: true, color: { argb: CVX_XLS[tf] } }); r.getCell(4).fill = { type: "pattern", pattern: "solid", fgColor: { argb: CVX_XLS[tb] } };
+      }
+    });
+  const buf = await wb.xlsx.writeBuffer();
+  const a = document.createElement("a");
+  const limpio = t => cvxNorm(t).replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 40);
+  a.href = URL.createObjectURL(new Blob([buf], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }));
+  a.download = `quien-realizo-${limpio(mod.name)}-${CVP.view}-${new Date().toISOString().slice(0, 10)}.xlsx`;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+};
+
 window.cvpExportXLSX = async function () {
   try {
     if (!window.ExcelJS) await cvxCargarScript("https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js");
@@ -2824,6 +2908,7 @@ function injectStyles() {
 .cvx-mx tbody tr.cvx-mx-grupo td b{color:#00abc8}
 .cvx-zchip{display:block;font-size:11px;color:#6b6e6a}
 .cvx-chip.neutro{background:#f4f7f8;color:#6b6e6a}
+.cvx-sino-acc{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .cvx-exc{display:block;margin-top:6px;border:1px solid #00abc8;background:#fff;color:#00abc8;border-radius:999px;padding:3px 10px;font:inherit;font-size:11.5px;font-weight:600;cursor:pointer}
 .cvx-exc:hover{background:#e5f6f9}
 .cvx-exc.on{background:#fff6dd;border-color:#ffc629;color:#373a36}
