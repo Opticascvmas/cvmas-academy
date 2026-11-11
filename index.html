@@ -4044,6 +4044,14 @@ window.hydrateUserData = async function() {
     const progressDoc = await window.loadUserData("progress");
     PROGRESS = (progressDoc && progressDoc.progress) ? progressDoc.progress : {};
     window.SUMAS_AV = (progressDoc && progressDoc.sumas) ? progressDoc.sumas : {};
+    // Excepción de Capacitación: se marcan como vistos los 7 videos y los 10 procesos de la guía
+    if (window.CVP_EXCEPCION_SUMAS) {
+      var av = window.SUMAS_AV; av.v = av.v || {}; av.vd = av.vd || {}; av.g = av.g || {};
+      var faltaba = false;
+      ['v1','v2','v3','v4','v5','v6','v7'].forEach(function(k){ if (!av.vd[k]) { av.vd[k] = true; faltaba = true; } });
+      ['p1','pe','p2','p3','p4','p5','p6','p7','p8','p9'].forEach(function(k){ if (!av.g[k]) { av.g[k] = true; faltaba = true; } });
+      if (faltaba) { av.porExcepcion = new Date().toISOString(); try { await saveProgress(PROGRESS); } catch(e) { console.error(e); } }
+    }
     localStorage.setItem('cvplus_sumas_avance', JSON.stringify(window.SUMAS_AV));
 
     // Sincronizar el navegador con lo de Firebase (evita datos viejos pegados)
@@ -4958,6 +4966,8 @@ if(user) {
    } else {
       // Ingresos siguientes: actualizar solo la fecha (merge conserva el resto)
       window.CVP_CONTENT_ROLE = snap.data().role || snap.data().rol || "participant";
+      // Excepción dada por Capacitación: puede hacer el quiz de SUMÁS sin repetir videos y guía
+      window.CVP_EXCEPCION_SUMAS = !!snap.data().excepcionSumas;
       await setDoc(ref, {
         lastLogin: new Date().toISOString(),
         sessionStart: new Date().toISOString()
@@ -5596,7 +5606,7 @@ Cerrar
 
   window.cvpQuizPermitido = function(mod){
     if (!mod || mod.requisitos !== 'sumas') return true;
-    return rolLibre() || completo();
+    return rolLibre() || completo() || !!window.CVP_EXCEPCION_SUMAS;
   };
 
   // Ajusta los dos botones de quiz del módulo y pinta el panel de avance de SUMÁS
@@ -5611,17 +5621,19 @@ Cerrar
     });
     if (mod.requisitos !== 'sumas') return;
     var a = AV(), c = cuenta(), ok = completo();
+    var exc = !ok && !!window.CVP_EXCEPCION_SUMAS;
     var chips = function(lista, mapa, pref){ return lista.map(function(k, i){ return '<span class="cv-req-chip' + (mapa[k] ? ' si' : '') + '">' + (mapa[k] ? '✓ ' : '') + pref + ' ' + (i+1) + '</span>'; }).join(' '); };
     var panel = document.createElement('div');
-    panel.className = 'cv-req' + (ok ? ' ok' : '');
+    panel.className = 'cv-req' + (ok || exc ? ' ok' : '');
     panel.innerHTML =
-      '<h4>' + (ok ? '✅ Quiz desbloqueado' : '🔒 Para desbloquear el quiz') + '</h4>' +
+      '<h4>' + (ok ? '✅ Quiz desbloqueado' : exc ? '✅ Quiz habilitado por Capacitación' : '🔒 Para desbloquear el quiz') + '</h4>' +
       '<p>' + (ok ? 'Ya viste todos los videos y recorriste la guía completa. ¡Adelante con el quiz!'
+                 : exc ? 'Capacitación te habilitó el quiz sin repetir los videos ni la guía. Haz el quiz y espera el mensaje verde «Tu nota quedó guardada». Nota mínima: 80%.'
                  : 'Mira cada video hasta el final (sin saltar escenas) y abre cada proceso de la guía práctica y recórrelo hasta abajo. Tu avance se guarda solo.') +
       (rolLibre() && !ok ? ' <i>(Como administrador, tú puedes entrar al quiz igual.)</i>' : '') + '</p>' +
       '<div class="cv-req-fila"><b>🎬 Videos ' + c.v + '/' + REQ_VIDEOS.length + '</b>' + chips(REQ_VIDEOS, a.vd, 'Video') + '</div>' +
       '<div class="cv-req-fila"><b>📘 Guía ' + c.g + '/' + REQ_PROCESOS.length + '</b>' + chips(REQ_PROCESOS, a.g, 'Proceso') + '</div>' +
-      (ok ? '' : '<div style="margin-top:.8rem"><button class="cv-btn-sumas" type="button" onclick="cvpContinuarSumas()">' + textoContinuar() + '</button></div>');
+      (ok || exc ? '' : '<div style="margin-top:.8rem"><button class="cv-btn-sumas" type="button" onclick="cvpContinuarSumas()">' + textoContinuar() + '</button></div>');
     var body = document.getElementById('module-content-body');
     if (body) body.insertBefore(panel, body.firstChild);
   };
