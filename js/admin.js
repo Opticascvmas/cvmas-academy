@@ -509,7 +509,7 @@ function computeData(range) {
     }
     // Avance del contenido de SUMÁS (7 videos + 10 procesos de la guía)
     const av = ((CVP.progreso || {})[u.id] || {}).sumas || {};
-    const sumas = {
+    const sumas = u.excepcionSumas ? { videos: 7, guia: 10, excepcion: true } : {
       videos: ["v1","v2","v3","v4","v5","v6","v7"].filter(k => av.vd && av.vd[k]).length,
       guia: ["p1","pe","p2","p3","p4","p5","p6","p7","p8","p9"].filter(k => av.g && av.g[k]).length
     };
@@ -547,6 +547,7 @@ function computeData(range) {
                      moduleEntries.reduce((a, m) => a + m.attempts, 0),
       completed: moduleEntries.length,
       sumas,
+      excepcionSumas: !!u.excepcionSumas,
       totalMod: TOTAL_MOD,
       progress: Math.round((moduleEntries.length / TOTAL_MOD) * 100),
       modules: moduleEntries
@@ -1148,6 +1149,26 @@ function cvxMatrizKpis(d) {
         <div class="cvx-meter"><i style="width:${pctNo}%"></i></div><div class="cvx-kpi-sub">${equiv(pend)}</div></div>
     </div>`;
 }
+// Excepción de SUMÁS: el usuario puede hacer el quiz sin repetir videos y guía
+window.cvxExcepcionSumas = async function (uid, on) {
+  if (!currentCanEdit()) return;
+  try {
+    if (!window.CVP_MOCK) {
+      const f = await import("https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js");
+      await f.setDoc(f.doc(window.db, "users", uid), {
+        excepcionSumas: on,
+        excepcionSumasPor: window.CVP_CURRENT_EMAIL || "admin",
+        excepcionSumasAt: new Date().toISOString()
+      }, { merge: true });
+    }
+    const u = CVP.users.find(x => x.id === uid); if (u) u.excepcionSumas = on;
+    CVP._last = computeData(CVP.range);
+    cvxMatrizRefrescar();
+  } catch (e) {
+    console.error(e);
+    alert("No se pudo guardar la excepción (" + (e.code || e.message) + ").");
+  }
+};
 // Tabla de quiénes sí y quiénes no realizaron el módulo elegido
 function cvxMatrizSiNo(d) {
   const mod = CVX_MATRIZ.mod ? cvxMatrizModulos().find(m => m.key === CVX_MATRIZ.mod) : null;
@@ -1159,10 +1180,12 @@ function cvxMatrizSiNo(d) {
   const avance = f => {
     const v = f.u.sumas || { videos: 0, guia: 0 };
     const ok = v.videos === 7 && v.guia === 10;
-    return `<span class="cvx-chip ${ok ? 'warn' : (v.videos || v.guia ? 'neutro' : 'danger')}">${ok ? 'Contenido completo · falta el quiz' : (v.videos || v.guia ? 'Contenido incompleto' : 'Sin avance')}</span><small class="cvx-zchip">🎬 Videos ${v.videos}/7 · 📘 Guía ${v.guia}/10</small>`;
+    return `<span class="cvx-chip ${ok ? 'warn' : (v.videos || v.guia ? 'neutro' : 'danger')}">${ok ? 'Contenido completo · falta el quiz' : (v.videos || v.guia ? 'Contenido incompleto' : 'Sin avance')}</span><small class="cvx-zchip">🎬 Videos ${v.videos}/7 · 📘 Guía ${v.guia}/10${v.excepcion ? ' · ⭐ marcados por Capacitación' : ''}</small>`;
   };
   const filaSi = f => { const m = f.porMod[mod.key]; return `<tr><td><b>${esc(f.u.name)}</b>${m.rescatado ? '<small class="cvx-zchip" title="El quiz estaba en el historial pero no en el resumen de notas">↺ recuperado del historial</small>' : ''}</td><td>${esc(f.u.branch)}<small class="cvx-zchip">${esc(f.u.zona)}</small></td><td class="num"><span class="cvx-chip ${cvxTone(m.average)}">${m.average}%</span></td><td class="num">${m.attempts}</td></tr>`; };
-  const filaNo = f => `<tr><td><b>${esc(f.u.name)}</b></td><td>${esc(f.u.branch)}<small class="cvx-zchip">${esc(f.u.zona)}</small></td>${esSumas ? `<td>${avance(f)}</td>` : ''}<td>${f.u.lastLogin ? esc(fechaElSalvador(f.u.lastLogin)) : '<span class="cvp-muted">Nunca ha entrado</span>'}</td></tr>`;
+  const btnExc = f => !currentCanEdit() ? (f.u.excepcionSumas ? '<small class="cvx-zchip">⭐ Quiz habilitado por Capacitación</small>' : '')
+    : `<button type="button" class="cvx-exc ${f.u.excepcionSumas ? 'on' : ''}" onclick="cvxExcepcionSumas('${f.u.id}', ${!f.u.excepcionSumas})" title="Permite hacer el quiz sin repetir videos y guía">${f.u.excepcionSumas ? '⭐ Quiz habilitado · quitar' : 'Habilitar quiz sin requisitos'}</button>`;
+  const filaNo = f => `<tr><td><b>${esc(f.u.name)}</b>${esSumas ? btnExc(f) : ''}</td><td>${esc(f.u.branch)}<small class="cvx-zchip">${esc(f.u.zona)}</small></td>${esSumas ? `<td>${avance(f)}</td>` : ''}<td>${f.u.lastLogin ? esc(fechaElSalvador(f.u.lastLogin)) : '<span class="cvp-muted">Nunca ha entrado</span>'}</td></tr>`;
   return `
     <div class="cvx-mx-sino">
       <div class="cvx-mx-lista si">
@@ -2801,6 +2824,9 @@ function injectStyles() {
 .cvx-mx tbody tr.cvx-mx-grupo td b{color:#00abc8}
 .cvx-zchip{display:block;font-size:11px;color:#6b6e6a}
 .cvx-chip.neutro{background:#f4f7f8;color:#6b6e6a}
+.cvx-exc{display:block;margin-top:6px;border:1px solid #00abc8;background:#fff;color:#00abc8;border-radius:999px;padding:3px 10px;font:inherit;font-size:11.5px;font-weight:600;cursor:pointer}
+.cvx-exc:hover{background:#e5f6f9}
+.cvx-exc.on{background:#fff6dd;border-color:#ffc629;color:#373a36}
 .cvp-filters .cvx-msel-btn{min-height:46px}
 .cvx-mx.uno .cvx-mx-mod{min-width:180px;max-width:none}
 .cvx-mx-aviso{display:flex;align-items:center;gap:8px;padding:14px 16px;border-radius:12px;background:#e5f6f9;color:var(--cx-k);font-size:13.5px}
