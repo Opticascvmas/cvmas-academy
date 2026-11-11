@@ -1069,7 +1069,7 @@ function cvxMatrizFila(u, mods) {
   const porMod = {};
   u.modules.forEach(m => { porMod[m.key] = m; });
   const hechos = mods.filter(m => porMod[m.key]);
-  const prom = hechos.length ? Math.round(hechos.reduce((a, m) => a + porMod[m.key].average, 0) / hechos.length) : null;
+  const prom = hechos.length ? Math.round(hechos.reduce((a, m) => a + porMod[m.key].lastScore, 0) / hechos.length) : null;   // promedio de la ÚLTIMA nota de cada módulo
   return { u, porMod, hechos: hechos.length, prom };
 }
 // Módulos que se muestran como columnas (todos o solo el elegido en el filtro)
@@ -1093,7 +1093,7 @@ function cvxMatrizFilas(d) {
   let filas = cvxMatrizBase(d);
   const q = CVX_MATRIZ.q.trim().toLowerCase();
   if (q) filas = filas.filter(f => (f.u.name + ' ' + f.u.email).toLowerCase().includes(q));
-  const notaMod = f => (CVX_MATRIZ.mod && f.porMod[CVX_MATRIZ.mod]) ? f.porMod[CVX_MATRIZ.mod].average : (CVX_MATRIZ.mod ? -1 : (f.prom ?? -1));
+  const notaMod = f => (CVX_MATRIZ.mod && f.porMod[CVX_MATRIZ.mod]) ? f.porMod[CVX_MATRIZ.mod].lastScore : (CVX_MATRIZ.mod ? -1 : (f.prom ?? -1));
   if (CVX_MATRIZ.orden === 'promedio') filas.sort((a, b) => notaMod(b) - notaMod(a) || cvxPorNombre(a, b));
   else if (CVX_MATRIZ.orden === 'modulos') filas.sort((a, b) => b.hechos - a.hechos || cvxPorNombre(a, b));
   else if (CVX_MATRIZ.orden === 'sucursal') filas.sort((a, b) => a.u.branch.localeCompare(b.u.branch, 'es') || cvxPorNombre(a, b));
@@ -1114,14 +1114,14 @@ function cvxMatrizTabla(d) {
       ${mods.map(m => {
         const c = f.porMod[m.key];
         return c
-          ? `<td class="cvx-mx-c ${cvxTone(c.average)}" title="${esc(f.u.name)} · ${esc(m.name)}&#10;Promedio: ${c.average}% · Última nota: ${c.lastScore}% · Intentos: ${c.attempts}">${c.average}</td>`
+          ? `<td class="cvx-mx-c ${cvxTone(c.lastScore)}" title="${esc(f.u.name)} · ${esc(m.name)}&#10;Última nota: ${c.lastScore}% · Promedio de intentos: ${c.average}% · Intentos: ${c.attempts}">${c.lastScore}</td>`
           : `<td class="cvx-mx-c vacio" title="${esc(f.u.name)} · ${esc(m.name)}: sin realizar">·</td>`;
       }).join('')}
     </tr>`).join('');
   return `<table class="cvx-mx${CVX_MATRIZ.mod ? ' uno' : ''}">
         <thead><tr>
           <th class="cvx-mx-nom cvx-mx-esq" scope="col">Colaborador</th>
-          <th class="cvx-mx-res" scope="col">Promedio general</th>
+          <th class="cvx-mx-res" scope="col" title="Promedio de la última nota de cada módulo">Promedio general</th>
           <th class="cvx-mx-res" scope="col">Módulos</th>
           ${mods.map(m => `<th class="cvx-mx-mod" scope="col" title="${esc(m.key)}. ${esc(m.name)}"><span><b>${esc(m.key)}</b> ${esc(m.name)}</span></th>`).join('')}
         </tr></thead>
@@ -1174,7 +1174,7 @@ function cvxMatrizSiNo(d) {
   const mod = CVX_MATRIZ.mod ? cvxMatrizModulos().find(m => m.key === CVX_MATRIZ.mod) : null;
   if (!mod) return `<div class="cvx-mx-aviso">${cvxIco('matriz', 16)} Elige un módulo en el filtro <b>“Módulo”</b> para ver quiénes ya lo realizaron y quiénes aún no.</div>`;
   const base = cvxMatrizBase(d);
-  const si = base.filter(f => f.porMod[mod.key]).sort((a, b) => b.porMod[mod.key].average - a.porMod[mod.key].average || cvxPorNombre(a, b));
+  const si = base.filter(f => f.porMod[mod.key]).sort((a, b) => b.porMod[mod.key].lastScore - a.porMod[mod.key].lastScore || cvxPorNombre(a, b));
   const no = base.filter(f => !f.porMod[mod.key]).sort(cvxPorZona);
   const esSumas = /suma/i.test(cvxNorm(mod.name));
   const avance = f => {
@@ -1182,7 +1182,7 @@ function cvxMatrizSiNo(d) {
     const ok = v.videos === 7 && v.guia === 10;
     return `<span class="cvx-chip ${ok ? 'warn' : (v.videos || v.guia ? 'neutro' : 'danger')}">${ok ? 'Contenido completo · falta el quiz' : (v.videos || v.guia ? 'Contenido incompleto' : 'Sin avance')}</span><small class="cvx-zchip">🎬 Videos ${v.videos}/7 · 📘 Guía ${v.guia}/10${v.excepcion ? ' · ⭐ marcados por Capacitación' : ''}</small>`;
   };
-  const filaSi = f => { const m = f.porMod[mod.key]; return `<tr><td><b>${esc(f.u.name)}</b>${m.rescatado ? '<small class="cvx-zchip" title="El quiz estaba en el historial pero no en el resumen de notas">↺ recuperado del historial</small>' : ''}</td><td>${esc(f.u.branch)}<small class="cvx-zchip">${esc(f.u.zona)}</small></td><td class="num"><span class="cvx-chip ${cvxTone(m.average)}">${m.average}%</span></td><td class="num">${m.attempts}</td></tr>`; };
+  const filaSi = f => { const m = f.porMod[mod.key]; return `<tr><td><b>${esc(f.u.name)}</b>${m.rescatado ? '<small class="cvx-zchip" title="El quiz estaba en el historial pero no en el resumen de notas">↺ recuperado del historial</small>' : ''}</td><td>${esc(f.u.branch)}<small class="cvx-zchip">${esc(f.u.zona)}</small></td><td class="num"><span class="cvx-chip ${cvxTone(m.lastScore)}" title="Promedio de sus intentos: ${m.average}%">${m.lastScore}%</span></td><td class="num">${m.attempts}</td></tr>`; };
   const btnExc = f => !currentCanEdit() ? (f.u.excepcionSumas ? '<small class="cvx-zchip">⭐ Quiz habilitado por Capacitación</small>' : '')
     : `<button type="button" class="cvx-exc ${f.u.excepcionSumas ? 'on' : ''}" onclick="cvxExcepcionSumas('${f.u.id}', ${!f.u.excepcionSumas})" title="Permite hacer el quiz sin repetir videos y guía">${f.u.excepcionSumas ? '⭐ Quiz habilitado · quitar' : 'Habilitar quiz sin requisitos'}</button>`;
   const filaNo = f => `<tr><td><b>${esc(f.u.name)}</b>${esSumas ? btnExc(f) : ''}</td><td>${esc(f.u.branch)}<small class="cvx-zchip">${esc(f.u.zona)}</small></td>${esSumas ? `<td>${avance(f)}</td>` : ''}<td>${f.u.lastLogin ? esc(fechaElSalvador(f.u.lastLogin)) : '<span class="cvp-muted">Nunca ha entrado</span>'}</td></tr>`;
@@ -1191,7 +1191,7 @@ function cvxMatrizSiNo(d) {
       <div class="cvx-mx-lista si">
         <h4>✔ Ya lo realizaron <span>${si.length}</span></h4>
         <div class="cvx-tablewrap cvx-mx-scroll"><table class="cvx-table">
-          <thead><tr><th>Colaborador</th><th>Sucursal</th><th class="num">Nota promedio</th><th class="num">Intentos</th></tr></thead>
+          <thead><tr><th>Colaborador</th><th>Sucursal</th><th class="num">Última nota</th><th class="num">Intentos</th></tr></thead>
           <tbody>${si.map(filaSi).join('') || '<tr><td colspan="4" class="cvp-empty">Nadie lo ha realizado todavía.</td></tr>'}</tbody>
         </table></div>
       </div>
@@ -1288,7 +1288,7 @@ function renderMatriz(d) {
   return `
     <div class="cvp-card">
       <div class="cvx-card-head"><h3>${cvxIco('matriz')} Notas por módulo</h3>
-        <span class="cvp-muted">Nota promedio de cada persona en cada módulo${CVP.range ? ' (periodo seleccionado)' : ''}. Los filtros aplican a toda la pestaña.</span></div>
+        <span class="cvp-muted">Última nota de cada persona en cada módulo${CVP.range ? ' (periodo seleccionado)' : ''}. Los filtros aplican a toda la pestaña.</span></div>
       <div class="cvp-filters cvx-mx-filtros">
         <input id="cvxMxBuscar" placeholder="🔍 Buscar colaborador…" value="${esc(CVX_MATRIZ.q)}" oninput="cvxMatrizFiltrar('q', this.value)">
         <select id="cvxMxMod" onchange="cvxMatrizFiltrar('mod', this.value)">
@@ -2301,7 +2301,7 @@ window.cvpExportXLSX = async function () {
   const wm = wb.addWorksheet("Notas " + viewLabel, { views: [{ state: "frozen", xSplit: 1, ySplit: 5, showGridLines: false }] });
   wm.columns = [{ width: 30 }, { width: 16 }, { width: 18 }, { width: 12 }, { width: 11 }].concat(mods.map(() => ({ width: 13 })));
   wm.pageSetup = { orientation: "landscape", fitToPage: true, fitToWidth: 1, fitToHeight: 0 };
-  cvxHojaEncabezado(wm, wb, logo, `Academia CV+ · Notas por módulo · ${viewLabel}`, subt + " · Nota promedio de cada colaborador en cada módulo", nCols);
+  cvxHojaEncabezado(wm, wb, logo, `Academia CV+ · Notas por módulo · ${viewLabel}`, subt + " · Última nota de cada colaborador en cada módulo", nCols);
   const hm = wm.getRow(5);
   hm.values = ["Colaborador", "Zona", "Sucursal", "Promedio", "Módulos"].concat(mods.map(m => `${m.key}. ${m.name}`));
   cvxEstiloCabecera(hm, 66);
@@ -2310,7 +2310,7 @@ window.cvpExportXLSX = async function () {
   filas.forEach((f, i) => {
     const r = wm.getRow(6 + i);
     r.values = [f.u.name, f.u.zona, f.u.branch, f.prom == null ? "—" : f.prom / 100, `${f.hechos}/${mods.length}`]
-      .concat(mods.map(m => f.porMod[m.key] ? f.porMod[m.key].average : "—"));
+      .concat(mods.map(m => f.porMod[m.key] ? f.porMod[m.key].lastScore : "—"));
     r.height = 20;
     for (let col = 1; col <= nCols; col++) {
       const c = r.getCell(col);
@@ -2330,10 +2330,10 @@ window.cvpExportXLSX = async function () {
     mods.forEach((m, j) => {
       const c = r.getCell(6 + j), x = f.porMod[m.key];
       if (x) {
-        const [tf, tb] = cvxTono(x.average);
+        const [tf, tb] = cvxTono(x.lastScore);
         c.font = Object.assign({}, fuente, { bold: true, color: { argb: CVX_XLS[tf] } });
         c.fill = { type: "pattern", pattern: "solid", fgColor: { argb: CVX_XLS[tb] } };
-        c.note = `Última nota: ${x.lastScore}% · Intentos: ${x.attempts}`;
+        c.note = `Promedio de intentos: ${x.average}% · Intentos: ${x.attempts}`;
       } else {
         c.font = Object.assign({}, fuente, { color: { argb: "FFC9CDC8" } });
       }
