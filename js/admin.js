@@ -238,6 +238,7 @@ window.openAdminPanel = async function () {
     CVP.scores  = window.CVP_MOCK.scores;
     CVP.history = window.CVP_MOCK.history || [];
     CVP.followMarks = window.CVP_MOCK.followMarks || {};
+    CVP.progreso = window.CVP_MOCK.progress || {};
   } else {
     // MODO REAL: Firebase
     const { collection, getDocs } = await import(
@@ -255,6 +256,12 @@ window.openAdminPanel = async function () {
       const histSnap = await getDocs(collection(window.db, "quiz_history"));
       histSnap.forEach(d => CVP.history.push({ id: d.id, ...d.data() }));
     } catch (e) { console.warn("Sin histórico todavía:", e); }
+    // Avance de cada persona (videos y guía de SUMÁS). Si no hay permiso, queda vacío.
+    CVP.progreso = {};
+    try {
+      const pSnap = await getDocs(collection(window.db, "progress"));
+      pSnap.forEach(d => { CVP.progreso[d.id] = d.data(); });
+    } catch (e) { console.warn("Sin acceso a progress:", e); }
     // Usuarios eliminados: si vuelven a entrar con la misma cuenta, el login les
     // recrea el perfil; esta lista evita que reaparezcan en el panel.
     CVP.eliminados = new Set();
@@ -467,6 +474,36 @@ function computeData(range) {
         wrong:     latestWrongForModule(u.id, key)   // preguntas falladas (último intento)
       }));
 
+    // 🛟 Si un quiz quedó en el historial (quiz_history) pero se perdió del resumen
+    // (quiz_scores) —por ejemplo, al usar la academia en otro dispositivo con datos
+    // viejos—, se recupera desde el historial para que la persona no salga pendiente.
+    if (!range) {
+      const yaEsta = new Set(moduleEntries.map(m => m.key));
+      const porMod = {};
+      cvxHistDe(u.id).forEach(h => {
+        const k = String(h.moduleId);
+        if (h.score == null || yaEsta.has(k) || !validKeys.has(k)) return;
+        (porMod[k] = porMod[k] || []).push(h);
+      });
+      Object.entries(porMod).forEach(([k, xs]) => {
+        xs.sort((a, b) => new Date(a.date) - new Date(b.date));
+        moduleEntries.push({
+          key: k, name: moduleName(k),
+          average: Math.round(xs.reduce((a, h) => a + h.score, 0) / xs.length),
+          lastScore: Math.round(xs[xs.length - 1].score),
+          attempts: xs.length,
+          wrong: latestWrongForModule(u.id, k),
+          rescatado: true
+        });
+      });
+    }
+    // Avance del contenido de SUMÁS (7 videos + 10 procesos de la guía)
+    const av = ((CVP.progreso || {})[u.id] || {}).sumas || {};
+    const sumas = {
+      videos: ["v1","v2","v3","v4","v5","v6","v7"].filter(k => av.vd && av.vd[k]).length,
+      guia: ["p1","pe","p2","p3","p4","p5","p6","p7","p8","p9"].filter(k => av.g && av.g[k]).length
+    };
+
     const d = daysSince(u.lastLogin);
     let status = "inactivo", statusLabel = "Inactivo";
     if (d === 0)     { status = "hoy";    statusLabel = "Activo hoy"; }
@@ -499,6 +536,7 @@ function computeData(range) {
       totalAttempts: stats.totalAttempts ||
                      moduleEntries.reduce((a, m) => a + m.attempts, 0),
       completed: moduleEntries.length,
+      sumas,
       totalMod: TOTAL_MOD,
       progress: Math.round((moduleEntries.length / TOTAL_MOD) * 100),
       modules: moduleEntries
@@ -1107,8 +1145,14 @@ function cvxMatrizSiNo(d) {
   const base = cvxMatrizBase(d);
   const si = base.filter(f => f.porMod[mod.key]).sort((a, b) => b.porMod[mod.key].average - a.porMod[mod.key].average || cvxPorNombre(a, b));
   const no = base.filter(f => !f.porMod[mod.key]).sort(cvxPorZona);
-  const filaSi = f => { const m = f.porMod[mod.key]; return `<tr><td><b>${esc(f.u.name)}</b></td><td>${esc(f.u.branch)}<small class="cvx-zchip">${esc(f.u.zona)}</small></td><td class="num"><span class="cvx-chip ${cvxTone(m.average)}">${m.average}%</span></td><td class="num">${m.attempts}</td></tr>`; };
-  const filaNo = f => `<tr><td><b>${esc(f.u.name)}</b></td><td>${esc(f.u.branch)}<small class="cvx-zchip">${esc(f.u.zona)}</small></td><td>${f.u.lastLogin ? esc(fechaElSalvador(f.u.lastLogin)) : '<span class="cvp-muted">Nunca ha entrado</span>'}</td></tr>`;
+  const esSumas = /suma/i.test(cvxNorm(mod.name));
+  const avance = f => {
+    const v = f.u.sumas || { videos: 0, guia: 0 };
+    const ok = v.videos === 7 && v.guia === 10;
+    return `<span class="cvx-chip ${ok ? 'warn' : (v.videos || v.guia ? 'neutro' : 'danger')}">${ok ? 'Contenido completo · falta el quiz' : (v.videos || v.guia ? 'Contenido incompleto' : 'Sin avance')}</span><small class="cvx-zchip">🎬 Videos ${v.videos}/7 · 📘 Guía ${v.guia}/10</small>`;
+  };
+  const filaSi = f => { const m = f.porMod[mod.key]; return `<tr><td><b>${esc(f.u.name)}</b>${m.rescatado ? '<small class="cvx-zchip" title="El quiz estaba en el historial pero no en el resumen de notas">↺ recuperado del historial</small>' : ''}</td><td>${esc(f.u.branch)}<small class="cvx-zchip">${esc(f.u.zona)}</small></td><td class="num"><span class="cvx-chip ${cvxTone(m.average)}">${m.average}%</span></td><td class="num">${m.attempts}</td></tr>`; };
+  const filaNo = f => `<tr><td><b>${esc(f.u.name)}</b></td><td>${esc(f.u.branch)}<small class="cvx-zchip">${esc(f.u.zona)}</small></td>${esSumas ? `<td>${avance(f)}</td>` : ''}<td>${f.u.lastLogin ? esc(fechaElSalvador(f.u.lastLogin)) : '<span class="cvp-muted">Nunca ha entrado</span>'}</td></tr>`;
   return `
     <div class="cvx-mx-sino">
       <div class="cvx-mx-lista si">
@@ -1121,8 +1165,8 @@ function cvxMatrizSiNo(d) {
       <div class="cvx-mx-lista no">
         <h4>✖ Aún no lo realizan <span>${no.length}</span></h4>
         <div class="cvx-tablewrap cvx-mx-scroll"><table class="cvx-table">
-          <thead><tr><th>Colaborador</th><th>Sucursal</th><th>Último acceso</th></tr></thead>
-          <tbody>${no.map(filaNo).join('') || '<tr><td colspan="3" class="cvp-empty">¡Todos ya lo realizaron! 🎉</td></tr>'}</tbody>
+          <thead><tr><th>Colaborador</th><th>Sucursal</th>${esSumas ? '<th>Avance del contenido</th>' : ''}<th>Último acceso</th></tr></thead>
+          <tbody>${no.map(filaNo).join('') || `<tr><td colspan="${esSumas ? 4 : 3}" class="cvp-empty">¡Todos ya lo realizaron! 🎉</td></tr>`}</tbody>
         </table></div>
       </div>
     </div>`;
@@ -2746,6 +2790,7 @@ function injectStyles() {
 .cvx-mx tbody tr.cvx-mx-grupo td span{position:sticky;left:12px;display:inline-block;font-size:12px;color:#6b6e6a;padding-left:12px}
 .cvx-mx tbody tr.cvx-mx-grupo td b{color:#00abc8}
 .cvx-zchip{display:block;font-size:11px;color:#6b6e6a}
+.cvx-chip.neutro{background:#f4f7f8;color:#6b6e6a}
 .cvp-filters .cvx-msel-btn{min-height:46px}
 .cvx-mx.uno .cvx-mx-mod{min-width:180px;max-width:none}
 .cvx-mx-aviso{display:flex;align-items:center;gap:8px;padding:14px 16px;border-radius:12px;background:#e5f6f9;color:var(--cx-k);font-size:13.5px}
