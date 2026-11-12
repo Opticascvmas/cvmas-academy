@@ -218,7 +218,10 @@ const CVP = {
 /* ============================================================================
    3) ABRIR PANEL  ·  función principal
    ========================================================================== */
-window.openAdminPanel = async function () {
+// Para no gastar el límite diario de lecturas de Firebase, los datos se descargan
+// una vez y se reutilizan 15 minutos. El botón "↻ Actualizar" fuerza una descarga nueva.
+const CVX_CACHE_MIN = 15;
+window.openAdminPanel = async function (forzar) {
 
   // --- Seguridad básica: solo admins o visores ---
   if (ENFORCE_ADMIN_ONLY &&
@@ -251,6 +254,10 @@ window.openAdminPanel = async function () {
     CVP.history = window.CVP_MOCK.history || [];
     CVP.followMarks = window.CVP_MOCK.followMarks || {};
     CVP.progreso = window.CVP_MOCK.progress || {};
+  } else if (!forzar && CVP._raw && (Date.now() - CVP._raw.at) < CVX_CACHE_MIN * 60000) {
+    // Reutilizar lo ya descargado (sin leer Firebase de nuevo)
+    CVP.users = CVP._raw.users.slice(); CVP.scores = CVP._raw.scores.slice(); CVP.history = CVP._raw.history.slice();
+    CVP.progreso = CVP._raw.progreso; CVP.eliminados = CVP._raw.eliminados; CVP.followMarks = CVP._raw.followMarks;
   } else {
     // MODO REAL: Firebase
     const { collection, getDocs } = await import(
@@ -287,6 +294,8 @@ window.openAdminPanel = async function () {
       const fSnap = await getDocs(collection(window.db, "admin_followups"));
       fSnap.forEach(d => { CVP.followMarks[d.id] = d.data(); });
     } catch (e) { /* sin permisos o sin datos: queda vacío */ }
+    CVP._raw = { at: Date.now(), users: CVP.users.slice(), scores: CVP.scores.slice(), history: CVP.history.slice(),
+                 progreso: CVP.progreso, eliminados: CVP.eliminados, followMarks: CVP.followMarks };
   }
   CVP.ready = true;
   CVP.range = null; // null = "Cualquier fecha" (comportamiento original)
@@ -483,6 +492,7 @@ function computeData(range) {
         average:   Math.round(v.average   || 0),
         lastScore: Math.round(v.lastScore || 0),
         attempts:  v.attempts || 0,
+        registrado: !!v.registradoPor,
         wrong:     latestWrongForModule(u.id, key)   // preguntas falladas (último intento)
       }));
 
@@ -884,7 +894,8 @@ function renderShell(d) {
       </div>
       <div class="cvp-head-actions">
         <button class="cvp-btn gold" onclick="cvpReporteDireccion()">${cvxIco('reporte', 16)} Reporte para dirección</button>
-        ${currentCanEdit() ? `<button class="cvp-btn ghost" onclick="window.open('herramientas/crear-usuarios.html','_blank')" title="Crear usuarios en Firebase desde un Excel">＋ Alta masiva</button>` : ''}
+        ${currentCanEdit() ? `<button class="cvp-btn ghost" onclick="window.open('herramientas/crear-usuarios.html','_blank')" title="Crear usuarios en Firebase desde un Excel">＋ Alta masiva</button><button class="cvp-btn ghost" onclick="cvxRegistrarNotas()" title="Registrar notas de quiz que no se guardaron">📝 Registrar notas</button>` : ''}
+        <button class="cvp-btn ghost" onclick="openAdminPanel(true)" title="Volver a descargar los datos de Firebase">↻ Actualizar</button>
         <button class="cvp-btn ghost" onclick="cvpExportXLSX()">Excel</button>
         <button class="cvp-btn close" onclick="closeAdminPanel()">✕ Cerrar</button>
       </div>
@@ -1184,7 +1195,7 @@ function cvxMatrizSiNo(d) {
     const ok = v.videos === 7 && v.guia === 10;
     return `<span class="cvx-chip ${ok ? 'warn' : (v.videos || v.guia ? 'neutro' : 'danger')}">${ok ? 'Contenido completo · falta el quiz' : (v.videos || v.guia ? 'Contenido incompleto' : 'Sin avance')}</span><small class="cvx-zchip">🎬 Videos ${v.videos}/7 · 📘 Guía ${v.guia}/10${v.excepcion ? ' · ⭐ marcados por Capacitación' : ''}</small>`;
   };
-  const filaSi = f => { const m = f.porMod[mod.key]; return `<tr><td><b>${esc(f.u.name)}</b>${m.rescatado ? '<small class="cvx-zchip" title="El quiz estaba en el historial pero no en el resumen de notas">↺ recuperado del historial</small>' : ''}</td><td>${esc(f.u.branch)}<small class="cvx-zchip">${esc(f.u.zona)}</small></td><td class="num"><span class="cvx-chip ${cvxTone(m.lastScore)}" title="Promedio de sus intentos: ${m.average}%">${m.lastScore}%</span></td><td class="num">${m.attempts}</td></tr>`; };
+  const filaSi = f => { const m = f.porMod[mod.key]; return `<tr><td><b>${esc(f.u.name)}</b>${m.rescatado ? '<small class="cvx-zchip" title="El quiz estaba en el historial pero no en el resumen de notas">↺ recuperado del historial</small>' : ''}${m.registrado ? '<small class="cvx-zchip" title="Nota registrada manualmente por Capacitación">📝 registrada por Capacitación</small>' : ''}</td><td>${esc(f.u.branch)}<small class="cvx-zchip">${esc(f.u.zona)}</small></td><td class="num"><span class="cvx-chip ${cvxTone(m.lastScore)}" title="Promedio de sus intentos: ${m.average}%">${m.lastScore}%</span></td><td class="num">${m.attempts}</td></tr>`; };
   const btnExc = f => !currentCanEdit() ? (f.u.excepcionSumas ? '<small class="cvx-zchip">⭐ Quiz habilitado por Capacitación</small>' : '')
     : `<button type="button" class="cvx-exc ${f.u.excepcionSumas ? 'on' : ''}" onclick="cvxExcepcionSumas('${f.u.id}', ${!f.u.excepcionSumas})" title="Permite hacer el quiz sin repetir videos y guía">${f.u.excepcionSumas ? '⭐ Quiz habilitado · quitar' : 'Habilitar quiz sin requisitos'}</button>`;
   const filaNo = f => `<tr><td><b>${esc(f.u.name)}</b>${esSumas ? btnExc(f) : ''}</td><td>${esc(f.u.branch)}<small class="cvx-zchip">${esc(f.u.zona)}</small></td>${esSumas ? `<td>${avance(f)}</td>` : ''}<td>${f.u.lastLogin ? esc(fechaElSalvador(f.u.lastLogin)) : '<span class="cvp-muted">Nunca ha entrado</span>'}</td></tr>`;
@@ -1708,7 +1719,7 @@ window.saveUserInfo = async function (userId) {
   } catch (e) { /* si no quieres logs, ignora */ }
 
   alert("✅ Usuario actualizado");
-  openAdminPanel();
+  openAdminPanel(true);
 };
 
 
@@ -1788,6 +1799,119 @@ window.cvxEliminarUsuario = function (uid) {
       console.error("Error al eliminar usuario:", e);
       estado.innerHTML = `❌ No se pudo eliminar (${esc(e.code || e.message)}). Revisa que las reglas de Firestore permitan borrar al administrador.`;
       m.querySelector("#cvxDelNo").disabled = false;
+    }
+  };
+};
+
+
+/* ---------- REGISTRAR NOTAS MANUALMENTE (notas de quiz que no se guardaron) ----------
+   Se pega una tabla (correo o nombre + nota), se revisa a quién corresponde cada fila
+   y se guarda como un intento más del módulo, marcado como "registrada por Capacitación". */
+function cvxPartirTabla(txt) {
+  return String(txt || "").split(/\r?\n/).map(l => l.trim()).filter(Boolean).map((l, i) => {
+    let c = l.split(/\t|;|,(?=\s*\d+\s*%?\s*$)/).map(x => x.trim()).filter(x => x !== "");
+    if (c.length === 1) { const mm = /^(.*?)\s+(\d{1,3}(?:[.,]\d+)?)\s*%?$/.exec(l); if (mm) c = [mm[1], mm[2]]; }
+    const notaTxt = c.length > 1 ? c[c.length - 1] : "";
+    const nota = Number(String(notaTxt).replace("%", "").replace(",", "."));
+    const quien = c.length > 1 ? c.slice(0, -1).join(" ") : c[0];
+    return { fila: i + 1, quien, nota: (notaTxt !== "" && !isNaN(nota)) ? Math.round(nota <= 1 && /\./.test(notaTxt) ? nota * 100 : nota) : null };
+  }).filter(r => !/^(correo|usuario|nombre|colaborador)/i.test(r.quien));
+}
+function cvxBuscarPersona(quien, lista) {
+  const q = cvxNorm(quien);
+  if (q.includes("@")) return lista.filter(u => cvxNorm(u.email) === q);
+  let r = lista.filter(u => cvxNorm(u.name) === q);
+  if (!r.length) r = lista.filter(u => cvxNorm(u.name).includes(q) || q.includes(cvxNorm(u.name)));
+  return r;
+}
+window.cvxRegistrarNotas = function () {
+  if (!currentCanEdit()) return;
+  const mods = cvxMatrizModulos();
+  const vieja = document.getElementById("cvxReg"); if (vieja) vieja.remove();
+  const m = document.createElement("div"); m.id = "cvxReg";
+  const hoy = new Date().toLocaleDateString("en-CA", { timeZone: "America/El_Salvador" });
+  m.innerHTML = `
+    <div class="cvx-reg-box" role="dialog" aria-modal="true">
+      <div class="cvx-reg-top"><h3>📝 Registrar notas · ${CVP.view === "optometras" ? "Optometristas" : "Asesores"}</h3><button class="cvp-btn ghost dark" type="button" id="cvxRegX">✕</button></div>
+      <p class="cvp-muted">Para notas de quiz que la persona sí hizo pero no se guardaron. Cada nota se guarda como un intento más del módulo, marcado como <b>«registrada por Capacitación»</b>.</p>
+      <div class="cvx-reg-campos">
+        <label>Módulo<select id="cvxRegMod">${mods.map(x => `<option value="${esc(x.key)}"${(CVX_MATRIZ.mod || mods[mods.length - 1].key) === x.key ? " selected" : ""}>${esc(x.key)}. ${esc(x.name)}</option>`).join("")}</select></label>
+        <label>Fecha del quiz<input type="date" id="cvxRegFecha" value="${hoy}"></label>
+      </div>
+      <label>Pega la tabla: <b>correo</b> (o nombre completo) y <b>nota</b>, una persona por línea. Puedes copiarla directo de Excel.
+        <textarea id="cvxRegTxt" rows="7" placeholder="nathalie.ramosramos@gmail.com	100&#10;sindykarinagomez@gmail.com	80&#10;leahh9084@gmail.com	90"></textarea></label>
+      <div class="cvx-reg-acc"><button class="cvp-btn ghost dark" type="button" id="cvxRegRev">Revisar</button><span class="cvp-muted" id="cvxRegRes"></span><button class="cvp-btn gold" type="button" id="cvxRegOk" disabled>Guardar notas</button></div>
+      <div id="cvxRegPrev"></div>
+    </div>`;
+  document.body.appendChild(m);
+  let plan = [];
+  const cerrar = () => m.remove();
+  m.querySelector("#cvxRegX").onclick = cerrar;
+  const revisar = () => {
+    const mod = m.querySelector("#cvxRegMod").value;
+    const filas = cvxPartirTabla(m.querySelector("#cvxRegTxt").value);
+    const lista = (CVP._last || computeData(CVP.range)).enriched;
+    plan = filas.map(r => {
+      const encontrados = r.quien ? cvxBuscarPersona(r.quien, lista) : [];
+      let estado = "ok", nota = "";
+      if (r.nota == null || r.nota < 0 || r.nota > 100) { estado = "error"; nota = "Nota no válida"; }
+      else if (!encontrados.length) { estado = "error"; nota = "No se encontró en esta vista"; }
+      else if (encontrados.length > 1) { estado = "error"; nota = `Hay ${encontrados.length} personas con ese nombre: usa el correo`; }
+      const u = encontrados.length === 1 ? encontrados[0] : null;
+      const previa = u && u.modules.find(x => x.key === mod);
+      if (estado === "ok" && previa) nota = `Ya tiene ${previa.lastScore}% (${previa.attempts} intento${previa.attempts > 1 ? "s" : ""}): se agrega como intento nuevo`;
+      return { ...r, valor: r.nota, u, estado, nota };
+    });
+    const ok = plan.filter(p => p.estado === "ok").length;
+    m.querySelector("#cvxRegPrev").innerHTML = plan.length ? `<div class="cvx-tablewrap"><table class="cvx-table"><thead><tr><th>#</th><th>Escrito</th><th>Persona</th><th class="num">Nota</th><th>Revisión</th></tr></thead><tbody>${
+      plan.map(p => `<tr class="${p.estado}"><td>${p.fila}</td><td>${esc(p.quien)}</td><td>${p.u ? `<b>${esc(p.u.name)}</b><small class="cvx-zchip">${esc(p.u.email)} · ${esc(p.u.branch)}</small>` : "—"}</td><td class="num">${p.valor != null ? `<span class="cvx-chip ${cvxTone(p.valor)}">${p.valor}%</span>` : "—"}</td><td>${p.estado === "ok" ? "✅ " : "⚠️ "}${esc(p.nota || "Lista para guardar")}</td></tr>`).join("")
+    }</tbody></table></div>` : `<p class="cvp-empty">Pega al menos una línea con correo y nota.</p>`;
+    m.querySelector("#cvxRegRes").textContent = plan.length ? `${ok} de ${plan.length} listas para guardar` : "";
+    const btn = m.querySelector("#cvxRegOk"); btn.disabled = !ok; btn.textContent = ok ? `Guardar ${ok} nota${ok > 1 ? "s" : ""}` : "Guardar notas";
+  };
+  m.querySelector("#cvxRegRev").onclick = revisar;
+  m.querySelector("#cvxRegMod").onchange = () => { if (plan.length) revisar(); };
+  m.querySelector("#cvxRegOk").onclick = async () => {
+    const mod = m.querySelector("#cvxRegMod").value;
+    const fecha = m.querySelector("#cvxRegFecha").value;
+    const fechaISO = fecha ? new Date(fecha + "T12:00:00-06:00").toISOString() : new Date().toISOString();
+    const listos = plan.filter(p => p.estado === "ok");
+    const btn = m.querySelector("#cvxRegOk"); btn.disabled = true;
+    const res = m.querySelector("#cvxRegRes");
+    let hechos = 0; const errores = [];
+    try {
+      const f = await import("https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js");
+      for (const p of listos) {
+        res.textContent = `Guardando ${hechos + 1} de ${listos.length}…`;
+        try {
+          const valor = p.valor;
+          const ref = f.doc(window.db, "quiz_scores", p.u.id);
+          const snap = await f.getDoc(ref);
+          const prev = (snap.exists() && snap.data().scores && typeof snap.data().scores[mod] === "object") ? snap.data().scores[mod] : { attempts: 0, scores: [] };
+          const lista = Array.isArray(prev.scores) ? prev.scores.slice() : [];
+          lista.push(valor);
+          const entrada = Object.assign({}, prev, {
+            attempts: (prev.attempts || 0) + 1, scores: lista, lastScore: valor,
+            average: Math.round(lista.reduce((a, b) => a + b, 0) / lista.length),
+            lastActivity: fechaISO, registradoPor: window.CVP_CURRENT_EMAIL || "admin", registradoAt: new Date().toISOString()
+          });
+          await f.setDoc(ref, { scores: { [mod]: entrada } }, { merge: true });
+          await f.addDoc(f.collection(window.db, "quiz_history"), {
+            uid: p.u.id, email: p.u.email || "", moduleId: Number(mod), score: valor, attempt: entrada.attempts,
+            wrong: [], date: fechaISO, manual: true, registradoPor: window.CVP_CURRENT_EMAIL || "admin"
+          });
+          hechos++;
+        } catch (e) { console.error(e); errores.push(`${p.u.name}: ${e.code || e.message}`); }
+      }
+    } catch (e) { errores.push(e.code || e.message); }
+    if (errores.length) {
+      res.innerHTML = `<b>${hechos} guardadas · ${errores.length} con error.</b> ${errores.some(x => /permission/i.test(x)) ? "Revisa las reglas de Firestore (deben permitir al administrador guardar notas)." : ""}`;
+      m.querySelector("#cvxRegPrev").insertAdjacentHTML("afterbegin", `<p class="cvx-reg-err">${errores.map(esc).join("<br>")}</p>`);
+      btn.disabled = false;
+    } else {
+      cerrar();
+      alert(`✅ ${hechos} nota${hechos > 1 ? "s" : ""} registrada${hechos > 1 ? "s" : ""}.`);
+      openAdminPanel(true);
     }
   };
 };
@@ -2275,7 +2399,7 @@ window.cvxExportSiNo = async function () {
   // Hoja 1: ya lo realizaron
   hoja("Ya lo realizaron", `${mod.key}. ${mod.name} · Ya lo realizaron (${si.length})`,
     [["Colaborador", 32], ["Zona", 16], ["Sucursal", 22], ["Última nota", 13, "center"], ["Resultado", 14, "center"], ["Promedio de intentos", 14, "center"], ["Intentos", 10, "center"], ["Observación", 28]],
-    si.map(f => { const m = f.porMod[mod.key]; return [f.u.name, f.u.zona, f.u.branch, m.lastScore / 100, m.lastScore >= 80 ? "Aprobado" : "No aprobado", m.average / 100, m.attempts, m.rescatado ? "Recuperado del historial" : ""]; }),
+    si.map(f => { const m = f.porMod[mod.key]; return [f.u.name, f.u.zona, f.u.branch, m.lastScore / 100, m.lastScore >= 80 ? "Aprobado" : "No aprobado", m.average / 100, m.attempts, m.rescatado ? "Recuperado del historial" : (m.registrado ? "Registrada por Capacitación" : "")]; }),
     (r, i) => {
       const m = si[i].porMod[mod.key];
       [4, 6].forEach(c => { r.getCell(c).numFmt = "0%"; });
@@ -3065,6 +3189,19 @@ function injectStyles() {
 .cvx .cvx-heat td.ok,.cvx .cvx-mx tbody td.cvx-mx-c.ok,.cvx .cvx-heatlegend .ok{background:#e7f5ec;color:var(--cvp-ok)}
 .cvx .cvx-heat td.warn,.cvx .cvx-mx tbody td.cvx-mx-c.warn,.cvx .cvx-heatlegend .warn{background:#fff6dd;color:var(--cvp-alerta)}
 .cvx .cvx-heat td.danger,.cvx .cvx-mx tbody td.cvx-mx-c.danger,.cvx .cvx-heatlegend .danger{background:#fdeaea;color:var(--cvp-critico)}
+/* Registrar notas */
+#cvxReg{position:fixed;inset:0;z-index:160000;background:rgba(55,58,54,.55);display:flex;align-items:flex-start;justify-content:center;padding:24px 16px;overflow:auto;font-family:'Poppins','Segoe UI',Arial,sans-serif}
+.cvx-reg-box{background:#fff;color:#373a36;border-radius:18px;max-width:820px;width:100%;padding:22px;border-top:5px solid #00abc8;box-shadow:0 12px 40px rgba(0,0,0,.25);display:grid;gap:12px}
+.cvx-reg-top{display:flex;justify-content:space-between;align-items:center;gap:10px}.cvx-reg-top h3{margin:0;font-size:18px}
+.cvx-reg-box p{margin:0;font-size:13px}
+.cvx-reg-campos{display:grid;grid-template-columns:2fr 1fr;gap:10px}
+.cvx-reg-box label{display:grid;gap:6px;font-size:13px;font-weight:500}
+.cvx-reg-box select,.cvx-reg-box input,.cvx-reg-box textarea{padding:10px;border-radius:10px;border:1px solid #dfe5e7;font:inherit;font-size:14px;width:100%;box-sizing:border-box}
+.cvx-reg-box textarea{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px}
+.cvx-reg-acc{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.cvx-reg-acc .cvp-muted{flex:1}
+.cvx-reg-box tr.error td{background:#fdeaea!important}
+.cvx-reg-err{color:#d64545;font-size:12.5px}
+@media(max-width:600px){.cvx-reg-campos{grid-template-columns:1fr}}
 /* Eliminar usuario */
 .cvp-btn.cvx-eliminar{background:#fff;color:#d64545;border:1px solid #f3c6c6;width:100%;padding:11px}
 .cvp-btn.cvx-eliminar:hover:not(:disabled){background:#d64545;color:#fff}
