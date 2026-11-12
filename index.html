@@ -3988,6 +3988,7 @@ async function saveQuizScores(s) {
   } catch(e) {
 
     console.error(e);
+    window.__cvpUltimoError = (e && (e.code || e.message)) || 'desconocido';
     return false;
 
   }
@@ -4053,6 +4054,9 @@ window.hydrateUserData = async function() {
       if (faltaba) { av.porExcepcion = new Date().toISOString(); try { await saveProgress(PROGRESS); } catch(e) { console.error(e); } }
     }
     localStorage.setItem('cvplus_sumas_avance', JSON.stringify(window.SUMAS_AV));
+
+    // Notas que no se pudieron guardar antes en este dispositivo: se reenvían ahora
+    try { if (window.cvpReintentarPendientes) await window.cvpReintentarPendientes(); } catch(e) { console.error(e); }
 
     // Sincronizar el navegador con lo de Firebase (evita datos viejos pegados)
     localStorage.setItem('cvplus_quiz_scores', JSON.stringify(QUIZ_SCORES));
@@ -4935,6 +4939,25 @@ role: rolLocal
 // Conectar con el panel de admin (control de acceso y registro de cambios)
 window.CVP_CURRENT_ROLE = rolLocal;
 window.CVP_CURRENT_EMAIL = user.email;
+window.CVP_UID = user.uid;
+// Si la sesión se cierra sola mientras la persona sigue en la academia (por ejemplo,
+// al cerrar sesión o por inactividad en OTRA pestaña del mismo iPad), se le avisa.
+try {
+  const { onAuthStateChanged } = await import("https://www.gstatic.com/firebasejs/12.13.0/firebase-auth.js");
+  onAuthStateChanged(window.auth, (u) => {
+    if (u || window.__cvpSaliendo || document.getElementById('login-screen')) return;
+    try {
+      const a = document.createElement('div');
+      a.style.cssText = 'position:fixed;inset:0;z-index:300001;background:rgba(55,58,54,.6);display:flex;align-items:center;justify-content:center;padding:16px;font-family:Poppins,sans-serif';
+      a.innerHTML = '<div style="background:#fff;border-radius:16px;max-width:420px;padding:22px;border-top:5px solid #d64545;color:#373a36">'
+        + '<b style="font-size:17px">🔒 Tu sesión se cerró</b><p style="font-size:14px;line-height:1.5">Se cerró desde otra pestaña o ventana de la academia en este dispositivo. '
+        + 'Si acabas de terminar un quiz, tu nota quedó guardada en este dispositivo y se enviará sola cuando vuelvas a entrar.</p>'
+        + '<button type="button" style="border:0;border-radius:10px;padding:10px 16px;background:#00abc8;color:#fff;font:600 14px Poppins,sans-serif;cursor:pointer">Volver a entrar</button></div>';
+      a.querySelector('button').onclick = () => location.reload();
+      document.body.appendChild(a);
+    } catch(e) {}
+  });
+} catch(e) { console.error(e); }
 
 if(user) {
 
@@ -5003,7 +5026,7 @@ try {
       } catch(e) {}
     };
     _hbFn(); // primer ping inmediato
-    setInterval(_hbFn, 2 * 60 * 1000); // cada 2 minutos
+    setInterval(_hbFn, 10 * 60 * 1000); // cada 10 minutos (antes 2: gastaba mucho del límite diario de Firebase)
   }
 } catch(e) { console.error("Error heartbeat:", e); }
 
@@ -5057,7 +5080,7 @@ window.saveUserData = async function(collection, data) {
 
   const user = window.auth.currentUser;
 
-  if(!user) return;
+  if(!user) { const e = new Error("No hay sesión iniciada"); e.code = "sin-sesion"; throw e; }
 
   const { doc, setDoc } = await import(
     "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js"
@@ -5086,6 +5109,7 @@ window.cerrarSesion = async function(opciones) {
     const ok = confirm("¿Cerrar sesión?");
     if (!ok) return;
   }
+  window.__cvpSaliendo = true;   // cierre de sesión hecho en esta pestaña: no mostrar el aviso de "sesión cerrada"
   // Esperar a que termine de guardarse el último quiz (máximo 15 s)
   try { if (window.__cvpGuardandoQuiz) await Promise.race([window.__cvpGuardandoQuiz, new Promise(function(r){ setTimeout(r, 15000); })]); } catch(e) {}
   // Guardar el avance de SUMÁS pendiente antes de salir
@@ -5143,7 +5167,7 @@ window.cerrarSesion = async function(opciones) {
 window.saveQuizHistory = async function(moduleId, score, attempt, wrong) {
   try {
     const user = window.auth && window.auth.currentUser;
-    if (!user || !window.firebaseReady) return;
+    if (!user || !window.firebaseReady) { window.__cvpUltimoError = 'sin-sesion'; return false; }
 
     const { collection, addDoc } = await import(
       "https://www.gstatic.com/firebasejs/12.13.0/firebase-firestore.js"
@@ -5161,6 +5185,7 @@ window.saveQuizHistory = async function(moduleId, score, attempt, wrong) {
     return true;
   } catch (e) {
     console.error("No se pudo guardar el histórico:", e);
+    window.__cvpUltimoError = (e && (e.code || e.message)) || 'desconocido';
     return false;
   }
 };
@@ -5190,6 +5215,41 @@ window.saveQuizHistory = async function(moduleId, score, attempt, wrong) {
     clearTimeout(a._t);
     if (tipo === 'ok') a._t = setTimeout(function(){ a.style.display = 'none'; }, 6000);
   }
+  // ── Notas pendientes: si Firebase rechaza el guardado, la nota queda en este
+  //    dispositivo y se vuelve a enviar sola la próxima vez que la persona entre.
+  var PEND_KEY = 'cvplus_notas_pendientes';
+  function leerPend(){ try { return JSON.parse(localStorage.getItem(PEND_KEY) || '{}') || {}; } catch(e) { return {}; } }
+  function escribirPend(x){ try { localStorage.setItem(PEND_KEY, JSON.stringify(x)); } catch(e) {} }
+  function uidActual(){ try { return (window.auth && window.auth.currentUser && window.auth.currentUser.uid) || window.CVP_UID || null; } catch(e) { return window.CVP_UID || null; } }
+  function guardarPendiente(moduleId, pct, attempt, wrong, faltaS, faltaH){
+    var uid = uidActual(); if (!uid) return;
+    var x = leerPend(); var lista = x[uid] || [];
+    lista = lista.filter(function(p){ return !(String(p.mod) === String(moduleId) && p.attempt === attempt); });
+    lista.push({ mod: moduleId, pct: pct, attempt: attempt, wrong: wrong || [], entrada: QUIZ_SCORES[moduleId], faltaS: faltaS, faltaH: faltaH, at: new Date().toISOString() });
+    x[uid] = lista; escribirPend(x);
+  }
+  function quitarPendiente(moduleId, attempt){
+    var uid = uidActual(); if (!uid) return;
+    var x = leerPend(); if (!x[uid]) return;
+    x[uid] = x[uid].filter(function(p){ return !(String(p.mod) === String(moduleId) && p.attempt === attempt); });
+    if (!x[uid].length) delete x[uid];
+    escribirPend(x);
+  }
+  // Se llama al iniciar sesión (después de cargar las notas de Firebase)
+  window.cvpReintentarPendientes = async function(){
+    var uid = uidActual(); if (!uid) return;
+    var lista = (leerPend()[uid] || []).slice();
+    for (var i = 0; i < lista.length; i++) {
+      var p = lista[i], actual = QUIZ_SCORES[p.mod];
+      // Se usa la nota del dispositivo si es más reciente que la de Firebase
+      if (p.entrada && (!actual || typeof actual !== 'object' || (p.entrada.attempts || 0) > (actual.attempts || 0))) QUIZ_SCORES[p.mod] = p.entrada;
+      var okS = !p.faltaS || await saveQuizScores(QUIZ_SCORES);
+      var okH = !p.faltaH || !!(window.saveQuizHistory && await window.saveQuizHistory(p.mod, p.pct, p.attempt, p.wrong));
+      if (okS && okH) { quitarPendiente(p.mod, p.attempt); aviso('ok', '✅ Se guardó tu nota pendiente de ' + (function(){ try { return MODULES.find(function(m){ return m.id === p.mod; }).title; } catch(e) { return 'un quiz'; } })() + ' (' + p.pct + '%).'); }
+      else { guardarPendiente(p.mod, p.pct, p.attempt, p.wrong, !okS, !okH); }
+    }
+  };
+
   window.cvpGuardarQuiz = function(moduleId, pct, attempt, wrong){
     aviso('guardando', '⏳ Guardando tu nota… no cierres sesión todavía.');
     var lento = setTimeout(function(){
@@ -5204,9 +5264,19 @@ window.saveQuizHistory = async function(moduleId, score, attempt, wrong) {
       }
       clearTimeout(lento);
       if (okS && okH) {
+        quitarPendiente(moduleId, attempt);
         aviso('ok', '✅ Tu nota quedó guardada.');
       } else {
-        aviso('error', '⚠️ Tu nota NO se pudo guardar. Revisa tu internet y toca Reintentar. No cierres sesión.',
+        guardarPendiente(moduleId, pct, attempt, wrong, !okS, !okH);
+        var cod = String(window.__cvpUltimoError || '');
+        var limite = /resource-exhausted|quota/i.test(cod);
+        var sinSesion = /sin-sesion|unauthenticated/i.test(cod);
+        aviso('error', (sinSesion
+            ? '⚠️ Tu sesión se cerró antes de guardar la nota (¿se cerró sesión en otra pestaña?). Tu nota quedó en este dispositivo: vuelve a entrar con tu usuario y se enviará sola.'
+            : limite
+            ? '⚠️ La academia llegó a su límite de guardado por hoy. Tu nota quedó guardada en este dispositivo y se enviará sola la próxima vez que entres con tu usuario.'
+            : '⚠️ Tu nota NO se pudo guardar. Revisa tu internet y toca Reintentar. Si sigue igual, tu nota queda en este dispositivo y se enviará sola la próxima vez que entres.')
+          + ' <small style="opacity:.7">(código: ' + (cod || 'sin código') + ')</small>',
           function(){ window.cvpGuardarQuiz(moduleId, pct, attempt, wrong); });
       }
       return okS && okH;
@@ -5528,13 +5598,19 @@ Cerrar
   function AV(){ var a = window.SUMAS_AV || (window.SUMAS_AV = {}); a.v = a.v || {}; a.vd = a.vd || {}; a.g = a.g || {}; return a; }
   // Cada escena o proceso completado se guarda AL INSTANTE (navegador + Firebase)
   var pendiente = null;
+  // El avance queda al instante en el dispositivo; a Firebase se envía agrupado
+  // (como máximo cada 20 s, y siempre al cerrar sesión o salir) para no gastar
+  // el límite diario de guardados de Firebase.
+  var temporizador = null;
+  function enviar(){ temporizador = null; try { pendiente = Promise.resolve(saveProgress(PROGRESS)); } catch(e) { pendiente = null; } return pendiente; }
   function guardar(){
     try { localStorage.setItem('cvplus_sumas_avance', JSON.stringify(window.SUMAS_AV)); } catch(e) {}
-    try { pendiente = Promise.resolve(saveProgress(PROGRESS)); } catch(e) { pendiente = null; }
+    if (!temporizador) temporizador = setTimeout(enviar, 20000);
     return pendiente;
   }
   // Se llama antes de cerrar sesión (manual o por inactividad) para no perder lo último
   window.cvpGuardarSumasAhora = function(){
+    if (temporizador) { clearTimeout(temporizador); temporizador = null; }
     var esp = pendiente || Promise.resolve();
     return esp.then(function(){ return saveProgress(PROGRESS); }).catch(function(){});
   };
